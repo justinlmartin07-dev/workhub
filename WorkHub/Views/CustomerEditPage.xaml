@@ -9,9 +9,16 @@
     <ScrollView>
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
             <Entry Placeholder="Name *" Text="{Binding Name}" ReturnType="Next" />
+
+            <Editor Placeholder="Street Address" Text="{Binding Street}" HeightRequest="60" />
+            <Grid ColumnDefinitions="2*,*,*" ColumnSpacing="8">
+                <Entry Placeholder="City" Text="{Binding City}" ReturnType="Next" />
+                <Entry Grid.Column="1" Placeholder="State" Text="{Binding State}" ReturnType="Next" />
+                <Entry Grid.Column="2" Placeholder="Zip" Text="{Binding Zip}" Keyboard="Numeric" ReturnType="Next" />
+            </Grid>
+
             <Entry Placeholder="Phone" Text="{Binding Phone}" Keyboard="Telephone" ReturnType="Next" />
             <Entry Placeholder="Email" Text="{Binding Email}" Keyboard="Email" ReturnType="Next" />
-            <Entry Placeholder="Address" Text="{Binding Address}" ReturnType="Next" />
             <Editor Placeholder="Notes" Text="{Binding Notes}" HeightRequest="120" />
 
             <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
