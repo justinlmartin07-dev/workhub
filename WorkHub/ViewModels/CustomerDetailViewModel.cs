@@ -22,10 +22,22 @@ public partial class CustomerDetailViewModel : BaseViewModel
     [ObservableProperty]
     private int _locationPhotoCount;
 
+    public List<CustomerContactResponse> PhoneContacts =>
+        Customer?.Contacts?.Where(c => c.Type == "phone").ToList() ?? [];
+
+    public List<CustomerContactResponse> EmailContacts =>
+        Customer?.Contacts?.Where(c => c.Type == "email").ToList() ?? [];
+
     public CustomerDetailViewModel(ApiService apiService, PhotoService photoService)
     {
         _apiService = apiService;
         _photoService = photoService;
+    }
+
+    partial void OnCustomerChanged(CustomerResponse? value)
+    {
+        OnPropertyChanged(nameof(PhoneContacts));
+        OnPropertyChanged(nameof(EmailContacts));
     }
 
     partial void OnCustomerIdChanged(string? value)
@@ -132,21 +144,21 @@ public partial class CustomerDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task CallPhoneAsync()
+    private void CallPhone(string? phoneNumber)
     {
-        if (!string.IsNullOrEmpty(Customer?.Phone))
+        if (!string.IsNullOrEmpty(phoneNumber))
         {
-            try { PhoneDialer.Open(Customer.Phone); }
+            try { PhoneDialer.Open(phoneNumber); }
             catch { }
         }
     }
 
     [RelayCommand]
-    private async Task SendEmailAsync()
+    private async Task SendEmailAsync(string? email)
     {
-        if (!string.IsNullOrEmpty(Customer?.Email))
+        if (!string.IsNullOrEmpty(email))
         {
-            try { await Launcher.OpenAsync($"mailto:{Customer.Email}"); }
+            try { await Launcher.OpenAsync($"mailto:{email}"); }
             catch { }
         }
     }

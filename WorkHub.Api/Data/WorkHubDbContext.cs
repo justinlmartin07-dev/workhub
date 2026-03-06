@@ -10,6 +10,7 @@ public class WorkHubDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<CustomerContact> CustomerContacts => Set<CustomerContact>();
     public DbSet<CustomerPhoto> CustomerPhotos => Set<CustomerPhoto>();
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<JobNote> JobNotes => Set<JobNote>();
@@ -60,8 +61,6 @@ public class WorkHubDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasColumnName("id");
             e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
-            e.Property(x => x.Phone).HasColumnName("phone").HasMaxLength(50);
-            e.Property(x => x.Email).HasColumnName("email").HasMaxLength(200);
             e.Property(x => x.Address).HasColumnName("address");
             e.Property(x => x.NormalizedAddress).HasColumnName("normalized_address").HasMaxLength(500);
             e.Property(x => x.Notes).HasColumnName("notes");
@@ -72,6 +71,22 @@ public class WorkHubDbContext : DbContext
             e.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedBy).OnDelete(DeleteBehavior.Restrict);
             e.HasIndex(x => x.DeletedAt).HasFilter("deleted_at IS NULL").HasDatabaseName("idx_customers_deleted_at");
             e.HasIndex(x => x.NormalizedAddress).HasDatabaseName("idx_customers_normalized_address");
+        });
+
+        // Customer Contacts
+        modelBuilder.Entity<CustomerContact>(e =>
+        {
+            e.ToTable("customer_contacts");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.CustomerId).HasColumnName("customer_id");
+            e.Property(x => x.Type).HasColumnName("type").HasMaxLength(20).IsRequired();
+            e.Property(x => x.Label).HasColumnName("label").HasMaxLength(50).IsRequired();
+            e.Property(x => x.Value).HasColumnName("value").HasMaxLength(200).IsRequired();
+            e.Property(x => x.IsPrimary).HasColumnName("is_primary").HasDefaultValue(false);
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.HasOne(x => x.Customer).WithMany(c => c.Contacts).HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => x.CustomerId).HasDatabaseName("idx_customer_contacts_customer_id");
         });
 
         // Customer Photos

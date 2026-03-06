@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WorkHub.Models;
@@ -15,12 +16,6 @@ public partial class CustomerEditViewModel : BaseViewModel
 
     [ObservableProperty]
     private string _name = string.Empty;
-
-    [ObservableProperty]
-    private string _phone = string.Empty;
-
-    [ObservableProperty]
-    private string _email = string.Empty;
 
     [ObservableProperty]
     private string _street = string.Empty;
@@ -43,9 +38,18 @@ public partial class CustomerEditViewModel : BaseViewModel
     [ObservableProperty]
     private string _pageTitle = "New Customer";
 
+    public ObservableCollection<ContactEntry> PhoneEntries { get; } = [];
+    public ObservableCollection<ContactEntry> EmailEntries { get; } = [];
+
+    public string[] PhoneLabelOptions { get; } = ["Mobile", "Home", "Work", "Other"];
+    public string[] EmailLabelOptions { get; } = ["Personal", "Work", "Other"];
+
     public CustomerEditViewModel(ApiService apiService)
     {
         _apiService = apiService;
+        // Start with one empty phone and email entry
+        PhoneEntries.Add(new ContactEntry { Label = "Mobile" });
+        EmailEntries.Add(new ContactEntry { Label = "Personal" });
     }
 
     partial void OnCustomerIdChanged(string? value)
@@ -68,12 +72,62 @@ public partial class CustomerEditViewModel : BaseViewModel
             if (customer != null)
             {
                 Name = customer.Name;
-                Phone = customer.Phone ?? string.Empty;
-                Email = customer.Email ?? string.Empty;
                 ParseAddress(customer.Address);
                 Notes = customer.Notes ?? string.Empty;
+
+                PhoneEntries.Clear();
+                EmailEntries.Clear();
+
+                if (customer.Contacts?.Count > 0)
+                {
+                    foreach (var c in customer.Contacts.Where(c => c.Type == "phone"))
+                        PhoneEntries.Add(new ContactEntry { Label = c.Label, Value = c.Value, IsPrimary = c.IsPrimary });
+                    foreach (var c in customer.Contacts.Where(c => c.Type == "email"))
+                        EmailEntries.Add(new ContactEntry { Label = c.Label, Value = c.Value, IsPrimary = c.IsPrimary });
+                }
+
+                if (PhoneEntries.Count == 0)
+                    PhoneEntries.Add(new ContactEntry { Label = "Mobile" });
+                if (EmailEntries.Count == 0)
+                    EmailEntries.Add(new ContactEntry { Label = "Personal" });
             }
         });
+    }
+
+    [RelayCommand]
+    private void AddPhone()
+    {
+        PhoneEntries.Add(new ContactEntry { Label = "Mobile" });
+    }
+
+    [RelayCommand]
+    private void RemovePhone(ContactEntry entry)
+    {
+        if (PhoneEntries.Count > 1)
+            PhoneEntries.Remove(entry);
+        else
+        {
+            entry.Value = string.Empty;
+            entry.Label = "Mobile";
+        }
+    }
+
+    [RelayCommand]
+    private void AddEmail()
+    {
+        EmailEntries.Add(new ContactEntry { Label = "Personal" });
+    }
+
+    [RelayCommand]
+    private void RemoveEmail(ContactEntry entry)
+    {
+        if (EmailEntries.Count > 1)
+            EmailEntries.Remove(entry);
+        else
+        {
+            entry.Value = string.Empty;
+            entry.Label = "Personal";
+        }
     }
 
     [RelayCommand]
@@ -88,15 +142,16 @@ public partial class CustomerEditViewModel : BaseViewModel
 
         await LoadAsync(async () =>
         {
+            var contacts = BuildContacts();
+
             if (IsNew)
             {
                 var request = new CreateCustomerRequest
                 {
                     Name = Name.Trim(),
-                    Phone = string.IsNullOrWhiteSpace(Phone) ? null : Phone.Trim(),
-                    Email = string.IsNullOrWhiteSpace(Email) ? null : Email.Trim(),
                     Address = BuildAddress(),
-                    Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim()
+                    Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
+                    Contacts = contacts.Count > 0 ? contacts : null,
                 };
                 await _apiService.CreateCustomerAsync(request);
             }
@@ -105,10 +160,9 @@ public partial class CustomerEditViewModel : BaseViewModel
                 var request = new UpdateCustomerRequest
                 {
                     Name = Name.Trim(),
-                    Phone = string.IsNullOrWhiteSpace(Phone) ? null : Phone.Trim(),
-                    Email = string.IsNullOrWhiteSpace(Email) ? null : Email.Trim(),
                     Address = BuildAddress(),
-                    Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim()
+                    Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
+                    Contacts = contacts,
                 };
                 await _apiService.UpdateCustomerAsync(Guid.Parse(CustomerId!), request);
             }
@@ -122,6 +176,16 @@ public partial class CustomerEditViewModel : BaseViewModel
         await Shell.Current.GoToAsync("..");
     }
 
+    private List<CustomerContactRequest> BuildContacts()
+    {
+        var contacts = new List<CustomerContactRequest>();
+        foreach (var p in PhoneEntries.Where(e => !string.IsNullOrWhiteSpace(e.Value)))
+            contacts.Add(new CustomerContactRequest { Type = "phone", Label = p.Label, Value = p.Value.Trim(), IsPrimary = p.IsPrimary });
+        foreach (var e in EmailEntries.Where(e => !string.IsNullOrWhiteSpace(e.Value)))
+            contacts.Add(new CustomerContactRequest { Type = "email", Label = e.Label, Value = e.Value.Trim(), IsPrimary = e.IsPrimary });
+        return contacts;
+    }
+
     private void ParseAddress(string? address)
     {
         if (string.IsNullOrWhiteSpace(address))
@@ -130,7 +194,6 @@ public partial class CustomerEditViewModel : BaseViewModel
             return;
         }
 
-        // Try to parse "Street\nCity, State Zip" or "Street, City, State Zip"
         var lines = address.Split('\n', StringSplitOptions.TrimEntries);
         if (lines.Length >= 2)
         {
@@ -139,7 +202,6 @@ public partial class CustomerEditViewModel : BaseViewModel
         }
         else
         {
-            // Single line: try "Street, City, State Zip"
             var parts = address.Split(',', StringSplitOptions.TrimEntries);
             if (parts.Length >= 3)
             {
@@ -210,4 +272,16 @@ public partial class CustomerEditViewModel : BaseViewModel
             return $"{street}\n{cityStateZip}";
         return !string.IsNullOrEmpty(street) ? street : cityStateZip;
     }
+}
+
+public partial class ContactEntry : ObservableObject
+{
+    [ObservableProperty]
+    private string _label = string.Empty;
+
+    [ObservableProperty]
+    private string _value = string.Empty;
+
+    [ObservableProperty]
+    private bool _isPrimary;
 }

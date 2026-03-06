@@ -10,6 +10,7 @@
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
             <Entry Placeholder="Name *" Text="{Binding Name}" ReturnType="Next" />
 
+            <!-- Address -->
             <Editor Placeholder="Street Address" Text="{Binding Street}" HeightRequest="60" />
             <Grid ColumnDefinitions="2*,*,*" ColumnSpacing="8">
                 <Entry Placeholder="City" Text="{Binding City}" ReturnType="Next" />
@@ -17,8 +18,50 @@
                 <Entry Grid.Column="2" Placeholder="Zip" Text="{Binding Zip}" Keyboard="Numeric" ReturnType="Next" />
             </Grid>
 
-            <Entry Placeholder="Phone" Text="{Binding Phone}" Keyboard="Telephone" ReturnType="Next" />
-            <Entry Placeholder="Email" Text="{Binding Email}" Keyboard="Email" ReturnType="Next" />
+            <!-- Phone Numbers -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Phone Numbers" FontSize="14" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
+                        TextColor="{StaticResource Primary}" Command="{Binding AddPhoneCommand}" Padding="4" />
+            </Grid>
+            <CollectionView ItemsSource="{Binding PhoneEntries}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ContactEntry">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="0,2">
+                            <Picker WidthRequest="100" ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerEditViewModel}}, Path=PhoneLabelOptions}"
+                                    SelectedItem="{Binding Label}" />
+                            <Entry Grid.Column="1" Placeholder="Phone number" Text="{Binding Value}" Keyboard="Telephone" />
+                            <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="Red"
+                                    WidthRequest="40" Padding="0"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerEditViewModel}}, Path=RemovePhoneCommand}"
+                                    CommandParameter="{Binding .}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Email Addresses -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Email Addresses" FontSize="14" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
+                        TextColor="{StaticResource Primary}" Command="{Binding AddEmailCommand}" Padding="4" />
+            </Grid>
+            <CollectionView ItemsSource="{Binding EmailEntries}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ContactEntry">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="0,2">
+                            <Picker WidthRequest="100" ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerEditViewModel}}, Path=EmailLabelOptions}"
+                                    SelectedItem="{Binding Label}" />
+                            <Entry Grid.Column="1" Placeholder="Email address" Text="{Binding Value}" Keyboard="Email" />
+                            <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="Red"
+                                    WidthRequest="40" Padding="0"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerEditViewModel}}, Path=RemoveEmailCommand}"
+                                    CommandParameter="{Binding .}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
             <Editor Placeholder="Notes" Text="{Binding Notes}" HeightRequest="120" />
 
             <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />

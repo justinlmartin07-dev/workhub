@@ -34,25 +34,27 @@ public class CustomersController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(c => EF.Functions.ILike(c.Name, $"%{q}%")
-                || (c.Phone != null && EF.Functions.ILike(c.Phone, $"%{q}%"))
-                || (c.Email != null && EF.Functions.ILike(c.Email, $"%{q}%")));
+                || c.Contacts.Any(ct => EF.Functions.ILike(ct.Value, $"%{q}%")));
 
         var totalCount = await query.CountAsync();
         var items = await query
             .OrderBy(c => c.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .Include(c => c.Contacts)
             .Include(c => c.Jobs.Where(j => j.DeletedAt == null).OrderByDescending(j => j.CreatedAt).Take(1))
             .Select(c => new CustomerResponse
             {
                 Id = c.Id,
                 Name = c.Name,
-                Phone = c.Phone,
-                Email = c.Email,
                 Address = c.Address,
                 Notes = c.Notes,
                 CreatedAt = c.CreatedAt,
                 UpdatedAt = c.UpdatedAt,
+                Contacts = c.Contacts.Select(ct => new CustomerContactResponse
+                {
+                    Id = ct.Id, Type = ct.Type, Label = ct.Label, Value = ct.Value, IsPrimary = ct.IsPrimary
+                }).ToList(),
                 Jobs = c.Jobs.Where(j => j.DeletedAt == null).OrderByDescending(j => j.CreatedAt).Take(1)
                     .Select(j => new JobBriefResponse { Id = j.Id, Title = j.Title, Status = j.Status, Priority = j.Priority }).ToList(),
             })
@@ -73,6 +75,7 @@ public class CustomersController : ControllerBase
     {
         var customer = await _db.Customers
             .Where(c => c.Id == id && c.DeletedAt == null)
+            .Include(c => c.Contacts)
             .Include(c => c.Photos.OrderByDescending(p => p.UploadedAt))
             .Include(c => c.Jobs.Where(j => j.DeletedAt == null).OrderByDescending(j => j.CreatedAt))
             .FirstOrDefaultAsync();
@@ -80,31 +83,7 @@ public class CustomersController : ControllerBase
         if (customer == null)
             return NotFound(new ErrorResponse { Error = "Customer not found" });
 
-        return Ok(new CustomerResponse
-        {
-            Id = customer.Id,
-            Name = customer.Name,
-            Phone = customer.Phone,
-            Email = customer.Email,
-            Address = customer.Address,
-            Notes = customer.Notes,
-            CreatedAt = customer.CreatedAt,
-            UpdatedAt = customer.UpdatedAt,
-            Photos = customer.Photos.Select(p => new PhotoResponse
-            {
-                Id = p.Id,
-                Url = _photos.GeneratePresignedUrl(p.R2ObjectKey),
-                FileName = p.FileName,
-                UploadedAt = p.UploadedAt,
-            }).ToList(),
-            Jobs = customer.Jobs.Select(j => new JobBriefResponse
-            {
-                Id = j.Id,
-                Title = j.Title,
-                Status = j.Status,
-                Priority = j.Priority,
-            }).ToList(),
-        });
+        return Ok(MapToResponse(customer));
     }
 
     [HttpPost]
@@ -114,8 +93,6 @@ public class CustomersController : ControllerBase
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
-            Phone = request.Phone,
-            Email = request.Email,
             Address = request.Address,
             NormalizedAddress = AddressNormalizer.Normalize(request.Address),
             Notes = request.Notes,
@@ -124,53 +101,63 @@ public class CustomersController : ControllerBase
             UpdatedAt = DateTime.UtcNow,
         };
 
+        if (request.Contacts?.Count > 0)
+        {
+            customer.Contacts = request.Contacts.Select(c => new CustomerContact
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = customer.Id,
+                Type = c.Type,
+                Label = c.Label,
+                Value = c.Value,
+                IsPrimary = c.IsPrimary,
+                CreatedAt = DateTime.UtcNow,
+            }).ToList();
+        }
+
         _db.Customers.Add(customer);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(Get), new { id = customer.Id }, new CustomerResponse
-        {
-            Id = customer.Id,
-            Name = customer.Name,
-            Phone = customer.Phone,
-            Email = customer.Email,
-            Address = customer.Address,
-            Notes = customer.Notes,
-            CreatedAt = customer.CreatedAt,
-            UpdatedAt = customer.UpdatedAt,
-        });
+        return CreatedAtAction(nameof(Get), new { id = customer.Id }, MapToResponse(customer));
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCustomerRequest request)
     {
-        var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null);
+        var customer = await _db.Customers
+            .Include(c => c.Contacts)
+            .FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null);
         if (customer == null)
             return NotFound(new ErrorResponse { Error = "Customer not found" });
 
         if (request.Name != null) customer.Name = request.Name;
-        if (request.Phone != null) customer.Phone = request.Phone;
-        if (request.Email != null) customer.Email = request.Email;
         if (request.Notes != null) customer.Notes = request.Notes;
         if (request.Address != null)
         {
             customer.Address = request.Address;
             customer.NormalizedAddress = AddressNormalizer.Normalize(request.Address);
         }
-        customer.UpdatedAt = DateTime.UtcNow;
 
+        if (request.Contacts != null)
+        {
+            // Replace all contacts
+            _db.CustomerContacts.RemoveRange(customer.Contacts);
+            customer.Contacts = request.Contacts.Select(c => new CustomerContact
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = customer.Id,
+                Type = c.Type,
+                Label = c.Label,
+                Value = c.Value,
+                IsPrimary = c.IsPrimary,
+                CreatedAt = DateTime.UtcNow,
+            }).ToList();
+        }
+
+        customer.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        return Ok(new CustomerResponse
-        {
-            Id = customer.Id,
-            Name = customer.Name,
-            Phone = customer.Phone,
-            Email = customer.Email,
-            Address = customer.Address,
-            Notes = customer.Notes,
-            CreatedAt = customer.CreatedAt,
-            UpdatedAt = customer.UpdatedAt,
-        });
+        return Ok(MapToResponse(customer));
     }
 
     [HttpDelete("{id:guid}")]
@@ -203,5 +190,36 @@ public class CustomersController : ControllerBase
 
         await _db.SaveChangesAsync();
         return NoContent();
+    }
+
+    private CustomerResponse MapToResponse(Customer customer)
+    {
+        return new CustomerResponse
+        {
+            Id = customer.Id,
+            Name = customer.Name,
+            Address = customer.Address,
+            Notes = customer.Notes,
+            CreatedAt = customer.CreatedAt,
+            UpdatedAt = customer.UpdatedAt,
+            Contacts = customer.Contacts.Select(c => new CustomerContactResponse
+            {
+                Id = c.Id, Type = c.Type, Label = c.Label, Value = c.Value, IsPrimary = c.IsPrimary
+            }).ToList(),
+            Photos = customer.Photos?.Select(p => new PhotoResponse
+            {
+                Id = p.Id,
+                Url = _photos.GeneratePresignedUrl(p.R2ObjectKey),
+                FileName = p.FileName,
+                UploadedAt = p.UploadedAt,
+            }).ToList(),
+            Jobs = customer.Jobs?.Select(j => new JobBriefResponse
+            {
+                Id = j.Id,
+                Title = j.Title,
+                Status = j.Status,
+                Priority = j.Priority,
+            }).ToList(),
+        };
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WorkHub.Api.Data;
@@ -11,9 +12,11 @@ using WorkHub.Api.Data;
 namespace WorkHub.Api.Migrations
 {
     [DbContext(typeof(WorkHubDbContext))]
-    partial class WorkHubDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260306215146_AddCustomerContacts")]
+    partial class AddCustomerContacts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

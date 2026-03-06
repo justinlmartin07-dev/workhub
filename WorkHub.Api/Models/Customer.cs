@@ -4,8 +4,6 @@ public class Customer
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? Phone { get; set; }
-    public string? Email { get; set; }
     public string? Address { get; set; }
     public string? NormalizedAddress { get; set; }
     public string? Notes { get; set; }
@@ -15,6 +13,7 @@ public class Customer
     public DateTime UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }
 
+    public List<CustomerContact> Contacts { get; set; } = [];
     public List<Job> Jobs { get; set; } = [];
     public List<CustomerPhoto> Photos { get; set; } = [];
 }

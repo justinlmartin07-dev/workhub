@@ -106,8 +106,7 @@ public partial class JobEditViewModel : BaseViewModel
             FilteredCustomers = new ObservableCollection<CustomerResponse>(
                 AllCustomers.Where(c =>
                     c.Name.ToLower().Contains(search) ||
-                    (c.Phone?.ToLower().Contains(search) ?? false) ||
-                    (c.Email?.ToLower().Contains(search) ?? false) ||
+                    (c.Contacts?.Any(ct => ct.Value.ToLower().Contains(search)) ?? false) ||
                     (c.Address?.ToLower().Contains(search) ?? false)));
         }
     }
