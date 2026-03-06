@@ -4,20 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-WorkHub is a cross-platform field service management app for a small 3-person team. It covers customer contacts, job tracking, inventory, scheduling, and photo documentation. No code has been written yet — only specification documents exist.
+WorkHub is a cross-platform field service management app for a small 3-person team. It covers customer contacts, job tracking, inventory, scheduling, and photo documentation.
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Client | .NET MAUI (.NET 8+) — Android + Windows |
+| Client | .NET MAUI (.NET 9) — Android + Windows |
 | API | ASP.NET Core Web API (.NET 8+) |
 | Database | PostgreSQL (Railway-hosted, EF Core + Npgsql) |
 | Auth | Self-hosted JWT (BCrypt hashing, API-signed tokens, no external provider) |
 | Photo Storage | Cloudflare R2 (private bucket, presigned URLs via AWSSDK.S3) |
 | Hosting | Railway |
 
-## Project Structure (Planned)
+## Project Structure
 
 ```
 /WorkHub.Api          — ASP.NET Core Web API
@@ -29,6 +29,16 @@ WorkHub is a cross-platform field service management app for a small 3-person te
   Program.cs
 
 /WorkHub              — .NET MAUI client (Android + Windows)
+  /Controls           — DataStateView (loading/error/empty/content states)
+  /Converters         — InverseBoolConverter, StatusColorConverter, etc.
+  /Messages           — WeakReferenceMessenger message types (DetailMessages)
+  /Models             — API DTOs (CustomerModels, JobModels, etc.)
+  /Services           — AuthService, ApiService, PhotoService
+  /ViewModels         — MVVM ViewModels (BaseViewModel + per-page VMs)
+  /Views              — XAML pages and MainLayout (responsive split-view shell)
+  MauiProgram.cs      — DI registration, HttpClient factory
+  App.xaml.cs         — Startup flow (version check → session restore → navigate)
+  AppShell.xaml.cs    — Route registrations
 ```
 
 Naming: root namespace `WorkHub`, API project `WorkHub.Api`, app ID `com.workhub.app`.
@@ -42,14 +52,18 @@ dotnet restore
 dotnet build
 dotnet run
 
-# MAUI Client
-dotnet workload install maui
-dotnet build -f net8.0-android
-dotnet build -f net8.0-windows10.0.19041.0
+# MAUI Client (Windows)
+cd WorkHub
+dotnet build -f net9.0-windows10.0.19041.0
+dotnet run -f net9.0-windows10.0.19041.0
+
+# MAUI Client (Android)
+cd WorkHub
+dotnet build -f net9.0-android
 
 # Publish
-dotnet publish -f net8.0-android -c Release
-dotnet publish -f net8.0-windows10.0.19041.0 -c Release
+dotnet publish -f net9.0-android -c Release
+dotnet publish -f net9.0-windows10.0.19041.0 -c Release
 
 # Database Migrations
 dotnet tool install --global dotnet-ef
@@ -76,6 +90,10 @@ dotnet ef database update --project WorkHub.Api
 - **50MB request body limit** at Kestrel level for photo uploads.
 - **Client uses `SecureStorage`** for token persistence and MVVM pattern via CommunityToolkit.Mvvm source generators.
 - **No paid UI libraries** — stock MAUI controls + CommunityToolkit only.
+- **Responsive split-view layout** — MainLayout uses AdaptiveTrigger at 720dp. Wide: left nav rail + list/detail split panel. Narrow: bottom tabs + full-page navigation.
+- **WeakReferenceMessenger** for cross-component communication — list VMs send `ShowDetailMessage` to MainLayout, which renders detail inline (wide) or navigates via Shell (narrow).
+- **Address stored as single field** in API — client splits into Street/City/State/Zip fields for editing, combines to `"Street\nCity, State Zip"` format on save.
+- **Two named HttpClients** — `"AuthClient"` (no auth handler, for login/refresh) and `"ApiClient"` (with `AuthDelegatingHandler` for token injection/refresh).
 
 ## Database
 
