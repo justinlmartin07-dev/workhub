@@ -138,6 +138,13 @@ public partial class MainLayout : ContentPage
 
     private async void HandleDetailRequest(DetailRequest request)
     {
+        if (request.SwitchTabIndex.HasValue)
+        {
+            _viewModel.SelectedTabIndex = request.SwitchTabIndex.Value;
+            _lastTabIndex = -1; // Force reload
+            LoadTabContent(request.SwitchTabIndex.Value);
+        }
+
         if (_isWide)
         {
             View? detailView = request.Route switch

@@ -12,8 +12,63 @@
             <!-- Customer picker (new only) -->
             <VerticalStackLayout IsVisible="{Binding IsNew}" Spacing="4">
                 <Label Text="Customer *" FontSize="12" TextColor="{StaticResource Gray500}" />
-                <Picker Title="Select Customer" ItemsSource="{Binding Customers}"
-                        SelectedItem="{Binding SelectedCustomer}" ItemDisplayBinding="{Binding Name}" />
+
+                <!-- Selected customer display / tap to open picker -->
+                <Frame Padding="12" CornerRadius="8" BorderColor="{StaticResource Gray200}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#2a2a2a}">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleCustomerPickerCommand}" />
+                    </Frame.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="{Binding SelectedCustomer.Name, FallbackValue='Tap to select a customer...'}"
+                               TextColor="{Binding SelectedCustomer, Converter={StaticResource StringNotEmptyConverter}, FallbackValue={StaticResource Gray400}}"
+                               VerticalTextAlignment="Center" FontSize="15" />
+                        <Label Grid.Column="1" Text="v" FontSize="14" TextColor="{StaticResource Gray400}"
+                               VerticalTextAlignment="Center" />
+                    </Grid>
+                </Frame>
+
+                <!-- Searchable customer list (shown when open) -->
+                <Frame Padding="0" CornerRadius="8" BorderColor="{StaticResource Gray300}"
+                       IsVisible="{Binding IsCustomerPickerOpen}" HeightRequest="250">
+                    <VerticalStackLayout>
+                        <SearchBar x:Name="CustomerSearchBar" Placeholder="Search customers..." Text="{Binding CustomerSearchText}"
+                                   Margin="0" />
+                        <CollectionView ItemsSource="{Binding FilteredCustomers}" HeightRequest="200"
+                                        SelectionMode="None">
+                            <CollectionView.EmptyView>
+                                <Label Text="No customers found" Padding="16" TextColor="{StaticResource Gray400}"
+                                       HorizontalTextAlignment="Center" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:CustomerResponse">
+                                    <Grid Padding="12,8" ColumnDefinitions="*">
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal" />
+                                                <VisualState x:Name="PointerOver">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{StaticResource Gray100}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobEditViewModel}}, Path=PickCustomerCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding Name}" FontSize="15" />
+                                            <Label Text="{Binding Phone}" FontSize="12" TextColor="{StaticResource Gray400}"
+                                                   IsVisible="{Binding Phone, Converter={StaticResource StringNotEmptyConverter}}" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Frame>
             </VerticalStackLayout>
 
             <Entry Placeholder="Job Title *" Text="{Binding Title}" ReturnType="Next" />
@@ -25,7 +80,11 @@
 
             <VerticalStackLayout Spacing="4">
                 <Label Text="Priority" FontSize="12" TextColor="{StaticResource Gray500}" />
-                <Picker ItemsSource="{Binding PriorityOptions}" SelectedItem="{Binding SelectedPriority}" />
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <Label Text="Low" FontSize="12" TextColor="Green" VerticalTextAlignment="Center" />
+                    <Slider Grid.Column="1" Minimum="0" Maximum="2" Value="{Binding PrioritySliderValue}" />
+                    <Label Grid.Column="2" Text="High" FontSize="12" TextColor="Red" VerticalTextAlignment="Center" />
+                </Grid>
             </VerticalStackLayout>
 
             <Editor Placeholder="Scope Notes" Text="{Binding ScopeNotes}" HeightRequest="120" />

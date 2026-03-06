@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using WorkHub.Messages;
 using WorkHub.Models;
 using WorkHub.Services;
 
@@ -111,9 +113,16 @@ public partial class CustomerDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task ViewJobAsync(JobBriefResponse job)
+    private void ViewJob(JobBriefResponse job)
     {
-        await Shell.Current.GoToAsync($"jobDetail?id={job.Id}");
+        var id = job.Id.ToString();
+        WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+        {
+            Route = "jobDetail",
+            Properties = new() { ["JobId"] = id },
+            QueryParams = new() { ["id"] = id },
+            SwitchTabIndex = 1
+        }));
     }
 
     [RelayCommand]

@@ -14,4 +14,6 @@ public class DetailRequest
     public Dictionary<string, string> Properties { get; set; } = new();
     // Key = query param name, Value = value (for Shell navigation)
     public Dictionary<string, string> QueryParams { get; set; } = new();
+    // Optional: switch to this tab index before showing detail
+    public int? SwitchTabIndex { get; set; }
 }

@@ -28,13 +28,36 @@ public partial class JobEditViewModel : BaseViewModel
     private string _selectedPriority = "medium";
 
     [ObservableProperty]
+    private double _prioritySliderValue = 1;
+
+    partial void OnPrioritySliderValueChanged(double value)
+    {
+        SelectedPriority = (int)Math.Round(value) switch
+        {
+            0 => "low",
+            1 => "medium",
+            2 => "high",
+            _ => "medium"
+        };
+    }
+
+    [ObservableProperty]
     private string _scopeNotes = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<CustomerResponse> _customers = new();
+    private ObservableCollection<CustomerResponse> _allCustomers = new();
+
+    [ObservableProperty]
+    private ObservableCollection<CustomerResponse> _filteredCustomers = new();
 
     [ObservableProperty]
     private CustomerResponse? _selectedCustomer;
+
+    [ObservableProperty]
+    private string _customerSearchText = string.Empty;
+
+    [ObservableProperty]
+    private bool _isCustomerPickerOpen;
 
     [ObservableProperty]
     private bool _isNew = true;
@@ -66,6 +89,29 @@ public partial class JobEditViewModel : BaseViewModel
             LoadDataCommand.Execute(null);
     }
 
+    partial void OnCustomerSearchTextChanged(string value)
+    {
+        FilterCustomers();
+    }
+
+    private void FilterCustomers()
+    {
+        if (string.IsNullOrWhiteSpace(CustomerSearchText))
+        {
+            FilteredCustomers = new ObservableCollection<CustomerResponse>(AllCustomers);
+        }
+        else
+        {
+            var search = CustomerSearchText.ToLower();
+            FilteredCustomers = new ObservableCollection<CustomerResponse>(
+                AllCustomers.Where(c =>
+                    c.Name.ToLower().Contains(search) ||
+                    (c.Phone?.ToLower().Contains(search) ?? false) ||
+                    (c.Email?.ToLower().Contains(search) ?? false) ||
+                    (c.Address?.ToLower().Contains(search) ?? false)));
+        }
+    }
+
     [RelayCommand]
     private async Task LoadDataAsync()
     {
@@ -73,10 +119,9 @@ public partial class JobEditViewModel : BaseViewModel
         {
             if (IsNew)
             {
-                var result = await _apiService.GetCustomersAsync(pageSize: 100);
-                Customers = new ObservableCollection<CustomerResponse>(result.Items);
+                await LoadAllCustomersAsync();
                 if (Guid.TryParse(InitialCustomerId, out var custId))
-                    SelectedCustomer = Customers.FirstOrDefault(c => c.Id == custId);
+                    SelectedCustomer = AllCustomers.FirstOrDefault(c => c.Id == custId);
             }
             else if (Guid.TryParse(JobId, out var jobId))
             {
@@ -86,10 +131,46 @@ public partial class JobEditViewModel : BaseViewModel
                     Title = job.Title;
                     SelectedStatus = job.Status;
                     SelectedPriority = job.Priority;
+                    PrioritySliderValue = job.Priority switch { "low" => 0, "high" => 2, _ => 1 };
                     ScopeNotes = job.ScopeNotes ?? string.Empty;
                 }
             }
         });
+    }
+
+    private async Task LoadAllCustomersAsync()
+    {
+        var all = new List<CustomerResponse>();
+        int page = 1;
+        int totalPages;
+        do
+        {
+            var result = await _apiService.GetCustomersAsync(page: page, pageSize: 100);
+            all.AddRange(result.Items);
+            totalPages = result.TotalPages;
+            page++;
+        } while (page <= totalPages);
+
+        AllCustomers = new ObservableCollection<CustomerResponse>(all.OrderBy(c => c.Name));
+        FilterCustomers();
+    }
+
+    [RelayCommand]
+    private void ToggleCustomerPicker()
+    {
+        IsCustomerPickerOpen = !IsCustomerPickerOpen;
+        if (IsCustomerPickerOpen)
+        {
+            CustomerSearchText = string.Empty;
+            FilterCustomers();
+        }
+    }
+
+    [RelayCommand]
+    private void PickCustomer(CustomerResponse customer)
+    {
+        SelectedCustomer = customer;
+        IsCustomerPickerOpen = false;
     }
 
     [RelayCommand]
