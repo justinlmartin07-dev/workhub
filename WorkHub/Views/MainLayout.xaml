@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             x:Class="WorkHub.Views.MainLayout"
+             x:DataType="vm:MainLayoutViewModel"
+             Shell.NavBarIsVisible="False"
+             Title="WorkHub">
+
+    <Grid x:Name="RootGrid" RowDefinitions="*,Auto">
+        <!-- Main content area -->
+        <Grid x:Name="ContentGrid" Grid.Row="0" ColumnDefinitions="*">
+            <!-- Left Navigation Rail (wide only) -->
+            <Grid x:Name="NavRail" Grid.Column="0" ZIndex="10"
+                  WidthRequest="72" BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark=#1a1a2e}"
+                  IsVisible="False" RowDefinitions="*,Auto" Padding="0,8" HorizontalOptions="Start">
+                <VerticalStackLayout Spacing="4" VerticalOptions="Start" Padding="0,8">
+                    <Button Text="&#x1F465;" FontSize="20" BackgroundColor="Transparent"
+                            Command="{Binding SelectTabCommand}" CommandParameter="0"
+                            WidthRequest="56" HeightRequest="56" CornerRadius="16" Margin="8,0" />
+                    <Button Text="&#x1F527;" FontSize="20" BackgroundColor="Transparent"
+                            Command="{Binding SelectTabCommand}" CommandParameter="1"
+                            WidthRequest="56" HeightRequest="56" CornerRadius="16" Margin="8,0" />
+                    <Button Text="&#x1F4E6;" FontSize="20" BackgroundColor="Transparent"
+                            Command="{Binding SelectTabCommand}" CommandParameter="2"
+                            WidthRequest="56" HeightRequest="56" CornerRadius="16" Margin="8,0" />
+                    <Button Text="&#x1F4C5;" FontSize="20" BackgroundColor="Transparent"
+                            Command="{Binding SelectTabCommand}" CommandParameter="3"
+                            WidthRequest="56" HeightRequest="56" CornerRadius="16" Margin="8,0" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="1" Padding="0,0,0,8">
+                    <Border StrokeShape="RoundRectangle 20" WidthRequest="40" HeightRequest="40"
+                            BackgroundColor="{StaticResource Secondary}" StrokeThickness="0"
+                            HorizontalOptions="Center">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToProfileCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding UserInitial}" HorizontalTextAlignment="Center"
+                               VerticalTextAlignment="Center" FontSize="16" FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}" />
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- List Panel -->
+            <ContentView x:Name="ListPanel" Grid.Column="0"
+                         HorizontalOptions="Fill" VerticalOptions="Fill" />
+
+            <!-- Detail Panel (wide only, added dynamically as second column) -->
+            <ContentView x:Name="DetailPanel" Grid.Column="1" IsVisible="False"
+                         HorizontalOptions="Fill" VerticalOptions="Fill">
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                    <Label Text="Select an item to view details" TextColor="{StaticResource Gray400}"
+                           FontSize="16" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </ContentView>
+        </Grid>
+
+        <!-- Bottom Tab Bar (narrow only) -->
+        <Grid x:Name="BottomTabs" Grid.Row="1"
+              ColumnDefinitions="*,*,*,*" HeightRequest="56"
+              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#1a1a2e}"
+              Padding="0">
+            <Button Text="Customers" FontSize="11" BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}"
+                    Command="{Binding SelectTabCommand}" CommandParameter="0" />
+            <Button Grid.Column="1" Text="Jobs" FontSize="11" BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                    Command="{Binding SelectTabCommand}" CommandParameter="1" />
+            <Button Grid.Column="2" Text="Inventory" FontSize="11" BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                    Command="{Binding SelectTabCommand}" CommandParameter="2" />
+            <Button Grid.Column="3" Text="Calendar" FontSize="11" BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}"
+                    Command="{Binding SelectTabCommand}" CommandParameter="3" />
+        </Grid>
+    </Grid>
+</ContentPage>

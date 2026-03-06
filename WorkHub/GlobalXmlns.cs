@@ -1,0 +1,5 @@
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "WorkHub")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "WorkHub.Views")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "WorkHub.ViewModels")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "WorkHub.Converters")]
+[assembly: XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "WorkHub.Controls")]

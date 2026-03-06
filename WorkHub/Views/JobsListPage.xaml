@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="WorkHub.Views.JobsListPage"
+             x:DataType="vm:JobsListViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <SearchBar Placeholder="Search jobs..." Text="{Binding SearchText}"
+                   SearchCommand="{Binding SearchCommand}" Margin="8,8,8,0" />
+
+        <HorizontalStackLayout Grid.Row="1" Spacing="8" Margin="8,4">
+            <Picker Title="Status" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding StatusFilter}"
+                    WidthRequest="120">
+                <Picker.Behaviors>
+                    <toolkit:EventToCommandBehavior EventName="SelectedIndexChanged" Command="{Binding FilterChangedCommand}" />
+                </Picker.Behaviors>
+            </Picker>
+            <Picker Title="Priority" ItemsSource="{Binding PriorityOptions}" SelectedItem="{Binding PriorityFilter}"
+                    WidthRequest="120">
+                <Picker.Behaviors>
+                    <toolkit:EventToCommandBehavior EventName="SelectedIndexChanged" Command="{Binding FilterChangedCommand}" />
+                </Picker.Behaviors>
+            </Picker>
+        </HorizontalStackLayout>
+
+        <controls:DataStateView Grid.Row="2"
+            IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
+            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
+            EmptyMessage="No jobs found" RetryCommand="{Binding LoadJobsCommand}">
+            <controls:DataStateView.Body>
+                <RefreshView IsRefreshing="{Binding IsLoading}" Command="{Binding LoadJobsCommand}">
+                    <CollectionView ItemsSource="{Binding Jobs}"
+                                    RemainingItemsThreshold="2"
+                                    RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
+                                    SelectionMode="Single"
+                                    SelectionChangedCommand="{Binding SelectJobCommand}"
+                                    SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:JobListItemResponse">
+                                <Grid Padding="16,12" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                    <Border StrokeShape="RoundRectangle 4" WidthRequest="8" HeightRequest="8"
+                                            BackgroundColor="{Binding Priority, Converter={StaticResource PriorityColorConverter}}"
+                                            VerticalOptions="Center" StrokeThickness="0" />
+                                    <VerticalStackLayout Grid.Column="1">
+                                        <Label Text="{Binding Title}" FontSize="15" FontAttributes="Bold" />
+                                        <Label Text="{Binding CustomerName}" FontSize="13" TextColor="{StaticResource Gray500}" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
+                                        <Label Text="{Binding Status}" FontSize="11"
+                                               TextColor="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                               HorizontalTextAlignment="End" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </RefreshView>
+            </controls:DataStateView.Body>
+        </controls:DataStateView>
+
+        <Button Grid.Row="3" Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
+                CornerRadius="28" Margin="16" HorizontalOptions="End" VerticalOptions="End"
+                Command="{Binding AddJobCommand}" />
+    </Grid>
+</ContentView>

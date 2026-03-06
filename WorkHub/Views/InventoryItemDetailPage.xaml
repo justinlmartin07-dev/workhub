@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             x:Class="WorkHub.Views.InventoryItemDetailPage"
+             x:DataType="vm:InventoryItemDetailViewModel"
+             Title="{Binding PageTitle}">
+
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto,Auto">
+            <Label Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
+            <Button Grid.Column="1" Text="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}, StringFormat='{0}'}"
+                    BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                    Command="{Binding ToggleEditCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
+            <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent" TextColor="Red"
+                    Command="{Binding DeleteCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
+        </Grid>
+    </Shell.TitleView>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
+            <Entry Placeholder="Name *" Text="{Binding Name}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
+            <Entry Placeholder="Part Number" Text="{Binding PartNumber}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
+            <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120"
+                    IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsEditing}">
+                <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"
+                        TextColor="{StaticResource Gray900}" Command="{Binding CancelCommand}" />
+                <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+            </Grid>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

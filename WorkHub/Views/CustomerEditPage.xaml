@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             x:Class="WorkHub.Views.CustomerEditPage"
+             x:DataType="vm:CustomerEditViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
+            <Entry Placeholder="Name *" Text="{Binding Name}" ReturnType="Next" />
+            <Entry Placeholder="Phone" Text="{Binding Phone}" Keyboard="Telephone" ReturnType="Next" />
+            <Entry Placeholder="Email" Text="{Binding Email}" Keyboard="Email" ReturnType="Next" />
+            <Entry Placeholder="Address" Text="{Binding Address}" ReturnType="Next" />
+            <Editor Placeholder="Notes" Text="{Binding Notes}" HeightRequest="120" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"
+                        TextColor="{StaticResource Gray900}" Command="{Binding CancelCommand}" />
+                <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+            </Grid>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

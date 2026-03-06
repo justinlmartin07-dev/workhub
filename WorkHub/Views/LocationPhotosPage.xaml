@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
+             x:Class="WorkHub.Views.LocationPhotosPage"
+             x:DataType="vm:LocationPhotosViewModel"
+             Title="Location Photos">
+
+    <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
+                            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
+                            EmptyMessage="No photos at this location" RetryCommand="{Binding LoadPhotosCommand}">
+        <controls:DataStateView.Body>
+            <CollectionView ItemsSource="{Binding Groups}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:LocationPhotoGroupResponse">
+                        <VerticalStackLayout Padding="16,8">
+                            <Label FontSize="14" FontAttributes="Bold" Margin="0,0,0,4">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="{}{0}{1}">
+                                        <Binding Path="CustomerName" FallbackValue="" />
+                                        <Binding Path="JobTitle" FallbackValue="" StringFormat=" - {0}" />
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                            <CollectionView ItemsSource="{Binding Photos}" HeightRequest="120" ItemsLayout="HorizontalList">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:PhotoResponse">
+                                        <Border StrokeShape="RoundRectangle 8" Margin="0,0,8,0" StrokeThickness="0">
+                                            <Image Source="{Binding Url}" WidthRequest="120" HeightRequest="120" Aspect="AspectFill" />
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </controls:DataStateView.Body>
+    </controls:DataStateView>
+</ContentPage>

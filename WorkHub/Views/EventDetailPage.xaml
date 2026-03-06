@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="WorkHub.Views.EventDetailPage"
+             x:DataType="vm:EventDetailViewModel"
+             Title="{Binding PageTitle}">
+
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto,Auto">
+            <Label Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
+            <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                    Command="{Binding ToggleEditCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
+            <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent" TextColor="Red"
+                    Command="{Binding DeleteCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
+        </Grid>
+    </Shell.TitleView>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
+            <Entry Placeholder="Event Title *" Text="{Binding Title}"
+                   IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
+
+            <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="80"
+                    IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Start Date" FontSize="12" TextColor="{StaticResource Gray500}" />
+                    <DatePicker Date="{Binding StartDate}" IsEnabled="{Binding IsEditing}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="Start Time" FontSize="12" TextColor="{StaticResource Gray500}" />
+                    <TimePicker Time="{Binding StartTime}" IsEnabled="{Binding IsEditing}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <HorizontalStackLayout Spacing="8">
+                <CheckBox IsChecked="{Binding HasEndTime}" IsEnabled="{Binding IsEditing}" />
+                <Label Text="Has End Time" VerticalTextAlignment="Center" />
+            </HorizontalStackLayout>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8" IsVisible="{Binding HasEndTime}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="End Date" FontSize="12" TextColor="{StaticResource Gray500}" />
+                    <DatePicker Date="{Binding EndDate}" IsEnabled="{Binding IsEditing}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="End Time" FontSize="12" TextColor="{StaticResource Gray500}" />
+                    <TimePicker Time="{Binding EndTime}" IsEnabled="{Binding IsEditing}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsEditing}">
+                <Label Text="Customer (optional)" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Picker Title="Select Customer" ItemsSource="{Binding Customers}"
+                        SelectedItem="{Binding SelectedCustomer}" ItemDisplayBinding="{Binding Name}" />
+            </VerticalStackLayout>
+
+            <!-- Assigned Users -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Assigned To" FontSize="14" FontAttributes="Bold" />
+                <CollectionView ItemsSource="{Binding AssignedUsers}" HeightRequest="100">
+                    <CollectionView.EmptyView>
+                        <Label Text="No assignments" TextColor="{StaticResource Gray400}" Padding="0,4" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:UserBriefResponse">
+                            <Grid ColumnDefinitions="*,Auto" Padding="4">
+                                <Label Text="{Binding Name}" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="X" BackgroundColor="Transparent" TextColor="Red"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EventDetailViewModel}}, Path=RemoveAssignmentCommand}"
+                                        CommandParameter="{Binding .}" Padding="4" WidthRequest="32" HeightRequest="32"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:EventDetailViewModel}}, Path=IsEditing}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <Picker Title="Add User..." ItemsSource="{Binding Users}" ItemDisplayBinding="{Binding Name}"
+                        IsVisible="{Binding IsEditing}">
+                    <Picker.Behaviors>
+                        <toolkit:EventToCommandBehavior EventName="SelectedIndexChanged"
+                            Command="{Binding AddAssignmentCommand}" />
+                    </Picker.Behaviors>
+                </Picker>
+            </VerticalStackLayout>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsEditing}">
+                <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"
+                        TextColor="{StaticResource Gray900}" Command="{Binding CancelCommand}" />
+                <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+            </Grid>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

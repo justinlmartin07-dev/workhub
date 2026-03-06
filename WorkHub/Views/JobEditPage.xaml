@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:models="clr-namespace:WorkHub.Models"
+             x:Class="WorkHub.Views.JobEditPage"
+             x:DataType="vm:JobEditViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
+            <!-- Customer picker (new only) -->
+            <VerticalStackLayout IsVisible="{Binding IsNew}" Spacing="4">
+                <Label Text="Customer *" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Picker Title="Select Customer" ItemsSource="{Binding Customers}"
+                        SelectedItem="{Binding SelectedCustomer}" ItemDisplayBinding="{Binding Name}" />
+            </VerticalStackLayout>
+
+            <Entry Placeholder="Job Title *" Text="{Binding Title}" ReturnType="Next" />
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Status" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Picker ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Priority" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Picker ItemsSource="{Binding PriorityOptions}" SelectedItem="{Binding SelectedPriority}" />
+            </VerticalStackLayout>
+
+            <Editor Placeholder="Scope Notes" Text="{Binding ScopeNotes}" HeightRequest="120" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"
+                        TextColor="{StaticResource Gray900}" Command="{Binding CancelCommand}" />
+                <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+            </Grid>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

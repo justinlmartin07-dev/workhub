@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="WorkHub.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:WorkHub.Views"
+    Title="WorkHub"
+    FlyoutBehavior="Disabled">
+
+    <ShellItem Route="welcome" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate views:WelcomePage}" Shell.NavBarIsVisible="False" />
+    </ShellItem>
+
+</Shell>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             x:Class="WorkHub.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Shell.NavBarIsVisible="False"
+             Title="Login">
+    <ScrollView>
+        <VerticalStackLayout Padding="40" Spacing="20" VerticalOptions="Center" MaximumWidthRequest="500" HorizontalOptions="Center">
+            <Label Text="WorkHub" FontSize="32" FontAttributes="Bold" HorizontalTextAlignment="Center" Margin="0,0,0,20" />
+
+            <Entry Placeholder="Email" Text="{Binding Email}" Keyboard="Email" ReturnType="Next" />
+            <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True" ReturnType="Done" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" HorizontalTextAlignment="Center" />
+
+            <Button Text="Sign In" Command="{Binding LoginCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

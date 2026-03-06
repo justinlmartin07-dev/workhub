@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
+             x:Class="WorkHub.Views.PhotoViewerPage"
+             x:DataType="vm:PhotoViewerViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="Black">
+
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto">
+            <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold"
+                   VerticalTextAlignment="Center" TextColor="White" />
+            <Button Grid.Column="1" Text="Delete" BackgroundColor="Transparent"
+                    TextColor="Red" Command="{Binding DeleteCurrentPhotoCommand}" />
+        </Grid>
+    </Shell.TitleView>
+
+    <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
+                            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
+                            RetryCommand="{Binding LoadPhotosCommand}">
+        <controls:DataStateView.Body>
+            <Grid>
+                <CarouselView ItemsSource="{Binding Photos}" Position="{Binding CurrentIndex}" Loop="False">
+                    <CarouselView.ItemTemplate>
+                        <DataTemplate x:DataType="models:PhotoResponse">
+                            <Image Source="{Binding Url}" Aspect="AspectFit"
+                                   VerticalOptions="Center" HorizontalOptions="Center" />
+                        </DataTemplate>
+                    </CarouselView.ItemTemplate>
+                </CarouselView>
+                <IndicatorView Position="{Binding CurrentIndex}" Count="{Binding Photos.Count}"
+                               HorizontalOptions="Center" VerticalOptions="End" Margin="0,0,0,20"
+                               IndicatorColor="#80FFFFFF" SelectedIndicatorColor="White" />
+            </Grid>
+        </controls:DataStateView.Body>
+    </controls:DataStateView>
+</ContentPage>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
+             x:Class="WorkHub.Views.CustomerDetailPage"
+             x:DataType="vm:CustomerDetailViewModel"
+             Title="{Binding Customer.Name, FallbackValue='Customer'}">
+
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto,Auto">
+            <Label Text="{Binding Customer.Name, FallbackValue='Customer'}" FontSize="18" FontAttributes="Bold"
+                   VerticalTextAlignment="Center" />
+            <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent"
+                    TextColor="{StaticResource Primary}" Command="{Binding EditCommand}" />
+            <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent"
+                    TextColor="Red" Command="{Binding DeleteCommand}" />
+        </Grid>
+    </Shell.TitleView>
+
+    <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
+                            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
+                            RetryCommand="{Binding LoadCustomerCommand}">
+        <controls:DataStateView.Body>
+            <ScrollView>
+                <VerticalStackLayout Spacing="16" Padding="16">
+                    <!-- Contact Info -->
+                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Contact Information" FontSize="16" FontAttributes="Bold" />
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="4">
+                                <Label Text="Phone:" TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Column="1" Text="{Binding Customer.Phone, FallbackValue='-'}" >
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding CallPhoneCommand}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Label Grid.Row="1" Text="Email:" TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Customer.Email, FallbackValue='-'}" TextColor="{StaticResource Primary}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SendEmailCommand}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Label Grid.Row="2" Text="Address:" TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Customer.Address, FallbackValue='-'}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Notes -->
+                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}"
+                           IsVisible="{Binding Customer.Notes, Converter={StaticResource StringNotEmptyConverter}}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Notes" FontSize="16" FontAttributes="Bold" />
+                            <Label Text="{Binding Customer.Notes}" TextColor="{StaticResource Gray600}" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Photos -->
+                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <Label Text="Photos" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="Pick" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                        Command="{Binding PickPhotoCommand}" Padding="4" />
+                                <Button Grid.Column="2" Text="Camera" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                        Command="{Binding TakePhotoCommand}" Padding="4" />
+                            </Grid>
+                            <CollectionView ItemsSource="{Binding Customer.Photos}" HeightRequest="120"
+                                            ItemsLayout="HorizontalList">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:PhotoResponse">
+                                        <Border StrokeShape="RoundRectangle 8" Margin="0,0,8,0" StrokeThickness="0">
+                                            <Image Source="{Binding Url}" WidthRequest="120" HeightRequest="120" Aspect="AspectFill">
+                                                <Image.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=ViewPhotosCommand}"
+                                                                          CommandParameter="{Binding .}" />
+                                                </Image.GestureRecognizers>
+                                            </Image>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                            <!-- Location Photos Link -->
+                            <Label IsVisible="{Binding LocationPhotoCount, Converter={StaticResource StringNotEmptyConverter}}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="View " />
+                                        <Span Text="{Binding LocationPhotoCount}" FontAttributes="Bold" />
+                                        <Span Text=" photos at this location" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ViewLocationPhotosCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Jobs -->
+                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Jobs" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="+ Add Job" BackgroundColor="Transparent"
+                                        TextColor="{StaticResource Primary}" Command="{Binding AddJobCommand}" Padding="4" />
+                            </Grid>
+                            <CollectionView ItemsSource="{Binding Customer.Jobs}">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:JobBriefResponse">
+                                        <Grid Padding="8,6" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                            <Border StrokeShape="RoundRectangle 4" WidthRequest="8" HeightRequest="8"
+                                                    BackgroundColor="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                                    VerticalOptions="Center" StrokeThickness="0" />
+                                            <Label Grid.Column="1" Text="{Binding Title}" VerticalTextAlignment="Center" />
+                                            <Label Grid.Column="2" Text="{Binding Status}" FontSize="12"
+                                                   TextColor="{StaticResource Gray500}" VerticalTextAlignment="Center" />
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=ViewJobCommand}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </Grid.GestureRecognizers>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Frame>
+                </VerticalStackLayout>
+            </ScrollView>
+        </controls:DataStateView.Body>
+    </controls:DataStateView>
+</ContentPage>

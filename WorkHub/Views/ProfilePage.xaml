@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
+             x:Class="WorkHub.Views.ProfilePage"
+             x:DataType="vm:ProfileViewModel"
+             Title="Profile">
+
+    <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
+                            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
+                            RetryCommand="{Binding LoadProfileCommand}">
+        <controls:DataStateView.Body>
+            <ScrollView>
+                <VerticalStackLayout Spacing="20" Padding="24" HorizontalOptions="Fill">
+                    <!-- Avatar -->
+                    <VerticalStackLayout HorizontalOptions="Center" Spacing="8">
+                        <Border StrokeShape="RoundRectangle 50" WidthRequest="100" HeightRequest="100"
+                                BackgroundColor="{StaticResource Secondary}" StrokeThickness="0"
+                                HorizontalOptions="Center">
+                            <Grid>
+                                <Label Text="{Binding Profile.Name, StringFormat='{0}'}"
+                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                       FontSize="36" FontAttributes="Bold" TextColor="{StaticResource Primary}"
+                                       IsVisible="True" />
+                                <Image Source="{Binding Profile.ProfilePhotoUrl}" Aspect="AspectFill"
+                                       IsVisible="{Binding Profile.ProfilePhotoUrl, Converter={StaticResource StringNotEmptyConverter}}" />
+                            </Grid>
+                        </Border>
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                            <Button Text="Change Photo" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                    Command="{Binding ChangePhotoCommand}" Padding="4" FontSize="13" />
+                            <Button Text="Remove" BackgroundColor="Transparent" TextColor="Red"
+                                    Command="{Binding DeletePhotoCommand}" Padding="4" FontSize="13"
+                                    IsVisible="{Binding Profile.ProfilePhotoUrl, Converter={StaticResource StringNotEmptyConverter}}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Profile Info -->
+                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                        <VerticalStackLayout Spacing="12">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Profile" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="{Binding IsEditing, StringFormat='Cancel'}"
+                                        BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                        Command="{Binding ToggleEditCommand}" Padding="4" />
+                            </Grid>
+
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Name" FontSize="12" TextColor="{StaticResource Gray500}" />
+                                <Entry Text="{Binding Name}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Email" FontSize="12" TextColor="{StaticResource Gray500}" />
+                                <Label Text="{Binding Profile.Email}" FontSize="14" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Member Since" FontSize="12" TextColor="{StaticResource Gray500}" />
+                                <Label Text="{Binding Profile.CreatedAt, Converter={StaticResource DateFormatConverter}}" FontSize="14" />
+                            </VerticalStackLayout>
+
+                            <Button Text="Save Changes" Command="{Binding SaveProfileCommand}"
+                                    IsVisible="{Binding IsEditing}" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Actions -->
+                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                        <VerticalStackLayout Spacing="12">
+                            <Button Text="Change Password" Command="{Binding ChangePasswordCommand}"
+                                    BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+                            <BoxView HeightRequest="1" Color="{StaticResource Gray200}" />
+                            <Button Text="Logout" Command="{Binding LogoutCommand}"
+                                    BackgroundColor="Transparent" TextColor="Red" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+                </VerticalStackLayout>
+            </ScrollView>
+        </controls:DataStateView.Body>
+    </controls:DataStateView>
+</ContentPage>
