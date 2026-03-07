@@ -19,84 +19,85 @@
         </Grid>
     </Shell.TitleView>
 
-    <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
-                            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
-                            RetryCommand="{Binding LoadJobCommand}">
-        <controls:DataStateView.Body>
-            <ScrollView>
-                <VerticalStackLayout Spacing="16" Padding="16">
-                    <!-- Status/Priority -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
-                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
-                            <Label Text="Customer" TextColor="{StaticResource Gray500}" />
-                            <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{StaticResource Primary}">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ViewCustomerCommand}" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                            <Label Grid.Row="1" Text="Status" TextColor="{StaticResource Gray500}" />
-                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Job.Status}"
-                                   TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}" FontAttributes="Bold" />
-                            <Label Grid.Row="2" Text="Priority" TextColor="{StaticResource Gray500}" />
-                            <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority}"
-                                   TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
-                        </Grid>
-                    </Frame>
-
-                    <!-- Scope Notes -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}"
-                           IsVisible="{Binding Job.ScopeNotes, Converter={StaticResource StringNotEmptyConverter}}">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Scope Notes" FontSize="16" FontAttributes="Bold" />
-                            <Label Text="{Binding Job.ScopeNotes}" TextColor="{StaticResource Gray600}" />
-                        </VerticalStackLayout>
-                    </Frame>
-
-                    <!-- Photos -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
-                        <VerticalStackLayout Spacing="8">
-                            <Grid ColumnDefinitions="*,Auto,Auto">
-                                <Label Text="Photos" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                <Button Grid.Column="1" Text="Pick" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                                        Command="{Binding PickPhotoCommand}" Padding="4" />
-                                <Button Grid.Column="2" Text="Camera" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                                        Command="{Binding TakePhotoCommand}" Padding="4" />
+    <Grid>
+        <!-- Main content -->
+        <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
+                                HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
+                                RetryCommand="{Binding LoadJobCommand}">
+            <controls:DataStateView.Body>
+                <ScrollView>
+                    <VerticalStackLayout Spacing="16" Padding="16">
+                        <!-- Status/Priority -->
+                        <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+                                <Label Text="Customer" TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{StaticResource Primary}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ViewCustomerCommand}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Label Grid.Row="1" Text="Status" TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Job.Status}"
+                                       TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}" FontAttributes="Bold" />
+                                <Label Grid.Row="2" Text="Priority" TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority}"
+                                       TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
                             </Grid>
-                            <CollectionView ItemsSource="{Binding Job.Photos}" HeightRequest="120"
-                                            ItemsLayout="HorizontalList">
-                                <CollectionView.ItemTemplate>
-                                    <DataTemplate x:DataType="models:PhotoResponse">
-                                        <Border StrokeShape="RoundRectangle 8" Margin="0,0,8,0" StrokeThickness="0">
-                                            <Image Source="{Binding Url}" WidthRequest="120" HeightRequest="120" Aspect="AspectFill">
-                                                <Image.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=ViewPhotosCommand}"
-                                                                          CommandParameter="{Binding .}" />
-                                                </Image.GestureRecognizers>
-                                            </Image>
-                                        </Border>
-                                    </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
-                        </VerticalStackLayout>
-                    </Frame>
+                        </Frame>
 
-                    <!-- Items Used -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Items Used" FontSize="16" FontAttributes="Bold" />
-                            <CollectionView ItemsSource="{Binding Job.UsedItems}">
-                                <CollectionView.EmptyView>
-                                    <Label Text="No items" TextColor="{StaticResource Gray400}" />
-                                </CollectionView.EmptyView>
-                                <CollectionView.ItemTemplate>
-                                    <DataTemplate x:DataType="models:JobItemResponse">
-                                        <SwipeView>
-                                            <SwipeView.RightItems>
-                                                <SwipeItem Text="Delete" BackgroundColor="Red"
-                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
-                                                           CommandParameter="{Binding .}" />
-                                            </SwipeView.RightItems>
-                                            <Grid Padding="4" ColumnDefinitions="*,Auto">
+                        <!-- Scope Notes -->
+                        <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}"
+                               IsVisible="{Binding Job.ScopeNotes, Converter={StaticResource StringNotEmptyConverter}}">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Scope Notes" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="{Binding Job.ScopeNotes}" TextColor="{StaticResource Gray600}" />
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <!-- Photos -->
+                        <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                    <Label Text="Photos" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                    <Button Grid.Column="1" Text="Pick" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                            Command="{Binding PickPhotoCommand}" Padding="4" />
+                                    <Button Grid.Column="2" Text="Camera" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                            Command="{Binding TakePhotoCommand}" Padding="4" />
+                                </Grid>
+                                <CollectionView ItemsSource="{Binding Job.Photos}" HeightRequest="120"
+                                                ItemsLayout="HorizontalList">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:PhotoResponse">
+                                            <Border StrokeShape="RoundRectangle 8" Margin="0,0,8,0" StrokeThickness="0">
+                                                <Image Source="{Binding Url}" WidthRequest="120" HeightRequest="120" Aspect="AspectFill">
+                                                    <Image.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=ViewPhotosCommand}"
+                                                                              CommandParameter="{Binding .}" />
+                                                    </Image.GestureRecognizers>
+                                                </Image>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <!-- Items Used -->
+                        <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="Items Used" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                    <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
+                                            TextColor="{StaticResource Primary}" Command="{Binding OpenPartsPanelCommand}"
+                                            CommandParameter="used" Padding="4" />
+                                </Grid>
+                                <CollectionView ItemsSource="{Binding Job.UsedItems}">
+                                    <CollectionView.EmptyView>
+                                        <Label Text="No items" TextColor="{StaticResource Gray400}" />
+                                    </CollectionView.EmptyView>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:JobItemResponse">
+                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto">
                                                 <VerticalStackLayout>
                                                     <Label Text="{Binding Name}" FontSize="14" />
                                                     <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{StaticResource Gray400}"
@@ -104,77 +105,149 @@
                                                 </VerticalStackLayout>
                                                 <Label Grid.Column="1" Text="{Binding Quantity, StringFormat='x{0}'}"
                                                        VerticalTextAlignment="Center" TextColor="{StaticResource Gray500}" />
+                                                <Label Grid.Column="2" Text="✕" FontSize="14" TextColor="Red"
+                                                       VerticalTextAlignment="Center" Padding="8,0">
+                                                    <Label.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Label.GestureRecognizers>
+                                                </Label>
                                             </Grid>
-                                        </SwipeView>
-                                    </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
-                        </VerticalStackLayout>
-                    </Frame>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Frame>
 
-                    <!-- Items To Order -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Items To Order" FontSize="16" FontAttributes="Bold" />
-                            <CollectionView ItemsSource="{Binding Job.ToOrderItems}">
-                                <CollectionView.EmptyView>
-                                    <Label Text="No items" TextColor="{StaticResource Gray400}" />
-                                </CollectionView.EmptyView>
-                                <CollectionView.ItemTemplate>
-                                    <DataTemplate x:DataType="models:JobItemResponse">
-                                        <SwipeView>
-                                            <SwipeView.RightItems>
-                                                <SwipeItem Text="Delete" BackgroundColor="Red"
-                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
-                                                           CommandParameter="{Binding .}" />
-                                            </SwipeView.RightItems>
-                                            <Grid Padding="4" ColumnDefinitions="*,Auto">
-                                                <Label Text="{Binding Name}" FontSize="14" />
+                        <!-- Items To Order -->
+                        <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="Items To Order" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                    <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
+                                            TextColor="{StaticResource Primary}" Command="{Binding OpenPartsPanelCommand}"
+                                            CommandParameter="to_order" Padding="4" />
+                                </Grid>
+                                <CollectionView ItemsSource="{Binding Job.ToOrderItems}">
+                                    <CollectionView.EmptyView>
+                                        <Label Text="No items" TextColor="{StaticResource Gray400}" />
+                                    </CollectionView.EmptyView>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:JobItemResponse">
+                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto">
+                                                <Label Text="{Binding Name}" FontSize="14" VerticalTextAlignment="Center" />
                                                 <Label Grid.Column="1" Text="{Binding Quantity, StringFormat='x{0}'}"
                                                        VerticalTextAlignment="Center" TextColor="{StaticResource Gray500}" />
+                                                <Label Grid.Column="2" Text="✕" FontSize="14" TextColor="Red"
+                                                       VerticalTextAlignment="Center" Padding="8,0">
+                                                    <Label.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Label.GestureRecognizers>
+                                                </Label>
                                             </Grid>
-                                        </SwipeView>
-                                    </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
-                        </VerticalStackLayout>
-                    </Frame>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Frame>
 
-                    <!-- Notes -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Notes" FontSize="16" FontAttributes="Bold" />
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                <Entry Placeholder="Add a note..." Text="{Binding NewNoteText}" ReturnType="Send"
-                                       ReturnCommand="{Binding AddNoteCommand}" />
-                                <Button Grid.Column="1" Text="Add" Command="{Binding AddNoteCommand}"
-                                        Padding="12,0" />
+                        <!-- Notes -->
+                        <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Notes" FontSize="16" FontAttributes="Bold" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Entry Placeholder="Add a note..." Text="{Binding NewNoteText}" ReturnType="Send"
+                                           ReturnCommand="{Binding AddNoteCommand}" />
+                                    <Button Grid.Column="1" Text="Add" Command="{Binding AddNoteCommand}"
+                                            Padding="12,0" />
+                                </Grid>
+                                <CollectionView ItemsSource="{Binding Job.Notes}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:JobNoteResponse">
+                                            <SwipeView>
+                                                <SwipeView.RightItems>
+                                                    <SwipeItem Text="Delete" BackgroundColor="Red"
+                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteNoteCommand}"
+                                                               CommandParameter="{Binding .}" />
+                                                </SwipeView.RightItems>
+                                                <VerticalStackLayout Padding="4,8">
+                                                    <Label Text="{Binding Content}" FontSize="14" />
+                                                    <HorizontalStackLayout Spacing="4">
+                                                        <Label Text="{Binding CreatedByName}" FontSize="11" TextColor="{StaticResource Gray400}" />
+                                                        <Label Text="{Binding CreatedAt, Converter={StaticResource DateFormatConverter}}"
+                                                               FontSize="11" TextColor="{StaticResource Gray400}" />
+                                                    </HorizontalStackLayout>
+                                                </VerticalStackLayout>
+                                            </SwipeView>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </controls:DataStateView.Body>
+        </controls:DataStateView>
+
+        <!-- Scrim (semi-transparent backdrop) -->
+        <BoxView Color="#80000000" IsVisible="{Binding IsPartsPanelOpen}" InputTransparent="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ClosePartsPanelCommand}" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- Slide-out parts panel -->
+        <Frame BackgroundColor="White" CornerRadius="16" BorderColor="{StaticResource Gray300}"
+               HorizontalOptions="End" VerticalOptions="Fill" Padding="0"
+               WidthRequest="320" IsVisible="{Binding IsPartsPanelOpen}" HasShadow="True">
+            <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Padding="16">
+                <!-- Header -->
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Button Text="✕" BackgroundColor="Transparent" TextColor="{StaticResource Gray500}"
+                            Command="{Binding ClosePartsPanelCommand}" FontSize="18" Padding="0" WidthRequest="36" />
+                    <Label Grid.Column="1" Text="{Binding PartsPanelTitle}" FontSize="18" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="2" Text="{Binding SelectedCount, StringFormat='{0} selected'}"
+                           FontSize="12" TextColor="{StaticResource Gray400}" VerticalTextAlignment="Center" />
+                </Grid>
+
+                <!-- Search -->
+                <SearchBar Grid.Row="1" Placeholder="Search parts..." Text="{Binding NewItemSearchText}"
+                           Margin="0,8,0,0" />
+
+                <!-- Inventory list with checkboxes -->
+                <CollectionView Grid.Row="2" ItemsSource="{Binding SelectableInventory}" SelectionMode="None"
+                                Margin="0,8,0,0">
+                    <CollectionView.EmptyView>
+                        <Label Text="No parts found" TextColor="{StaticResource Gray400}" Padding="0,16"
+                               HorizontalTextAlignment="Center" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SelectableInventoryItem">
+                            <Grid Padding="4,6" ColumnDefinitions="Auto,*">
+                                <CheckBox IsChecked="{Binding IsSelected}" VerticalOptions="Center" />
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" FontSize="14" />
+                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{StaticResource Gray400}"
+                                           IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                                </VerticalStackLayout>
                             </Grid>
-                            <CollectionView ItemsSource="{Binding Job.Notes}">
-                                <CollectionView.ItemTemplate>
-                                    <DataTemplate x:DataType="models:JobNoteResponse">
-                                        <SwipeView>
-                                            <SwipeView.RightItems>
-                                                <SwipeItem Text="Delete" BackgroundColor="Red"
-                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteNoteCommand}"
-                                                           CommandParameter="{Binding .}" />
-                                            </SwipeView.RightItems>
-                                            <VerticalStackLayout Padding="4,8">
-                                                <Label Text="{Binding Content}" FontSize="14" />
-                                                <HorizontalStackLayout Spacing="4">
-                                                    <Label Text="{Binding CreatedByName}" FontSize="11" TextColor="{StaticResource Gray400}" />
-                                                    <Label Text="{Binding CreatedAt, Converter={StaticResource DateFormatConverter}}"
-                                                           FontSize="11" TextColor="{StaticResource Gray400}" />
-                                                </HorizontalStackLayout>
-                                            </VerticalStackLayout>
-                                        </SwipeView>
-                                    </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
-                        </VerticalStackLayout>
-                    </Frame>
-                </VerticalStackLayout>
-            </ScrollView>
-        </controls:DataStateView.Body>
-    </controls:DataStateView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Custom item entry -->
+                <Grid Grid.Row="3" ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,8,0,0">
+                    <Entry Placeholder="Custom item name..." Text="{Binding NewAdhocItemName}" />
+                </Grid>
+
+                <!-- OK button -->
+                <Button Grid.Row="4" Text="{Binding SelectedCount, StringFormat='Add {0} Parts'}"
+                        Command="{Binding ConfirmAddPartsCommand}" Margin="0,12,0,0" />
+            </Grid>
+        </Frame>
+    </Grid>
 </ContentPage>

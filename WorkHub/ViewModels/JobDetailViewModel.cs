@@ -24,6 +24,27 @@ public partial class JobDetailViewModel : BaseViewModel
     [ObservableProperty]
     private int _locationPhotoCount;
 
+    [ObservableProperty]
+    private bool _isPartsPanelOpen;
+
+    [ObservableProperty]
+    private string _partsPanelTitle = "Add Parts";
+
+    [ObservableProperty]
+    private string _newItemSearchText = string.Empty;
+
+    [ObservableProperty]
+    private ObservableCollection<SelectableInventoryItem> _selectableInventory = new();
+
+    [ObservableProperty]
+    private string _newAdhocItemName = string.Empty;
+
+    [ObservableProperty]
+    private int _selectedCount;
+
+    private List<InventoryItemResponse> _allInventory = new();
+    private string _activeListType = string.Empty;
+
     public JobDetailViewModel(ApiService apiService, PhotoService photoService)
     {
         _apiService = apiService;
@@ -135,6 +156,92 @@ public partial class JobDetailViewModel : BaseViewModel
         await Shell.Current.GoToAsync($"customerDetail?id={Job.CustomerId}");
     }
 
+    partial void OnNewItemSearchTextChanged(string value) => FilterInventory();
+
+    private void FilterInventory()
+    {
+        var search = (NewItemSearchText ?? string.Empty).ToLower();
+        var filtered = string.IsNullOrWhiteSpace(search)
+            ? _allInventory
+            : _allInventory.Where(i =>
+                i.Name.ToLower().Contains(search) ||
+                (i.PartNumber?.ToLower().Contains(search) ?? false)).ToList();
+
+        SelectableInventory = new ObservableCollection<SelectableInventoryItem>(
+            filtered.Select(i =>
+            {
+                var si = new SelectableInventoryItem(i);
+                si.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(SelectableInventoryItem.IsSelected))
+                        SelectedCount = SelectableInventory.Count(x => x.IsSelected);
+                };
+                return si;
+            }));
+    }
+
+    [RelayCommand]
+    private async Task OpenPartsPanelAsync(string listType)
+    {
+        _activeListType = listType;
+        PartsPanelTitle = listType == "used" ? "Add Parts Used" : "Add Parts To Order";
+        NewItemSearchText = string.Empty;
+        NewAdhocItemName = string.Empty;
+        SelectedCount = 0;
+
+        try
+        {
+            var result = await _apiService.GetInventoryAsync(pageSize: 200);
+            _allInventory = result.Items.ToList();
+            FilterInventory();
+        }
+        catch { }
+
+        IsPartsPanelOpen = true;
+    }
+
+    [RelayCommand]
+    private void ClosePartsPanel()
+    {
+        IsPartsPanelOpen = false;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmAddPartsAsync()
+    {
+        if (Job == null) return;
+        try
+        {
+            var selected = SelectableInventory.Where(i => i.IsSelected).ToList();
+            foreach (var item in selected)
+            {
+                await _apiService.CreateJobItemAsync(Job.Id, new CreateJobInventoryRequest
+                {
+                    InventoryItemId = item.Item.Id,
+                    Quantity = 1,
+                    ListType = _activeListType
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(NewAdhocItemName))
+            {
+                await _apiService.CreateJobAdhocItemAsync(Job.Id, new CreateJobAdhocItemRequest
+                {
+                    Name = NewAdhocItemName.Trim(),
+                    Quantity = 1,
+                    ListType = _activeListType
+                });
+            }
+
+            IsPartsPanelOpen = false;
+            await LoadJobAsync();
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
+    }
+
     [RelayCommand]
     private async Task DeleteItemAsync(JobItemResponse item)
     {
@@ -146,5 +253,22 @@ public partial class JobDetailViewModel : BaseViewModel
         else
             await _apiService.DeleteJobAdhocItemAsync(Job.Id, item.Id);
         await LoadJobAsync();
+    }
+}
+
+public partial class SelectableInventoryItem : ObservableObject
+{
+    public InventoryItemResponse Item { get; }
+
+    [ObservableProperty]
+    private bool _isSelected;
+
+    public string Name => Item.Name;
+    public string? PartNumber => Item.PartNumber;
+    public string? Description => Item.Description;
+
+    public SelectableInventoryItem(InventoryItemResponse item)
+    {
+        Item = item;
     }
 }
