@@ -7,66 +7,42 @@
              x:Class="WorkHub.Views.CalendarPage"
              x:DataType="vm:CalendarViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Grid RowDefinitions="Auto,Auto,*" VerticalOptions="Fill">
+        <Grid.GestureRecognizers>
+            <SwipeGestureRecognizer Direction="Left" Swiped="OnSwipedLeft" />
+            <SwipeGestureRecognizer Direction="Right" Swiped="OnSwipedRight" />
+        </Grid.GestureRecognizers>
+
         <!-- Month Navigation -->
         <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,8">
             <Button Text="&lt;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
                     Command="{Binding PreviousMonthCommand}" FontSize="20" />
-            <Label Grid.Column="1" Text="{Binding SelectedDate, StringFormat='{0:MMMM yyyy}'}"
+            <Label Grid.Column="1" Text="{Binding MonthYearLabel}"
                    FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="Center"
                    VerticalTextAlignment="Center" />
             <Button Grid.Column="2" Text="&gt;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
                     Command="{Binding NextMonthCommand}" FontSize="20" />
         </Grid>
 
-        <!-- Date Picker -->
-        <DatePicker Grid.Row="1" Date="{Binding SelectedDate}" Margin="16,0"
-                    HorizontalOptions="Fill" />
+        <!-- Day-of-week headers -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*,*,*" Padding="4,0" HeightRequest="24">
+            <Label Text="Sun" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
+            <Label Grid.Column="1" Text="Mon" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
+            <Label Grid.Column="2" Text="Tue" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
+            <Label Grid.Column="3" Text="Wed" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
+            <Label Grid.Column="4" Text="Thu" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
+            <Label Grid.Column="5" Text="Fri" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
+            <Label Grid.Column="6" Text="Sat" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
+        </Grid>
 
-        <!-- Events for Selected Day -->
-        <controls:DataStateView Grid.Row="2"
-            IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
-            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
-            EmptyMessage="No events this month" RetryCommand="{Binding LoadEventsCommand}">
-            <controls:DataStateView.Body>
-                <CollectionView ItemsSource="{Binding DayEvents}" Margin="0,8,0,0">
-                    <CollectionView.Header>
-                        <Label Text="{Binding SelectedDate, StringFormat='Events for {0:ddd, MMM d}'}"
-                               FontSize="14" FontAttributes="Bold" Padding="16,8" TextColor="{StaticResource Gray500}" />
-                    </CollectionView.Header>
-                    <CollectionView.EmptyView>
-                        <Label Text="No events on this day" Padding="16" TextColor="{StaticResource Gray400}"
-                               HorizontalTextAlignment="Center" />
-                    </CollectionView.EmptyView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:CalendarEventResponse">
-                            <Grid Padding="16,10" ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                <VerticalStackLayout WidthRequest="50">
-                                    <Label Text="{Binding StartTime, StringFormat='{0:HH:mm}'}" FontSize="14" FontAttributes="Bold" />
-                                    <Label Text="{Binding EndTime, StringFormat='{0:HH:mm}'}" FontSize="11" TextColor="{StaticResource Gray400}" />
-                                </VerticalStackLayout>
-                                <VerticalStackLayout Grid.Column="1">
-                                    <Label Text="{Binding Title}" FontSize="15" FontAttributes="Bold" />
-                                    <Label Text="{Binding CustomerName}" FontSize="12" TextColor="{StaticResource Gray500}"
-                                           IsVisible="{Binding CustomerName, Converter={StaticResource StringNotEmptyConverter}}" />
-                                    <Label Text="{Binding Description}" FontSize="12" TextColor="{StaticResource Gray400}"
-                                           LineBreakMode="TailTruncation" MaxLines="1"
-                                           IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}" />
-                                </VerticalStackLayout>
-                                <Grid.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CalendarViewModel}}, Path=SelectEventCommand}"
-                                                          CommandParameter="{Binding .}" />
-                                </Grid.GestureRecognizers>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </controls:DataStateView.Body>
-        </controls:DataStateView>
+        <!-- Month Grid (built in code-behind) -->
+        <Grid Grid.Row="2">
+            <Grid x:Name="MonthGrid" Padding="4,0" VerticalOptions="Fill" />
 
-        <!-- FAB -->
-        <Button Grid.Row="3" Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
-                CornerRadius="28" Margin="16" HorizontalOptions="End" VerticalOptions="End"
-                Command="{Binding AddEventCommand}" />
+            <!-- FAB -->
+            <Button Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
+                    CornerRadius="28" Margin="16" HorizontalOptions="End" VerticalOptions="End"
+                    Command="{Binding AddEventCommand}" ZIndex="10" />
+        </Grid>
     </Grid>
 </ContentView>

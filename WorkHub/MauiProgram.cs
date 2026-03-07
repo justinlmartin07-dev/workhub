@@ -60,6 +60,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<InventoryItemDetailViewModel>();
 		builder.Services.AddTransient<CalendarViewModel>();
 		builder.Services.AddTransient<EventDetailViewModel>();
+		builder.Services.AddTransient<CalendarDaySummaryViewModel>();
 		builder.Services.AddTransient<PhotoViewerViewModel>();
 		builder.Services.AddTransient<LocationPhotosViewModel>();
 		builder.Services.AddTransient<ProfileViewModel>();
@@ -80,6 +81,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<InventoryItemDetailPage>();
 		builder.Services.AddTransient<CalendarPage>();
 		builder.Services.AddTransient<EventDetailPage>();
+		builder.Services.AddTransient<CalendarDaySummaryPage>();
 		builder.Services.AddTransient<PhotoViewerPage>();
 		builder.Services.AddTransient<LocationPhotosPage>();
 		builder.Services.AddTransient<ProfilePage>();

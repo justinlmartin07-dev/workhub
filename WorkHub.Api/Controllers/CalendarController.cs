@@ -36,10 +36,9 @@ public class CalendarController : ControllerBase
 
         var events = await query
             .OrderBy(e => e.StartTime)
-            .Select(e => MapEvent(e))
             .ToListAsync();
 
-        return Ok(events);
+        return Ok(events.Select(MapEvent));
     }
 
     [HttpGet("{id:guid}")]
@@ -192,10 +191,10 @@ public class CalendarController : ControllerBase
         JobTitle = e.Job?.Title,
         CreatedBy = e.CreatedBy,
         CreatedAt = e.CreatedAt,
-        Assignments = e.Assignments.Select(a => new EventAssignmentResponse
+        Assignments = (e.Assignments ?? []).Select(a => new EventAssignmentResponse
         {
             UserId = a.UserId,
-            Name = a.User.Name,
+            Name = a.User?.Name ?? string.Empty,
         }).ToList(),
     };
 }

@@ -16,6 +16,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("jobDetail", typeof(JobDetailPage));
         Routing.RegisterRoute("jobEdit", typeof(JobEditPage));
         Routing.RegisterRoute("inventoryDetail", typeof(InventoryItemDetailPage));
+        Routing.RegisterRoute("daySummary", typeof(CalendarDaySummaryPage));
         Routing.RegisterRoute("eventDetail", typeof(EventDetailPage));
         Routing.RegisterRoute("photoViewer", typeof(PhotoViewerPage));
         Routing.RegisterRoute("locationPhotos", typeof(LocationPhotosPage));

@@ -10,8 +10,8 @@ public class ShowDetailMessage : ValueChangedMessage<DetailRequest>
 public class DetailRequest
 {
     public string Route { get; set; } = string.Empty;
-    // Key = VM property name, Value = value
-    public Dictionary<string, string> Properties { get; set; } = new();
+    // Key = VM property name, Value = value (string for simple types, object for complex)
+    public Dictionary<string, object> Properties { get; set; } = new();
     // Key = query param name, Value = value (for Shell navigation)
     public Dictionary<string, string> QueryParams { get; set; } = new();
     // Optional: switch to this tab index before showing detail

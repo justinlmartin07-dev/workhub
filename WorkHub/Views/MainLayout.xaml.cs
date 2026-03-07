@@ -65,12 +65,7 @@ public partial class MainLayout : ContentPage
             BottomTabs.IsVisible = false;
             ListPanel.Margin = new Thickness(72, 0, 0, 0);
 
-            ContentGrid.ColumnDefinitions.Clear();
-            ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(1, GridUnitType.Star)));
-            ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(2, GridUnitType.Star)));
-
-            Grid.SetColumn(ListPanel, 0);
-            Grid.SetColumn(DetailPanel, 1);
+            UpdateColumnProportions();
             Grid.SetColumn(NavRail, 0);
         }
         else
@@ -86,6 +81,16 @@ public partial class MainLayout : ContentPage
 
             Grid.SetColumn(ListPanel, 0);
         }
+    }
+
+    private void UpdateColumnProportions()
+    {
+        bool isCalendar = _viewModel.SelectedTabIndex == 3;
+        ContentGrid.ColumnDefinitions.Clear();
+        ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(isCalendar ? 2 : 1, GridUnitType.Star)));
+        ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(1, GridUnitType.Star)));
+        Grid.SetColumn(ListPanel, 0);
+        Grid.SetColumn(DetailPanel, 1);
     }
 
     public bool IsWideLayout => _isWide;
@@ -115,6 +120,7 @@ public partial class MainLayout : ContentPage
         };
 
         ListPanel.Content = listContent;
+        if (_isWide) UpdateColumnProportions();
     }
 
     private void ResetDetailPanel()
@@ -153,6 +159,7 @@ public partial class MainLayout : ContentPage
                 "jobDetail" => CreateDetailView<JobDetailPage, JobDetailViewModel>(request),
                 "inventoryDetail" => CreateDetailView<InventoryItemDetailPage, InventoryItemDetailViewModel>(request),
                 "eventDetail" => CreateDetailView<EventDetailPage, EventDetailViewModel>(request),
+                "daySummary" => CreateDetailView<CalendarDaySummaryPage, CalendarDaySummaryViewModel>(request),
                 _ => null
             };
 

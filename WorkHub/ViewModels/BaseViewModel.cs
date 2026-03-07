@@ -46,9 +46,11 @@ public partial class BaseViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = $"{ex.GetType().Name}: {ex.Message}";
             HasError = true;
             HasContent = false;
+            var path = Path.Combine(FileSystem.AppDataDirectory, "crash.log");
+            File.WriteAllText(path, $"{DateTime.Now}\n{ex}\n");
         }
         finally
         {
