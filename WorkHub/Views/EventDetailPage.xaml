@@ -3,98 +3,138 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="WorkHub.Views.EventDetailPage"
              x:DataType="vm:EventDetailViewModel"
+             Shell.NavBarIsVisible="False"
              Title="{Binding PageTitle}">
 
-    <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto,Auto">
-            <Label Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
-            <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                    Command="{Binding ToggleEditCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
-            <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent" TextColor="Red"
-                    Command="{Binding DeleteCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
-        </Grid>
-    </Shell.TitleView>
-
     <ScrollView>
-        <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
-            <Entry Placeholder="Event Title *" Text="{Binding Title}"
-                   IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
-
-            <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="80"
-                    IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
-
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="Start Date" FontSize="12" TextColor="{StaticResource Gray500}" />
-                    <DatePicker Date="{Binding StartDate}" IsEnabled="{Binding IsEditing}" />
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="Start Time" FontSize="12" TextColor="{StaticResource Gray500}" />
-                    <TimePicker Time="{Binding StartTime}" IsEnabled="{Binding IsEditing}" />
-                </VerticalStackLayout>
+        <VerticalStackLayout Spacing="16" Padding="16" HorizontalOptions="Fill">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4">
+                <Button Text="&#x2190;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                        Command="{Binding GoBackCommand}" FontSize="20" Padding="0" WidthRequest="40" />
+                <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent" TextColor="Red"
+                        Command="{Binding DeleteCommand}"
+                        IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
             </Grid>
 
-            <HorizontalStackLayout Spacing="8">
-                <CheckBox IsChecked="{Binding HasEndTime}" IsEnabled="{Binding IsEditing}" />
-                <Label Text="Has End Time" VerticalTextAlignment="Center" />
-            </HorizontalStackLayout>
+            <Entry Placeholder="Event Title *" Text="{Binding Title}" />
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8" IsVisible="{Binding HasEndTime}">
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="End Date" FontSize="12" TextColor="{StaticResource Gray500}" />
-                    <DatePicker Date="{Binding EndDate}" IsEnabled="{Binding IsEditing}" />
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="End Time" FontSize="12" TextColor="{StaticResource Gray500}" />
-                    <TimePicker Time="{Binding EndTime}" IsEnabled="{Binding IsEditing}" />
-                </VerticalStackLayout>
-            </Grid>
+            <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="80" />
 
-            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsEditing}">
-                <Label Text="Customer (optional)" FontSize="12" TextColor="{StaticResource Gray500}" />
-                <Picker Title="Select Customer" ItemsSource="{Binding Customers}"
-                        SelectedItem="{Binding SelectedCustomer}" ItemDisplayBinding="{Binding Name}" />
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Date" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <DatePicker Date="{Binding StartDate}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
-            <!-- Assigned Users -->
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
+                <Label Text="Start Time" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <TimePicker Time="{Binding StartTime}" HorizontalOptions="Start" />
+            </VerticalStackLayout>
+
+            <HorizontalStackLayout Spacing="8">
+                <Label Text="All Day" VerticalTextAlignment="Center" />
+                <Switch IsToggled="{Binding IsAllDay}" />
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
+                <Label Text="End Date" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <DatePicker Date="{Binding EndDate}" HorizontalOptions="Start" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
+                <Label Text="End Time" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <TimePicker Time="{Binding EndTime}" HorizontalOptions="Start" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Customer (optional)" FontSize="12" TextColor="{StaticResource Gray500}" />
+
+                <!-- Selected customer display / tap to open picker -->
+                <Frame Padding="12" CornerRadius="8" BorderColor="{StaticResource Gray200}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#2a2a2a}">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleCustomerPickerCommand}" />
+                    </Frame.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <Label Text="{Binding SelectedCustomer.Name, FallbackValue='Tap to select a customer...'}"
+                               VerticalTextAlignment="Center" FontSize="15" />
+                        <Label Grid.Column="1" Text="✕" FontSize="14" TextColor="Red"
+                               VerticalTextAlignment="Center" Padding="8,0"
+                               IsVisible="{Binding SelectedCustomer, Converter={StaticResource IsNotNullConverter}}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ClearCustomerCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <Label Grid.Column="2" Text="▾" FontSize="14" TextColor="{StaticResource Gray400}"
+                               VerticalTextAlignment="Center" />
+                    </Grid>
+                </Frame>
+
+                <!-- Searchable customer list -->
+                <Frame Padding="0" CornerRadius="8" BorderColor="{StaticResource Gray300}"
+                       IsVisible="{Binding IsCustomerPickerOpen}" HeightRequest="250">
+                    <VerticalStackLayout>
+                        <SearchBar Placeholder="Search customers..." Text="{Binding CustomerSearchText}" Margin="0" />
+                        <CollectionView ItemsSource="{Binding FilteredCustomers}" HeightRequest="200"
+                                        SelectionMode="None">
+                            <CollectionView.EmptyView>
+                                <Label Text="No customers found" Padding="16" TextColor="{StaticResource Gray400}"
+                                       HorizontalTextAlignment="Center" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:CustomerResponse">
+                                    <Grid Padding="12,8">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EventDetailViewModel}}, Path=PickCustomerCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding Name}" FontSize="15" />
+                                            <Label Text="{Binding PrimaryPhone}" FontSize="12" TextColor="{StaticResource Gray400}"
+                                                   IsVisible="{Binding PrimaryPhone, Converter={StaticResource StringNotEmptyConverter}}" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Assigned Users (tag editor) -->
             <VerticalStackLayout Spacing="4">
                 <Label Text="Assigned To" FontSize="14" FontAttributes="Bold" />
-                <CollectionView ItemsSource="{Binding AssignedUsers}" HeightRequest="100">
-                    <CollectionView.EmptyView>
-                        <Label Text="No assignments" TextColor="{StaticResource Gray400}" Padding="0,4" />
-                    </CollectionView.EmptyView>
+                <Border Stroke="{StaticResource Gray200}" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8" Padding="6" MinimumHeightRequest="44">
+                    <FlexLayout x:Name="ChipContainer" Wrap="Wrap" AlignItems="Center"
+                                Direction="Row" JustifyContent="Start" />
+                </Border>
+
+                <!-- Suggestions dropdown -->
+                <CollectionView ItemsSource="{Binding FilteredUsers}" IsVisible="{Binding ShowUserSuggestions}"
+                                MaximumHeightRequest="150">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:UserBriefResponse">
-                            <Grid ColumnDefinitions="*,Auto" Padding="4">
-                                <Label Text="{Binding Name}" VerticalTextAlignment="Center" />
-                                <Button Grid.Column="1" Text="X" BackgroundColor="Transparent" TextColor="Red"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EventDetailViewModel}}, Path=RemoveAssignmentCommand}"
-                                        CommandParameter="{Binding .}" Padding="4" WidthRequest="32" HeightRequest="32"
-                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:EventDetailViewModel}}, Path=IsEditing}" />
-                            </Grid>
+                            <Border Stroke="{StaticResource Gray200}" StrokeThickness="0.5"
+                                    Padding="10,8" BackgroundColor="White">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EventDetailViewModel}}, Path=SelectSuggestionCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding Name}" FontSize="14" />
+                            </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-                <Picker Title="Add User..." ItemsSource="{Binding Users}" ItemDisplayBinding="{Binding Name}"
-                        IsVisible="{Binding IsEditing}">
-                    <Picker.Behaviors>
-                        <toolkit:EventToCommandBehavior EventName="SelectedIndexChanged"
-                            Command="{Binding AddAssignmentCommand}" />
-                    </Picker.Behaviors>
-                </Picker>
             </VerticalStackLayout>
 
             <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsEditing}">
-                <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"
-                        TextColor="{StaticResource Gray900}" Command="{Binding CancelCommand}" />
-                <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
-                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
-            </Grid>
+            <Button Text="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding IsDirty}" />
 
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
         </VerticalStackLayout>
