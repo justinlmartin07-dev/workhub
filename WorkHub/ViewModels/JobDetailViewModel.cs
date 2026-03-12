@@ -19,6 +19,12 @@ public partial class JobDetailViewModel : BaseViewModel
     private JobResponse? _job;
 
     [ObservableProperty]
+    private ObservableCollection<JobItemResponse> _usedItems = new();
+
+    [ObservableProperty]
+    private ObservableCollection<JobItemResponse> _toOrderItems = new();
+
+    [ObservableProperty]
     private string _newNoteText = string.Empty;
 
     [ObservableProperty]
@@ -64,6 +70,8 @@ public partial class JobDetailViewModel : BaseViewModel
         await LoadAsync(async () =>
         {
             Job = await _apiService.GetJobAsync(id);
+            UsedItems = new ObservableCollection<JobItemResponse>(Job?.UsedItems ?? []);
+            ToOrderItems = new ObservableCollection<JobItemResponse>(Job?.ToOrderItems ?? []);
         });
     }
 
@@ -243,6 +251,36 @@ public partial class JobDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private void UpdateQuantity(QuantityUpdateRequest req)
+    {
+        if (Job == null) return;
+        if (req.Quantity < 1 || req.Quantity == req.Item.Quantity) return;
+        req.Item.Quantity = req.Quantity;
+        SaveQuantityInBackground(req.Item, req.Quantity);
+    }
+
+    public void SaveQuantityInBackground(JobItemResponse item, int newQuantity)
+    {
+        if (Job == null) return;
+        _ = SaveQuantityAsync(item, newQuantity);
+    }
+
+    private async Task SaveQuantityAsync(JobItemResponse item, int newQuantity)
+    {
+        try
+        {
+            if (item.Source == "library")
+                await _apiService.UpdateJobItemAsync(Job!.Id, item.Id, new UpdateJobInventoryRequest { Quantity = newQuantity });
+            else
+                await _apiService.UpdateJobAdhocItemAsync(Job!.Id, item.Id, new UpdateJobAdhocItemRequest { Quantity = newQuantity });
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
+    }
+
+    [RelayCommand]
     private async Task DeleteItemAsync(JobItemResponse item)
     {
         if (Job == null) return;
@@ -272,3 +310,5 @@ public partial class SelectableInventoryItem : ObservableObject
         Item = item;
     }
 }
+
+public record QuantityUpdateRequest(JobItemResponse Item, int Quantity);

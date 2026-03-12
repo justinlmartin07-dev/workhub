@@ -91,21 +91,31 @@
                                             TextColor="{StaticResource Primary}" Command="{Binding OpenPartsPanelCommand}"
                                             CommandParameter="used" Padding="4" />
                                 </Grid>
-                                <CollectionView ItemsSource="{Binding Job.UsedItems}">
+                                <CollectionView ItemsSource="{Binding UsedItems}">
                                     <CollectionView.EmptyView>
                                         <Label Text="No items" TextColor="{StaticResource Gray400}" />
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:JobItemResponse">
-                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto">
+                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="4">
                                                 <VerticalStackLayout>
                                                     <Label Text="{Binding Name}" FontSize="14" />
                                                     <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{StaticResource Gray400}"
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
-                                                <Label Grid.Column="1" Text="{Binding Quantity, StringFormat='x{0}'}"
-                                                       VerticalTextAlignment="Center" TextColor="{StaticResource Gray500}" />
-                                                <Label Grid.Column="2" Text="✕" FontSize="14" TextColor="Red"
+                                                <Button Grid.Column="1" Text="−" FontSize="14" Padding="0"
+                                                        WidthRequest="28" HeightRequest="28" CornerRadius="14" MinimumWidthRequest="28" MinimumHeightRequest="28"
+                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{StaticResource Gray600}"
+                                                        Clicked="OnDecrementClicked" />
+                                                <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
+                                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                                       WidthRequest="40" Margin="0"
+                                                       Unfocused="OnQuantityEntryUnfocused" />
+                                                <Button Grid.Column="3" Text="+" FontSize="14" Padding="0"
+                                                        WidthRequest="28" HeightRequest="28" CornerRadius="14" MinimumWidthRequest="28" MinimumHeightRequest="28"
+                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{StaticResource Gray600}"
+                                                        Clicked="OnIncrementClicked" />
+                                                <Label Grid.Column="4" Text="✕" FontSize="14" TextColor="Red"
                                                        VerticalTextAlignment="Center" Padding="8,0">
                                                     <Label.GestureRecognizers>
                                                         <TapGestureRecognizer
@@ -129,17 +139,31 @@
                                             TextColor="{StaticResource Primary}" Command="{Binding OpenPartsPanelCommand}"
                                             CommandParameter="to_order" Padding="4" />
                                 </Grid>
-                                <CollectionView ItemsSource="{Binding Job.ToOrderItems}">
+                                <CollectionView ItemsSource="{Binding ToOrderItems}">
                                     <CollectionView.EmptyView>
                                         <Label Text="No items" TextColor="{StaticResource Gray400}" />
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:JobItemResponse">
-                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto">
-                                                <Label Text="{Binding Name}" FontSize="14" VerticalTextAlignment="Center" />
-                                                <Label Grid.Column="1" Text="{Binding Quantity, StringFormat='x{0}'}"
-                                                       VerticalTextAlignment="Center" TextColor="{StaticResource Gray500}" />
-                                                <Label Grid.Column="2" Text="✕" FontSize="14" TextColor="Red"
+                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="4">
+                                                <VerticalStackLayout>
+                                                    <Label Text="{Binding Name}" FontSize="14" />
+                                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{StaticResource Gray400}"
+                                                           IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                </VerticalStackLayout>
+                                                <Button Grid.Column="1" Text="−" FontSize="14" Padding="0"
+                                                        WidthRequest="28" HeightRequest="28" CornerRadius="14" MinimumWidthRequest="28" MinimumHeightRequest="28"
+                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{StaticResource Gray600}"
+                                                        Clicked="OnDecrementClicked" />
+                                                <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
+                                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                                       WidthRequest="40" Margin="0"
+                                                       Unfocused="OnQuantityEntryUnfocused" />
+                                                <Button Grid.Column="3" Text="+" FontSize="14" Padding="0"
+                                                        WidthRequest="28" HeightRequest="28" CornerRadius="14" MinimumWidthRequest="28" MinimumHeightRequest="28"
+                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{StaticResource Gray600}"
+                                                        Clicked="OnIncrementClicked" />
+                                                <Label Grid.Column="4" Text="✕" FontSize="14" TextColor="Red"
                                                        VerticalTextAlignment="Center" Padding="8,0">
                                                     <Label.GestureRecognizers>
                                                         <TapGestureRecognizer
