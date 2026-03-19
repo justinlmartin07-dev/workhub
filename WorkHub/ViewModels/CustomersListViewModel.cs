@@ -21,39 +21,56 @@ public partial class CustomersListViewModel : BaseViewModel
     [ObservableProperty]
     private CustomerResponse? _selectedCustomer;
 
-    private int _currentPage = 1;
-    private int _totalPages = 1;
+    private string? _pendingSelectId;
+
+    public event Action<CustomerResponse>? ScrollToRequested;
 
     public CustomersListViewModel(ApiService apiService)
     {
         _apiService = apiService;
+
+        WeakReferenceMessenger.Default.Register<SelectListItemMessage>(this, (r, m) =>
+        {
+            _pendingSelectId = m.Value;
+            TrySelectPending();
+        });
     }
 
     [RelayCommand]
     public async Task LoadCustomersAsync()
     {
-        _currentPage = 1;
         await LoadAsync(async () =>
         {
-            var result = await _apiService.GetCustomersAsync(SearchText, _currentPage);
-            _totalPages = result.TotalPages;
-            Customers = new ObservableCollection<CustomerResponse>(result.Items);
+            var all = new List<CustomerResponse>();
+            var page = 1;
+            int totalPages;
+            do
+            {
+                var result = await _apiService.GetCustomersAsync(SearchText, page);
+                totalPages = result.TotalPages;
+                all.AddRange(result.Items);
+                page++;
+            } while (page <= totalPages);
+
+            Customers = new ObservableCollection<CustomerResponse>(all);
             if (Customers.Count == 0) SetEmpty();
             else SetContent();
+            TrySelectPending();
         });
     }
 
-    [RelayCommand]
-    private async Task LoadMoreAsync()
+    private void TrySelectPending()
     {
-        if (IsBusy || _currentPage >= _totalPages) return;
-        _currentPage++;
-        await LoadAsync(async () =>
+        if (_pendingSelectId == null || Customers.Count == 0) return;
+        if (!Guid.TryParse(_pendingSelectId, out var id)) return;
+
+        var match = Customers.FirstOrDefault(c => c.Id == id);
+        if (match != null)
         {
-            var result = await _apiService.GetCustomersAsync(SearchText, _currentPage);
-            foreach (var customer in result.Items)
-                Customers.Add(customer);
-        }, showLoading: false);
+            SelectedCustomer = match;
+            ScrollToRequested?.Invoke(match);
+            _pendingSelectId = null;
+        }
     }
 
     [RelayCommand]

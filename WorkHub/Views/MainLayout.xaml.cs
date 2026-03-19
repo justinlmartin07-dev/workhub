@@ -149,6 +149,10 @@ public partial class MainLayout : ContentPage
             _viewModel.SelectedTabIndex = request.SwitchTabIndex.Value;
             _lastTabIndex = -1; // Force reload
             LoadTabContent(request.SwitchTabIndex.Value);
+
+            // Tell the list to select/scroll to the item
+            if (request.QueryParams.TryGetValue("id", out var id))
+                WeakReferenceMessenger.Default.Send(new SelectListItemMessage(id));
         }
 
         if (_isWide)

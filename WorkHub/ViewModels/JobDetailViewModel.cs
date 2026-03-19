@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using WorkHub.Messages;
 using WorkHub.Models;
 using WorkHub.Services;
 
@@ -158,10 +160,17 @@ public partial class JobDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task ViewCustomerAsync()
+    private void ViewCustomer()
     {
         if (Job == null) return;
-        await Shell.Current.GoToAsync($"customerDetail?id={Job.CustomerId}");
+        var id = Job.CustomerId.ToString();
+        WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+        {
+            Route = "customerDetail",
+            Properties = new() { ["CustomerId"] = id },
+            QueryParams = new() { ["id"] = id },
+            SwitchTabIndex = 0
+        }));
     }
 
     partial void OnNewItemSearchTextChanged(string value) => FilterInventory();

@@ -7,6 +7,11 @@ public class ShowDetailMessage : ValueChangedMessage<DetailRequest>
     public ShowDetailMessage(DetailRequest value) : base(value) { }
 }
 
+public class SelectListItemMessage : ValueChangedMessage<string>
+{
+    public SelectListItemMessage(string itemId) : base(itemId) { }
+}
+
 public class DetailRequest
 {
     public string Route { get; set; } = string.Empty;

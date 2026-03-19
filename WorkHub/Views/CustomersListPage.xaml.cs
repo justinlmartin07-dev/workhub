@@ -1,3 +1,4 @@
+using WorkHub.Models;
 using WorkHub.ViewModels;
 
 namespace WorkHub.Views;
@@ -11,6 +12,17 @@ public partial class CustomersListPage : ContentView
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;
+
+        _viewModel.ScrollToRequested += OnScrollToRequested;
+    }
+
+    private void OnScrollToRequested(CustomerResponse customer)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            CustomersCollectionView.SelectedItem = customer;
+            CustomersCollectionView.ScrollTo(customer, position: ScrollToPosition.Center, animate: true);
+        });
     }
 
     protected override void OnHandlerChanged()
