@@ -24,9 +24,6 @@ public partial class JobsListViewModel : BaseViewModel
     [ObservableProperty]
     private string? _priorityFilter;
 
-    private int _currentPage = 1;
-    private int _totalPages = 1;
-
     public List<string> StatusOptions { get; } = new() { "", "new", "in_progress", "on_hold", "complete", "cancelled" };
     public List<string> PriorityOptions { get; } = new() { "", "low", "medium", "high" };
 
@@ -38,31 +35,25 @@ public partial class JobsListViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadJobsAsync()
     {
-        _currentPage = 1;
         await LoadAsync(async () =>
         {
-            var result = await _apiService.GetJobsAsync(SearchText,
-                string.IsNullOrEmpty(StatusFilter) ? null : StatusFilter,
-                string.IsNullOrEmpty(PriorityFilter) ? null : PriorityFilter,
-                page: _currentPage);
-            _totalPages = result.TotalPages;
-            Jobs = new ObservableCollection<JobListItemResponse>(result.Items);
+            var status = string.IsNullOrEmpty(StatusFilter) ? null : StatusFilter;
+            var priority = string.IsNullOrEmpty(PriorityFilter) ? null : PriorityFilter;
+            var all = new List<JobListItemResponse>();
+            var page = 1;
+            int totalPages;
+            do
+            {
+                var result = await _apiService.GetJobsAsync(SearchText, status, priority, page: page);
+                totalPages = result.TotalPages;
+                all.AddRange(result.Items);
+                page++;
+            } while (page <= totalPages);
+
+            Jobs = new ObservableCollection<JobListItemResponse>(all);
             if (Jobs.Count == 0) SetEmpty();
             else SetContent();
         });
-    }
-
-    [RelayCommand]
-    private async Task LoadMoreAsync()
-    {
-        if (IsBusy || _currentPage >= _totalPages) return;
-        _currentPage++;
-        await LoadAsync(async () =>
-        {
-            var result = await _apiService.GetJobsAsync(SearchText, StatusFilter, PriorityFilter, page: _currentPage);
-            foreach (var job in result.Items)
-                Jobs.Add(job);
-        }, showLoading: false);
     }
 
     [RelayCommand]

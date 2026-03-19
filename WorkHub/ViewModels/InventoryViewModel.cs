@@ -18,9 +18,6 @@ public partial class InventoryViewModel : BaseViewModel
     [ObservableProperty]
     private string _searchText = string.Empty;
 
-    private int _currentPage = 1;
-    private int _totalPages = 1;
-
     public InventoryViewModel(ApiService apiService)
     {
         _apiService = apiService;
@@ -29,28 +26,23 @@ public partial class InventoryViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadItemsAsync()
     {
-        _currentPage = 1;
         await LoadAsync(async () =>
         {
-            var result = await _apiService.GetInventoryAsync(SearchText, _currentPage);
-            _totalPages = result.TotalPages;
-            Items = new ObservableCollection<InventoryItemResponse>(result.Items);
+            var all = new List<InventoryItemResponse>();
+            var page = 1;
+            int totalPages;
+            do
+            {
+                var result = await _apiService.GetInventoryAsync(SearchText, page);
+                totalPages = result.TotalPages;
+                all.AddRange(result.Items);
+                page++;
+            } while (page <= totalPages);
+
+            Items = new ObservableCollection<InventoryItemResponse>(all);
             if (Items.Count == 0) SetEmpty();
             else SetContent();
         });
-    }
-
-    [RelayCommand]
-    private async Task LoadMoreAsync()
-    {
-        if (IsBusy || _currentPage >= _totalPages) return;
-        _currentPage++;
-        await LoadAsync(async () =>
-        {
-            var result = await _apiService.GetInventoryAsync(SearchText, _currentPage);
-            foreach (var item in result.Items)
-                Items.Add(item);
-        }, showLoading: false);
     }
 
     [RelayCommand]
