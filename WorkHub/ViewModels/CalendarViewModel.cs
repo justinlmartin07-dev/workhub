@@ -120,6 +120,17 @@ public partial class CalendarViewModel : BaseViewModel
         DayEvents = new ObservableCollection<CalendarEventResponse>(dayEvents);
     }
 
+    private void HighlightDay(CalendarDay target)
+    {
+        foreach (var week in Weeks)
+        {
+            foreach (var day in week.AllDays)
+            {
+                day.IsSelected = day == target;
+            }
+        }
+    }
+
     private void HighlightSelectedDay()
     {
         foreach (var week in Weeks)
@@ -135,6 +146,10 @@ public partial class CalendarViewModel : BaseViewModel
     private void SelectDay(CalendarDay? day)
     {
         if (day == null || !day.IsCurrentMonth) return;
+
+        // Highlight immediately before any async work
+        HighlightDay(day);
+
         SelectedDate = day.Date;
 
         var dayEvents = Events

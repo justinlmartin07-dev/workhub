@@ -7,6 +7,8 @@ namespace WorkHub.Views;
 public partial class CalendarPage : ContentView
 {
     private readonly CalendarViewModel _viewModel;
+    private Border? _selectedBorder;
+    private Color _primaryColor = Colors.Blue;
 
     public CalendarPage(CalendarViewModel viewModel)
     {
@@ -14,10 +16,11 @@ public partial class CalendarPage : ContentView
         _viewModel = viewModel;
         BindingContext = viewModel;
 
+        _primaryColor = Application.Current!.Resources["Primary"] as Color ?? Colors.Blue;
+
         _viewModel.PropertyChanged += (s, e) =>
         {
-            if (e.PropertyName == nameof(CalendarViewModel.Weeks) ||
-                e.PropertyName == nameof(CalendarViewModel.SelectedDate))
+            if (e.PropertyName == nameof(CalendarViewModel.Weeks))
                 BuildMonthGrid();
         };
     }
@@ -98,17 +101,18 @@ public partial class CalendarPage : ContentView
 
     private View BuildDayCell(CalendarDay day)
     {
-        var primaryColor = Application.Current!.Resources["Primary"] as Color ?? Colors.Blue;
-
         var container = new Border
         {
             StrokeShape = new RoundRectangle { CornerRadius = 4 },
             StrokeThickness = day.IsSelected ? 2 : 0.5,
-            Stroke = day.IsSelected ? primaryColor : Colors.LightGray,
+            Stroke = day.IsSelected ? _primaryColor : Colors.LightGray,
             BackgroundColor = Colors.Transparent,
             Padding = new Thickness(2),
             Margin = new Thickness(1),
         };
+
+        if (day.IsSelected)
+            _selectedBorder = container;
 
         var stack = new VerticalStackLayout { Spacing = 1 };
 
@@ -131,7 +135,7 @@ public partial class CalendarPage : ContentView
                 {
                     StrokeShape = new Ellipse(),
                     StrokeThickness = 0,
-                    BackgroundColor = primaryColor,
+                    BackgroundColor = _primaryColor,
                     WidthRequest = 24,
                     HeightRequest = 24,
                     HorizontalOptions = LayoutOptions.Center,
@@ -151,7 +155,7 @@ public partial class CalendarPage : ContentView
                 {
                     StrokeShape = new RoundRectangle { CornerRadius = 2 },
                     StrokeThickness = 0,
-                    BackgroundColor = Application.Current!.Resources["Primary"] as Color ?? Colors.Blue,
+                    BackgroundColor = _primaryColor,
                     Padding = new Thickness(3, 1),
                     Margin = new Thickness(0, 0, 0, 1),
                 };
@@ -167,11 +171,26 @@ public partial class CalendarPage : ContentView
                 stack.Children.Add(tile);
             }
 
-            // Tap day to select
+            // Tap day to select — update border immediately, then notify VM
+            var borderRef = container;
             container.GestureRecognizers.Add(new TapGestureRecognizer
             {
-                Command = _viewModel.SelectDayCommand,
-                CommandParameter = day,
+                Command = new Command(() =>
+                {
+                    // Deselect old
+                    if (_selectedBorder != null)
+                    {
+                        _selectedBorder.StrokeThickness = 0.5;
+                        _selectedBorder.Stroke = Colors.LightGray;
+                    }
+                    // Select new
+                    borderRef.StrokeThickness = 2;
+                    borderRef.Stroke = _primaryColor;
+                    _selectedBorder = borderRef;
+
+                    // Then let the VM do its work
+                    _viewModel.SelectDayCommand.Execute(day);
+                }),
             });
         }
 
