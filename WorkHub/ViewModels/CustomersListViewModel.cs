@@ -31,7 +31,8 @@ public partial class CustomersListViewModel : BaseViewModel
 
         WeakReferenceMessenger.Default.Register<SelectListItemMessage>(this, (r, m) =>
         {
-            _pendingSelectId = m.Value;
+            if (m.Value.TabIndex != 0) return; // Only handle Customers tab
+            _pendingSelectId = m.Value.ItemId;
             TrySelectPending();
         });
     }

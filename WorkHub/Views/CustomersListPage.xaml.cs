@@ -16,8 +16,10 @@ public partial class CustomersListPage : ContentView
         _viewModel.ScrollToRequested += OnScrollToRequested;
     }
 
-    private void OnScrollToRequested(CustomerResponse customer)
+    private async void OnScrollToRequested(CustomerResponse customer)
     {
+        // Wait for CollectionView to render the new items
+        await Task.Delay(100);
         MainThread.BeginInvokeOnMainThread(() =>
         {
             CustomersCollectionView.SelectedItem = customer;

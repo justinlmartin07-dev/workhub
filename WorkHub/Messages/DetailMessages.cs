@@ -7,9 +7,15 @@ public class ShowDetailMessage : ValueChangedMessage<DetailRequest>
     public ShowDetailMessage(DetailRequest value) : base(value) { }
 }
 
-public class SelectListItemMessage : ValueChangedMessage<string>
+public class SelectListItemMessage : ValueChangedMessage<SelectListItemRequest>
 {
-    public SelectListItemMessage(string itemId) : base(itemId) { }
+    public SelectListItemMessage(SelectListItemRequest value) : base(value) { }
+}
+
+public class SelectListItemRequest
+{
+    public string ItemId { get; set; } = string.Empty;
+    public int TabIndex { get; set; }
 }
 
 public class DetailRequest

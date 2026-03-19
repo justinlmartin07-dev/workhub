@@ -32,8 +32,9 @@
             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
             EmptyMessage="No jobs found" RetryCommand="{Binding LoadJobsCommand}">
             <controls:DataStateView.Body>
-                <CollectionView ItemsSource="{Binding Jobs}"
+                <CollectionView x:Name="JobsCollectionView" ItemsSource="{Binding Jobs}"
                                 SelectionMode="Single"
+                                SelectedItem="{Binding SelectedJob, Mode=TwoWay}"
                                 SelectionChangedCommand="{Binding SelectJobCommand}"
                                 SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}">
                     <CollectionView.ItemTemplate>

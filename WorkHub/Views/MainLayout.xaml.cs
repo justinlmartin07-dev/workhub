@@ -152,7 +152,8 @@ public partial class MainLayout : ContentPage
 
             // Tell the list to select/scroll to the item
             if (request.QueryParams.TryGetValue("id", out var id))
-                WeakReferenceMessenger.Default.Send(new SelectListItemMessage(id));
+                WeakReferenceMessenger.Default.Send(new SelectListItemMessage(
+                    new SelectListItemRequest { ItemId = id, TabIndex = request.SwitchTabIndex.Value }));
         }
 
         if (_isWide)

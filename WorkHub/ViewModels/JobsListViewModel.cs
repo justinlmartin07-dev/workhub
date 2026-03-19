@@ -24,12 +24,26 @@ public partial class JobsListViewModel : BaseViewModel
     [ObservableProperty]
     private string? _priorityFilter;
 
+    [ObservableProperty]
+    private JobListItemResponse? _selectedJob;
+
+    private string? _pendingSelectId;
+
     public List<string> StatusOptions { get; } = new() { "", "new", "in_progress", "on_hold", "complete", "cancelled" };
     public List<string> PriorityOptions { get; } = new() { "", "low", "medium", "high" };
+
+    public event Action<JobListItemResponse>? ScrollToRequested;
 
     public JobsListViewModel(ApiService apiService)
     {
         _apiService = apiService;
+
+        WeakReferenceMessenger.Default.Register<SelectListItemMessage>(this, (r, m) =>
+        {
+            if (m.Value.TabIndex != 1) return; // Only handle Jobs tab
+            _pendingSelectId = m.Value.ItemId;
+            TrySelectPending();
+        });
     }
 
     [RelayCommand]
@@ -53,7 +67,22 @@ public partial class JobsListViewModel : BaseViewModel
             Jobs = new ObservableCollection<JobListItemResponse>(all);
             if (Jobs.Count == 0) SetEmpty();
             else SetContent();
+            TrySelectPending();
         });
+    }
+
+    private void TrySelectPending()
+    {
+        if (_pendingSelectId == null || Jobs.Count == 0) return;
+        if (!Guid.TryParse(_pendingSelectId, out var id)) return;
+
+        var match = Jobs.FirstOrDefault(j => j.Id == id);
+        if (match != null)
+        {
+            SelectedJob = match;
+            ScrollToRequested?.Invoke(match);
+            _pendingSelectId = null;
+        }
     }
 
     [RelayCommand]

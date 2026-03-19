@@ -20,6 +20,7 @@
             <controls:DataStateView.Body>
                 <CollectionView x:Name="CustomersCollectionView" ItemsSource="{Binding Customers}"
                                 SelectionMode="Single"
+                                SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}"
                                 SelectionChangedCommand="{Binding SelectCustomerCommand}"
                                 SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}">
                     <CollectionView.ItemTemplate>
