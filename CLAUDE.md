@@ -91,13 +91,22 @@ dotnet ef database update --project WorkHub.Api
 - **Client uses `SecureStorage`** for token persistence and MVVM pattern via CommunityToolkit.Mvvm source generators.
 - **No paid UI libraries** — stock MAUI controls + CommunityToolkit only.
 - **Responsive split-view layout** — MainLayout uses AdaptiveTrigger at 720dp. Wide: left nav rail + list/detail split panel. Narrow: bottom tabs + full-page navigation.
-- **WeakReferenceMessenger** for cross-component communication — list VMs send `ShowDetailMessage` to MainLayout, which renders detail inline (wide) or navigates via Shell (narrow).
+- **WeakReferenceMessenger** for cross-component communication — list VMs send `ShowDetailMessage` to MainLayout, which renders detail inline (wide) or navigates via Shell (narrow). Cross-tab navigation (e.g. job→customer) uses `SwitchTabIndex` on `DetailRequest` plus `SelectListItemMessage` with `TabIndex` to select/scroll the target list item.
 - **Address stored as single field** in API — client splits into Street/City/State/Zip fields for editing, combines to `"Street\nCity, State Zip"` format on save.
 - **Two named HttpClients** — `"AuthClient"` (no auth handler, for login/refresh) and `"ApiClient"` (with `AuthDelegatingHandler` for token injection/refresh).
 
+## Known MAUI Windows Issues
+
+- **RefreshView breaks CollectionView scrolling** — do NOT wrap CollectionView in RefreshView on Windows. Lists get stuck and snap back to top. Lists load all pages upfront instead.
+- **RemainingItemsThreshold unreliable on Windows** — don't rely on it for pagination. VMs loop through all API pages on load instead.
+- **CollectionView flicker on item replace** — updating an item in an ObservableCollection causes the whole row to re-render. For quantity +/- buttons, update Entry.Text directly in code-behind and fire-and-forget the API call.
+- **Calendar grid rebuild is slow** — don't rebuild the entire grid on day selection. Update border strokes directly on the old/new cells in the tap handler.
+
 ## Database
 
-12 tables: `users`, `refresh_tokens`, `customers`, `customer_photos`, `jobs`, `job_notes`, `job_photos`, `inventory_items`, `job_inventory`, `job_adhoc_items`, `calendar_events`, `calendar_event_assignments`. All PKs are UUIDs. Auto-migration on API startup via `db.Database.Migrate()`.
+13 tables: `users`, `refresh_tokens`, `customers`, `customer_contacts`, `customer_photos`, `jobs`, `job_notes`, `job_photos`, `inventory_items`, `job_inventory`, `job_adhoc_items`, `calendar_events`, `calendar_event_assignments`. All PKs are UUIDs. Auto-migration on API startup via `db.Database.Migrate()`. Seed data in `SeedData.cs` populates test data (200 customers, 500 jobs, 100 inventory items, 150 calendar events) when DB is empty.
+
+Local dev uses PostgreSQL via Docker: `docker run -d --name workhub-db -e POSTGRES_USER=Admin -e POSTGRES_PASSWORD=Admin -e POSTGRES_DB=workhub -p 5432:5432 postgres:16`
 
 ## Environment Variables (API)
 
