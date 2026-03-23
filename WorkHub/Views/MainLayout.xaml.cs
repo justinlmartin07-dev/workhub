@@ -144,7 +144,10 @@ public partial class MainLayout : ContentPage
 
     private async void HandleDetailRequest(DetailRequest request)
     {
-        if (request.SwitchTabIndex.HasValue)
+        // Only switch tabs in wide mode — in narrow mode the detail page is pushed
+        // via Shell, and switching tabs would leave MainLayout on the wrong tab
+        // when the user navigates back.
+        if (request.SwitchTabIndex.HasValue && _isWide)
         {
             _viewModel.SelectedTabIndex = request.SwitchTabIndex.Value;
             _lastTabIndex = -1; // Force reload
@@ -161,7 +164,9 @@ public partial class MainLayout : ContentPage
             View? detailView = request.Route switch
             {
                 "customerDetail" => CreateDetailView<CustomerDetailPage, CustomerDetailViewModel>(request),
+                "customerEdit" => CreateDetailView<CustomerEditPage, CustomerEditViewModel>(request),
                 "jobDetail" => CreateDetailView<JobDetailPage, JobDetailViewModel>(request),
+                "jobEdit" => CreateDetailView<JobEditPage, JobEditViewModel>(request),
                 "inventoryDetail" => CreateDetailView<InventoryItemDetailPage, InventoryItemDetailViewModel>(request),
                 "eventDetail" => CreateDetailView<EventDetailPage, EventDetailViewModel>(request),
                 "daySummary" => CreateDetailView<CalendarDaySummaryPage, CalendarDaySummaryViewModel>(request),

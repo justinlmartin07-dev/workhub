@@ -304,7 +304,7 @@ public partial class EventDetailViewModel : BaseViewModel
             {
                 IsDirty = false;
                 if (IsNew)
-                    await Shell.Current.GoToAsync("..");
+                    NavigateBackToDaySummary();
             }
         }
         catch (Exception ex)
@@ -325,7 +325,7 @@ public partial class EventDetailViewModel : BaseViewModel
         try
         {
             await _apiService.DeleteEventAsync(Guid.Parse(EventId!));
-            await Shell.Current.GoToAsync("..");
+            NavigateBackToDaySummary();
         }
         catch (Exception ex)
         {
@@ -334,23 +334,25 @@ public partial class EventDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task CancelAsync()
+    private void Cancel()
     {
-        await Shell.Current.GoToAsync("..");
+        NavigateBackToDaySummary();
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    private void GoBack()
+    {
+        NavigateBackToDaySummary();
+    }
+
+    private async void NavigateBackToDaySummary()
     {
         if (MainLayout.Current?.IsWideLayout == true)
         {
             WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
             {
                 Route = "daySummary",
-                Properties = new()
-                {
-                    ["SelectedDate"] = StartDate,
-                }
+                Properties = new() { ["SelectedDate"] = StartDate }
             }));
         }
         else

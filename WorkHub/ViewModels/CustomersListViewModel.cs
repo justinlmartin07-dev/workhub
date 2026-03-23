@@ -81,9 +81,13 @@ public partial class CustomersListViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddCustomerAsync()
+    private void AddCustomer()
     {
-        await Shell.Current.GoToAsync("customerEdit");
+        WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+        {
+            Route = "customerEdit",
+            QueryParams = new()
+        }));
     }
 
     [RelayCommand]

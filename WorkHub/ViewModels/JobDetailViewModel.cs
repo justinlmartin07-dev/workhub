@@ -78,9 +78,14 @@ public partial class JobDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task EditAsync()
+    private void Edit()
     {
-        await Shell.Current.GoToAsync($"jobEdit?id={JobId}");
+        WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+        {
+            Route = "jobEdit",
+            Properties = new() { ["JobId"] = JobId! },
+            QueryParams = new() { ["id"] = JobId! }
+        }));
     }
 
     [RelayCommand]

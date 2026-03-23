@@ -183,9 +183,14 @@ public partial class CalendarViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddEventAsync()
+    private void AddEvent()
     {
-        await Shell.Current.GoToAsync($"eventDetail?date={SelectedDate:yyyy-MM-dd}");
+        WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+        {
+            Route = "eventDetail",
+            Properties = new() { ["InitialDate"] = SelectedDate.ToString("yyyy-MM-dd") },
+            QueryParams = new() { ["date"] = SelectedDate.ToString("yyyy-MM-dd") }
+        }));
     }
 
     [RelayCommand]

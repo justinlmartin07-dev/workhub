@@ -98,9 +98,13 @@ public partial class JobsListViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddJobAsync()
+    private void AddJob()
     {
-        await Shell.Current.GoToAsync("jobEdit");
+        WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+        {
+            Route = "jobEdit",
+            QueryParams = new()
+        }));
     }
 
     [RelayCommand]

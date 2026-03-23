@@ -61,9 +61,14 @@ public partial class CustomerDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task EditAsync()
+    private void Edit()
     {
-        await Shell.Current.GoToAsync($"customerEdit?id={CustomerId}");
+        WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+        {
+            Route = "customerEdit",
+            Properties = new() { ["CustomerId"] = CustomerId! },
+            QueryParams = new() { ["id"] = CustomerId! }
+        }));
     }
 
     [RelayCommand]
@@ -138,9 +143,14 @@ public partial class CustomerDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddJobAsync()
+    private void AddJob()
     {
-        await Shell.Current.GoToAsync($"jobEdit?customerId={CustomerId}");
+        WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+        {
+            Route = "jobEdit",
+            Properties = new() { ["CustomerId"] = CustomerId! },
+            QueryParams = new() { ["customerId"] = CustomerId! }
+        }));
     }
 
     [RelayCommand]

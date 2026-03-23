@@ -23,6 +23,38 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+			})
+			.ConfigureMauiHandlers(handlers =>
+			{
+#if WINDOWS
+				Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("CompactEntry", (handler, view) =>
+				{
+					if (view is Entry entry && entry.HeightRequest > 0 && entry.HeightRequest <= 32)
+					{
+						handler.PlatformView.Padding = new Microsoft.UI.Xaml.Thickness(4, 0, 4, 0);
+						handler.PlatformView.MinHeight = 0;
+					}
+				});
+				Microsoft.Maui.Handlers.ButtonHandler.Mapper.AppendToMapping("CompactButton", (handler, view) =>
+				{
+					if (view is Button button && button.HeightRequest > 0 && button.HeightRequest <= 32)
+					{
+						var native = handler.PlatformView;
+						native.Padding = new Microsoft.UI.Xaml.Thickness(0);
+						native.MinHeight = 0;
+						native.MinWidth = 0;
+						native.Height = button.HeightRequest;
+						native.Width = button.WidthRequest;
+						// Remove internal content margin
+						if (native.Content is Microsoft.UI.Xaml.FrameworkElement content)
+						{
+							content.Margin = new Microsoft.UI.Xaml.Thickness(0);
+						}
+						// Strip WinUI default style padding via resources
+						native.Resources["ButtonPadding"] = new Microsoft.UI.Xaml.Thickness(0);
+					}
+				});
+#endif
 			});
 
 		// Auth handler
