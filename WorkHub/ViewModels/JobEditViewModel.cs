@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using WorkHub.Messages;
 using WorkHub.Models;
 using WorkHub.Services;
 
@@ -211,13 +213,30 @@ public partial class JobEditViewModel : BaseViewModel
                 };
                 await _apiService.UpdateJobAsync(Guid.Parse(JobId!), request);
             }
-            await Shell.Current.GoToAsync("..");
+            NavigateBackToDetail();
         });
     }
 
     [RelayCommand]
-    private async Task CancelAsync()
+    private void Cancel()
     {
-        await Shell.Current.GoToAsync("..");
+        NavigateBackToDetail();
+    }
+
+    private async void NavigateBackToDetail()
+    {
+        if (Views.MainLayout.Current?.IsWideLayout == true && !string.IsNullOrEmpty(JobId))
+        {
+            WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+            {
+                Route = "jobDetail",
+                Properties = new() { ["JobId"] = JobId },
+                QueryParams = new() { ["id"] = JobId }
+            }));
+        }
+        else
+        {
+            await Shell.Current.GoToAsync("..");
+        }
     }
 }

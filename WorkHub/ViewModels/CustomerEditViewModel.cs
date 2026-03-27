@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using WorkHub.Messages;
 using WorkHub.Models;
 using WorkHub.Services;
 
@@ -166,14 +168,31 @@ public partial class CustomerEditViewModel : BaseViewModel
                 };
                 await _apiService.UpdateCustomerAsync(Guid.Parse(CustomerId!), request);
             }
-            await Shell.Current.GoToAsync("..");
+            NavigateBackToDetail();
         });
     }
 
     [RelayCommand]
-    private async Task CancelAsync()
+    private void Cancel()
     {
-        await Shell.Current.GoToAsync("..");
+        NavigateBackToDetail();
+    }
+
+    private async void NavigateBackToDetail()
+    {
+        if (Views.MainLayout.Current?.IsWideLayout == true && !string.IsNullOrEmpty(CustomerId))
+        {
+            WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+            {
+                Route = "customerDetail",
+                Properties = new() { ["CustomerId"] = CustomerId },
+                QueryParams = new() { ["id"] = CustomerId }
+            }));
+        }
+        else
+        {
+            await Shell.Current.GoToAsync("..");
+        }
     }
 
     private List<CustomerContactRequest> BuildContacts()

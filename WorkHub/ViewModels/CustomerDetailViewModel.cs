@@ -81,7 +81,10 @@ public partial class CustomerDetailViewModel : BaseViewModel
         try
         {
             await _apiService.DeleteCustomerAsync(Customer.Id);
-            await Shell.Current.GoToAsync("..");
+            if (Views.MainLayout.Current?.IsWideLayout == true)
+                Views.MainLayout.Current.ClearDetail();
+            else
+                await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
@@ -151,6 +154,48 @@ public partial class CustomerDetailViewModel : BaseViewModel
             Properties = new() { ["CustomerId"] = CustomerId! },
             QueryParams = new() { ["customerId"] = CustomerId! }
         }));
+    }
+
+    [RelayCommand]
+    private async Task OpenAddressInMapsAsync()
+    {
+        var address = Customer?.Address;
+        if (string.IsNullOrWhiteSpace(address)) return;
+
+        var encoded = Uri.EscapeDataString(address);
+        try
+        {
+#if ANDROID
+            await Launcher.OpenAsync($"geo:0,0?q={encoded}");
+#else
+            await Launcher.OpenAsync($"https://www.google.com/maps/search/?api=1&query={encoded}");
+#endif
+        }
+        catch
+        {
+            await Shell.Current.DisplayAlert("Error", "Could not open Maps.", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenAddressInEarthAsync()
+    {
+        var address = Customer?.Address;
+        if (string.IsNullOrWhiteSpace(address)) return;
+
+        var encoded = Uri.EscapeDataString(address);
+        try
+        {
+#if ANDROID
+            await Launcher.OpenAsync($"com.google.earth:/search?q={encoded}");
+#else
+            await Launcher.OpenAsync($"https://earth.google.com/web/search/{encoded}");
+#endif
+        }
+        catch
+        {
+            await Shell.Current.DisplayAlert("Error", "Could not open Google Earth.", "OK");
+        }
     }
 
     [RelayCommand]

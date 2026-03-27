@@ -97,7 +97,10 @@ public partial class JobDetailViewModel : BaseViewModel
         try
         {
             await _apiService.DeleteJobAsync(Job.Id);
-            await Shell.Current.GoToAsync("..");
+            if (Views.MainLayout.Current?.IsWideLayout == true)
+                Views.MainLayout.Current.ClearDetail();
+            else
+                await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {

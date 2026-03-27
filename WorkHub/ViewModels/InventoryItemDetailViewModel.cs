@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using WorkHub.Messages;
 using WorkHub.Models;
 using WorkHub.Services;
 
@@ -91,7 +93,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                     PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim()
                 };
                 await _apiService.CreateInventoryItemAsync(request);
-                await Shell.Current.GoToAsync("..");
+                NavigateBack();
             }
             else
             {
@@ -117,7 +119,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         try
         {
             await _apiService.DeleteInventoryItemAsync(Guid.Parse(ItemId!));
-            await Shell.Current.GoToAsync("..");
+            NavigateBack();
         }
         catch (Exception ex)
         {
@@ -136,7 +138,15 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         }
         else
         {
-            await Shell.Current.GoToAsync("..");
+            NavigateBack();
         }
+    }
+
+    private async void NavigateBack()
+    {
+        if (Views.MainLayout.Current?.IsWideLayout == true)
+            Views.MainLayout.Current.ClearDetail();
+        else
+            await Shell.Current.GoToAsync("..");
     }
 }

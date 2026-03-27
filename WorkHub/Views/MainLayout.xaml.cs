@@ -95,6 +95,11 @@ public partial class MainLayout : ContentPage
 
     public bool IsWideLayout => _isWide;
 
+    public void ClearDetail()
+    {
+        DetailPanel.Content = null;
+    }
+
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(MainLayoutViewModel.SelectedTabIndex))
