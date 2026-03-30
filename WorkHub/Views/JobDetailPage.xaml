@@ -27,6 +27,16 @@
             <controls:DataStateView.Body>
                 <ScrollView>
                     <VerticalStackLayout Spacing="16" Padding="16">
+                        <!-- Header with Edit/Delete -->
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                            <Label Text="{Binding Job.Title, FallbackValue='Job'}" FontSize="20" FontAttributes="Bold"
+                                   VerticalTextAlignment="Center" />
+                            <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent"
+                                    TextColor="{StaticResource Primary}" Command="{Binding EditCommand}" Padding="4" />
+                            <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent"
+                                    TextColor="Red" Command="{Binding DeleteCommand}" Padding="4" />
+                        </Grid>
+
                         <!-- Status/Priority -->
                         <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
@@ -43,6 +53,25 @@
                                 <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority}"
                                        TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
                             </Grid>
+                        </Frame>
+
+                        <!-- Address -->
+                        <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}"
+                               IsVisible="{Binding Job.Address, Converter={StaticResource StringNotEmptyConverter}}">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Job Address" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="{Binding Job.Address}" TextColor="{StaticResource Primary}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenAddressInMapsCommand}" />
+                                    </Label.GestureRecognizers>
+                                    <FlyoutBase.ContextFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem Text="Open in Maps" Command="{Binding OpenAddressInMapsCommand}" />
+                                            <MenuFlyoutItem Text="Open in Google Earth" Command="{Binding OpenAddressInEarthCommand}" />
+                                        </MenuFlyout>
+                                    </FlyoutBase.ContextFlyout>
+                                </Label>
+                            </VerticalStackLayout>
                         </Frame>
 
                         <!-- Scope Notes -->

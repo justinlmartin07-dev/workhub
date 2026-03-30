@@ -22,6 +22,7 @@ public partial class CustomersListViewModel : BaseViewModel
     private CustomerResponse? _selectedCustomer;
 
     private string? _pendingSelectId;
+    private CancellationTokenSource? _searchCts;
 
     public event Action<CustomerResponse>? ScrollToRequested;
 
@@ -34,6 +35,12 @@ public partial class CustomersListViewModel : BaseViewModel
             if (m.Value.TabIndex != 0) return; // Only handle Customers tab
             _pendingSelectId = m.Value.ItemId;
             TrySelectPending();
+        });
+
+        WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
+        {
+            if (m.Value == "customer")
+                MainThread.BeginInvokeOnMainThread(() => LoadCustomersCommand.Execute(null));
         });
     }
 
@@ -74,9 +81,26 @@ public partial class CustomersListViewModel : BaseViewModel
         }
     }
 
+    partial void OnSearchTextChanged(string value)
+    {
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await Task.Delay(300, token);
+                await LoadCustomersAsync();
+            }
+            catch (TaskCanceledException) { }
+        });
+    }
+
     [RelayCommand]
     private async Task SearchAsync()
     {
+        _searchCts?.Cancel();
         await LoadCustomersAsync();
     }
 

@@ -82,9 +82,14 @@ public partial class CustomerDetailViewModel : BaseViewModel
         {
             await _apiService.DeleteCustomerAsync(Customer.Id);
             if (Views.MainLayout.Current?.IsWideLayout == true)
+            {
                 Views.MainLayout.Current.ClearDetail();
+                WeakReferenceMessenger.Default.Send(new DataChangedMessage("customer"));
+            }
             else
+            {
                 await Shell.Current.GoToAsync("..");
+            }
         }
         catch (Exception ex)
         {
@@ -151,7 +156,7 @@ public partial class CustomerDetailViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
         {
             Route = "jobEdit",
-            Properties = new() { ["CustomerId"] = CustomerId! },
+            Properties = new() { ["InitialCustomerId"] = CustomerId! },
             QueryParams = new() { ["customerId"] = CustomerId! }
         }));
     }

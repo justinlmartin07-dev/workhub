@@ -87,6 +87,22 @@
                 </Grid>
             </VerticalStackLayout>
 
+            <!-- Address -->
+            <VerticalStackLayout Spacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="Address" FontSize="12" TextColor="{StaticResource Gray500}" VerticalTextAlignment="Center" />
+                    <Button Grid.Column="1" Text="Use Customer Address" BackgroundColor="Transparent"
+                            TextColor="{StaticResource Primary}" Command="{Binding UseCustomerAddressCommand}"
+                            Padding="4" FontSize="12" />
+                </Grid>
+                <Entry Placeholder="Street" Text="{Binding Street}" ReturnType="Next" />
+                <Grid ColumnDefinitions="2*,*,*" ColumnSpacing="8">
+                    <Entry Placeholder="City" Text="{Binding City}" ReturnType="Next" />
+                    <Entry Grid.Column="1" Placeholder="State" Text="{Binding State}" ReturnType="Next" />
+                    <Entry Grid.Column="2" Placeholder="Zip" Text="{Binding Zip}" ReturnType="Next" />
+                </Grid>
+            </VerticalStackLayout>
+
             <Editor Placeholder="Scope Notes" Text="{Binding ScopeNotes}" HeightRequest="120" />
 
             <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />

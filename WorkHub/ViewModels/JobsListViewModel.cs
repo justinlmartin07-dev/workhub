@@ -28,6 +28,7 @@ public partial class JobsListViewModel : BaseViewModel
     private JobListItemResponse? _selectedJob;
 
     private string? _pendingSelectId;
+    private CancellationTokenSource? _searchCts;
 
     public List<string> StatusOptions { get; } = new() { "", "new", "in_progress", "on_hold", "complete", "cancelled" };
     public List<string> PriorityOptions { get; } = new() { "", "low", "medium", "high" };
@@ -43,6 +44,12 @@ public partial class JobsListViewModel : BaseViewModel
             if (m.Value.TabIndex != 1) return; // Only handle Jobs tab
             _pendingSelectId = m.Value.ItemId;
             TrySelectPending();
+        });
+
+        WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
+        {
+            if (m.Value == "job")
+                MainThread.BeginInvokeOnMainThread(() => LoadJobsCommand.Execute(null));
         });
     }
 
@@ -85,9 +92,26 @@ public partial class JobsListViewModel : BaseViewModel
         }
     }
 
+    partial void OnSearchTextChanged(string value)
+    {
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await Task.Delay(300, token);
+                await LoadJobsAsync();
+            }
+            catch (TaskCanceledException) { }
+        });
+    }
+
     [RelayCommand]
     private async Task SearchAsync()
     {
+        _searchCts?.Cancel();
         await LoadJobsAsync();
     }
 

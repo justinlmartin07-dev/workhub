@@ -9,6 +9,7 @@ public class JobResponse
     public string Status { get; set; } = string.Empty;
     public string Priority { get; set; } = string.Empty;
     public string? ScopeNotes { get; set; }
+    public string? Address { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<PhotoResponse>? Photos { get; set; }
@@ -57,6 +58,7 @@ public class CreateJobRequest
     public string? Status { get; set; }
     public string? Priority { get; set; }
     public string? ScopeNotes { get; set; }
+    public string? Address { get; set; }
 }
 
 public class UpdateJobRequest
@@ -65,6 +67,7 @@ public class UpdateJobRequest
     public string? Status { get; set; }
     public string? Priority { get; set; }
     public string? ScopeNotes { get; set; }
+    public string? Address { get; set; }
 }
 
 public class CreateJobNoteRequest

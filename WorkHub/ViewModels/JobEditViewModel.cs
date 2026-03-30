@@ -47,6 +47,18 @@ public partial class JobEditViewModel : BaseViewModel
     private string _scopeNotes = string.Empty;
 
     [ObservableProperty]
+    private string _street = string.Empty;
+
+    [ObservableProperty]
+    private string _city = string.Empty;
+
+    [ObservableProperty]
+    private string _state = string.Empty;
+
+    [ObservableProperty]
+    private string _zip = string.Empty;
+
+    [ObservableProperty]
     private ObservableCollection<CustomerResponse> _allCustomers = new();
 
     [ObservableProperty]
@@ -70,9 +82,18 @@ public partial class JobEditViewModel : BaseViewModel
     public List<string> StatusOptions { get; } = new() { "new", "in_progress", "on_hold", "complete", "cancelled" };
     public List<string> PriorityOptions { get; } = new() { "low", "medium", "high" };
 
+    private bool _dataLoaded;
+
     public JobEditViewModel(ApiService apiService)
     {
         _apiService = apiService;
+        // Deferred load for when no property change triggers LoadData (new job from jobs list)
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await Task.Yield();
+            if (!_dataLoaded && IsNew)
+                await LoadDataAsync();
+        });
     }
 
     partial void OnJobIdChanged(string? value)
@@ -116,6 +137,7 @@ public partial class JobEditViewModel : BaseViewModel
     [RelayCommand]
     private async Task LoadDataAsync()
     {
+        _dataLoaded = true;
         await LoadAsync(async () =>
         {
             if (IsNew)
@@ -133,7 +155,12 @@ public partial class JobEditViewModel : BaseViewModel
                     SelectedStatus = job.Status;
                     SelectedPriority = job.Priority;
                     PrioritySliderValue = job.Priority switch { "low" => 0, "high" => 2, _ => 1 };
+                    // Load customer for "Use Customer Address" button
+                    var customer = await _apiService.GetCustomerAsync(job.CustomerId);
+                    if (customer != null)
+                        SelectedCustomer = customer;
                     ScopeNotes = job.ScopeNotes ?? string.Empty;
+                    ParseAddress(job.Address);
                 }
             }
         });
@@ -175,6 +202,14 @@ public partial class JobEditViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private void UseCustomerAddress()
+    {
+        var address = SelectedCustomer?.Address;
+        if (string.IsNullOrWhiteSpace(address)) return;
+        ParseAddress(address);
+    }
+
+    [RelayCommand]
     private async Task SaveAsync()
     {
         if (string.IsNullOrWhiteSpace(Title))
@@ -198,9 +233,12 @@ public partial class JobEditViewModel : BaseViewModel
                     Title = Title.Trim(),
                     Status = SelectedStatus,
                     Priority = SelectedPriority,
-                    ScopeNotes = string.IsNullOrWhiteSpace(ScopeNotes) ? null : ScopeNotes.Trim()
+                    ScopeNotes = string.IsNullOrWhiteSpace(ScopeNotes) ? null : ScopeNotes.Trim(),
+                    Address = BuildAddress()
                 };
-                await _apiService.CreateJobAsync(request);
+                var created = await _apiService.CreateJobAsync(request);
+                if (created != null)
+                    JobId = created.Id.ToString();
             }
             else
             {
@@ -209,10 +247,14 @@ public partial class JobEditViewModel : BaseViewModel
                     Title = Title.Trim(),
                     Status = SelectedStatus,
                     Priority = SelectedPriority,
-                    ScopeNotes = string.IsNullOrWhiteSpace(ScopeNotes) ? null : ScopeNotes.Trim()
+                    ScopeNotes = string.IsNullOrWhiteSpace(ScopeNotes) ? null : ScopeNotes.Trim(),
+                    Address = BuildAddress()
                 };
                 await _apiService.UpdateJobAsync(Guid.Parse(JobId!), request);
             }
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
+            if (!string.IsNullOrEmpty(JobId))
+                WeakReferenceMessenger.Default.Send(new SelectListItemMessage(new SelectListItemRequest { ItemId = JobId, TabIndex = 1 }));
             NavigateBackToDetail();
         });
     }
@@ -223,16 +265,78 @@ public partial class JobEditViewModel : BaseViewModel
         NavigateBackToDetail();
     }
 
+    private void ParseAddress(string? address)
+    {
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            Street = City = State = Zip = string.Empty;
+            return;
+        }
+
+        var lines = address.Split('\n', StringSplitOptions.TrimEntries);
+        if (lines.Length >= 2)
+        {
+            Street = lines[0];
+            var parts = lines[1].Split(',', StringSplitOptions.TrimEntries);
+            if (parts.Length >= 2)
+            {
+                City = parts[0];
+                var tokens = parts[1].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                State = tokens.Length >= 1 ? tokens[0] : string.Empty;
+                Zip = tokens.Length >= 2 ? tokens[1] : string.Empty;
+            }
+            else
+            {
+                City = lines[1];
+            }
+        }
+        else
+        {
+            Street = address;
+        }
+    }
+
+    private string? BuildAddress()
+    {
+        var street = Street?.Trim();
+        var city = City?.Trim();
+        var state = State?.Trim();
+        var zip = Zip?.Trim();
+
+        if (string.IsNullOrEmpty(street) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(state) && string.IsNullOrEmpty(zip))
+            return null;
+
+        var cityStateZip = string.Empty;
+        if (!string.IsNullOrEmpty(city) || !string.IsNullOrEmpty(state) || !string.IsNullOrEmpty(zip))
+        {
+            var stateZip = $"{state} {zip}".Trim();
+            cityStateZip = !string.IsNullOrEmpty(city) && !string.IsNullOrEmpty(stateZip)
+                ? $"{city}, {stateZip}"
+                : $"{city}{stateZip}";
+        }
+
+        if (!string.IsNullOrEmpty(street) && !string.IsNullOrEmpty(cityStateZip))
+            return $"{street}\n{cityStateZip}";
+        return !string.IsNullOrEmpty(street) ? street : cityStateZip;
+    }
+
     private async void NavigateBackToDetail()
     {
-        if (Views.MainLayout.Current?.IsWideLayout == true && !string.IsNullOrEmpty(JobId))
+        if (Views.MainLayout.Current?.IsWideLayout == true)
         {
-            WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+            if (!string.IsNullOrEmpty(JobId))
             {
-                Route = "jobDetail",
-                Properties = new() { ["JobId"] = JobId },
-                QueryParams = new() { ["id"] = JobId }
-            }));
+                WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+                {
+                    Route = "jobDetail",
+                    Properties = new() { ["JobId"] = JobId },
+                    QueryParams = new() { ["id"] = JobId }
+                }));
+            }
+            else
+            {
+                Views.MainLayout.Current.ClearDetail();
+            }
         }
         else
         {

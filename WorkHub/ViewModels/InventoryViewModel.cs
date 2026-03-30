@@ -18,9 +18,17 @@ public partial class InventoryViewModel : BaseViewModel
     [ObservableProperty]
     private string _searchText = string.Empty;
 
+    private CancellationTokenSource? _searchCts;
+
     public InventoryViewModel(ApiService apiService)
     {
         _apiService = apiService;
+
+        WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
+        {
+            if (m.Value == "inventory")
+                MainThread.BeginInvokeOnMainThread(() => LoadItemsCommand.Execute(null));
+        });
     }
 
     [RelayCommand]
@@ -45,9 +53,26 @@ public partial class InventoryViewModel : BaseViewModel
         });
     }
 
+    partial void OnSearchTextChanged(string value)
+    {
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await Task.Delay(300, token);
+                await LoadItemsAsync();
+            }
+            catch (TaskCanceledException) { }
+        });
+    }
+
     [RelayCommand]
     private async Task SearchAsync()
     {
+        _searchCts?.Cancel();
         await LoadItemsAsync();
     }
 

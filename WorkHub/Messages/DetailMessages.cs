@@ -18,6 +18,11 @@ public class SelectListItemRequest
     public int TabIndex { get; set; }
 }
 
+public class DataChangedMessage : ValueChangedMessage<string>
+{
+    public DataChangedMessage(string entityType) : base(entityType) { }
+}
+
 public class DetailRequest
 {
     public string Route { get; set; } = string.Empty;

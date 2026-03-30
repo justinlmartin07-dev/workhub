@@ -9,6 +9,7 @@ public class Job
     public string Status { get; set; } = "Pending";
     public string Priority { get; set; } = "Normal";
     public string? ScopeNotes { get; set; }
+    public string? Address { get; set; }
     public Guid CreatedBy { get; set; }
     public User CreatedByUser { get; set; } = null!;
     public DateTime CreatedAt { get; set; }

@@ -155,7 +155,9 @@ public partial class CustomerEditViewModel : BaseViewModel
                     Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
                     Contacts = contacts.Count > 0 ? contacts : null,
                 };
-                await _apiService.CreateCustomerAsync(request);
+                var created = await _apiService.CreateCustomerAsync(request);
+                if (created != null)
+                    CustomerId = created.Id.ToString();
             }
             else
             {
@@ -168,6 +170,9 @@ public partial class CustomerEditViewModel : BaseViewModel
                 };
                 await _apiService.UpdateCustomerAsync(Guid.Parse(CustomerId!), request);
             }
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("customer"));
+            if (!string.IsNullOrEmpty(CustomerId))
+                WeakReferenceMessenger.Default.Send(new SelectListItemMessage(new SelectListItemRequest { ItemId = CustomerId, TabIndex = 0 }));
             NavigateBackToDetail();
         });
     }
@@ -180,14 +185,21 @@ public partial class CustomerEditViewModel : BaseViewModel
 
     private async void NavigateBackToDetail()
     {
-        if (Views.MainLayout.Current?.IsWideLayout == true && !string.IsNullOrEmpty(CustomerId))
+        if (Views.MainLayout.Current?.IsWideLayout == true)
         {
-            WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+            if (!string.IsNullOrEmpty(CustomerId))
             {
-                Route = "customerDetail",
-                Properties = new() { ["CustomerId"] = CustomerId },
-                QueryParams = new() { ["id"] = CustomerId }
-            }));
+                WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
+                {
+                    Route = "customerDetail",
+                    Properties = new() { ["CustomerId"] = CustomerId },
+                    QueryParams = new() { ["id"] = CustomerId }
+                }));
+            }
+            else
+            {
+                Views.MainLayout.Current.ClearDetail();
+            }
         }
         else
         {

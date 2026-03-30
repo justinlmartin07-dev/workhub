@@ -140,6 +140,7 @@ public class JobsController : ControllerBase
             Status = job.Status,
             Priority = job.Priority,
             ScopeNotes = job.ScopeNotes,
+            Address = job.Address,
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
             Photos = job.Photos.Select(p => new PhotoResponse
@@ -178,6 +179,7 @@ public class JobsController : ControllerBase
             Status = request.Status ?? "Pending",
             Priority = request.Priority ?? "Normal",
             ScopeNotes = request.ScopeNotes,
+            Address = request.Address,
             CreatedBy = this.GetUserId(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -195,6 +197,7 @@ public class JobsController : ControllerBase
             Status = job.Status,
             Priority = job.Priority,
             ScopeNotes = job.ScopeNotes,
+            Address = job.Address,
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
         });
@@ -211,6 +214,7 @@ public class JobsController : ControllerBase
         if (request.Status != null) job.Status = request.Status;
         if (request.Priority != null) job.Priority = request.Priority;
         if (request.ScopeNotes != null) job.ScopeNotes = request.ScopeNotes;
+        if (request.Address != null) job.Address = request.Address;
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -224,6 +228,7 @@ public class JobsController : ControllerBase
             Status = job.Status,
             Priority = job.Priority,
             ScopeNotes = job.ScopeNotes,
+            Address = job.Address,
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
         });

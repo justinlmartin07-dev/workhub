@@ -119,6 +119,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         try
         {
             await _apiService.DeleteInventoryItemAsync(Guid.Parse(ItemId!));
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("inventory"));
             NavigateBack();
         }
         catch (Exception ex)

@@ -13,6 +13,7 @@ public class CreateJobRequest
     [MaxLength(50)]
     public string? Priority { get; set; }
     public string? ScopeNotes { get; set; }
+    public string? Address { get; set; }
 }
 
 public class UpdateJobRequest
@@ -24,6 +25,7 @@ public class UpdateJobRequest
     [MaxLength(50)]
     public string? Priority { get; set; }
     public string? ScopeNotes { get; set; }
+    public string? Address { get; set; }
 }
 
 public class CreateJobNoteRequest

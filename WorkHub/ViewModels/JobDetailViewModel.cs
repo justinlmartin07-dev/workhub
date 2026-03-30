@@ -89,6 +89,48 @@ public partial class JobDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task OpenAddressInMapsAsync()
+    {
+        var address = Job?.Address;
+        if (string.IsNullOrWhiteSpace(address)) return;
+
+        var encoded = Uri.EscapeDataString(address);
+        try
+        {
+#if ANDROID
+            await Launcher.OpenAsync($"geo:0,0?q={encoded}");
+#else
+            await Launcher.OpenAsync($"https://www.google.com/maps/search/?api=1&query={encoded}");
+#endif
+        }
+        catch
+        {
+            await Shell.Current.DisplayAlert("Error", "Could not open Maps.", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenAddressInEarthAsync()
+    {
+        var address = Job?.Address;
+        if (string.IsNullOrWhiteSpace(address)) return;
+
+        var encoded = Uri.EscapeDataString(address);
+        try
+        {
+#if ANDROID
+            await Launcher.OpenAsync($"com.google.earth:/search?q={encoded}");
+#else
+            await Launcher.OpenAsync($"https://earth.google.com/web/search/{encoded}");
+#endif
+        }
+        catch
+        {
+            await Shell.Current.DisplayAlert("Error", "Could not open Google Earth.", "OK");
+        }
+    }
+
+    [RelayCommand]
     private async Task DeleteAsync()
     {
         if (Job == null) return;
@@ -98,9 +140,14 @@ public partial class JobDetailViewModel : BaseViewModel
         {
             await _apiService.DeleteJobAsync(Job.Id);
             if (Views.MainLayout.Current?.IsWideLayout == true)
+            {
                 Views.MainLayout.Current.ClearDetail();
+                WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
+            }
             else
+            {
                 await Shell.Current.GoToAsync("..");
+            }
         }
         catch (Exception ex)
         {
