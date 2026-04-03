@@ -188,6 +188,28 @@ public class ApiService
         response.EnsureSuccessStatusCode();
     }
 
+    // Address Autocomplete
+    public async Task<List<AddressSuggestionResponse>> GetAddressSuggestionsAsync(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 3) return [];
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<List<AddressSuggestionResponse>>(
+                $"v1/address/autocomplete?q={Uri.EscapeDataString(query)}") ?? [];
+        }
+        catch { return []; }
+    }
+
+    public async Task<AddressDetailsResponse?> GetAddressDetailsAsync(string placeId)
+    {
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<AddressDetailsResponse>(
+                $"v1/address/details/{Uri.EscapeDataString(placeId)}");
+        }
+        catch { return null; }
+    }
+
     // Calendar Events
     public async Task<List<CalendarEventResponse>> GetEventsAsync(DateTime from, DateTime to, Guid? userId = null)
     {

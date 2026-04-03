@@ -70,7 +70,12 @@ public partial class CustomersListViewModel : BaseViewModel
     private void TrySelectPending()
     {
         if (_pendingSelectId == null || Customers.Count == 0) return;
-        if (!Guid.TryParse(_pendingSelectId, out var id)) return;
+        if (!Guid.TryParse(_pendingSelectId, out var id))
+        {
+            SelectedCustomer = null;
+            _pendingSelectId = null;
+            return;
+        }
 
         var match = Customers.FirstOrDefault(c => c.Id == id);
         if (match != null)

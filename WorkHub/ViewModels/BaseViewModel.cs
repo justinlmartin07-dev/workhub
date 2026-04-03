@@ -2,6 +2,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WorkHub.ViewModels;
 
+public interface IHasUnsavedChanges
+{
+    bool HasUnsavedChanges { get; }
+}
+
 public partial class BaseViewModel : ObservableObject
 {
     [ObservableProperty]
@@ -38,9 +43,11 @@ public partial class BaseViewModel : ObservableObject
             HasContent = true;
             IsEmpty = false;
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
-            ErrorMessage = "Unable to connect to server";
+            ErrorMessage = ex.StatusCode.HasValue
+                ? $"Server error ({(int)ex.StatusCode}): {ex.Message}"
+                : "Unable to connect to server";
             HasError = true;
             HasContent = false;
         }

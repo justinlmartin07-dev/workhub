@@ -24,7 +24,7 @@ public class CustomerContactRequest
 {
     [Required, MaxLength(20)]
     public string Type { get; set; } = string.Empty;
-    [Required, MaxLength(50)]
+    [MaxLength(50)]
     public string Label { get; set; } = string.Empty;
     [Required, MaxLength(200)]
     public string Value { get; set; } = string.Empty;

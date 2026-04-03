@@ -69,6 +69,7 @@ else
 // Services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PhotoService>();
+builder.Services.AddHttpClient<AddressService>();
 builder.Services.AddHostedService<TokenCleanupService>();
 
 // Controllers

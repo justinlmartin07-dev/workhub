@@ -10,9 +10,37 @@ namespace WorkHub.ViewModels;
 
 [QueryProperty(nameof(JobId), "id")]
 [QueryProperty(nameof(InitialCustomerId), "customerId")]
-public partial class JobEditViewModel : BaseViewModel
+public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
 {
     private readonly ApiService _apiService;
+
+    private string _origTitle = string.Empty;
+    private string _origStatus = "new";
+    private string _origPriority = "medium";
+    private string _origStreet = string.Empty;
+    private string _origCity = string.Empty;
+    private string _origState = string.Empty;
+    private string _origZip = string.Empty;
+    private string _origScopeNotes = string.Empty;
+    private Guid? _origCustomerId;
+
+    public bool HasUnsavedChanges =>
+        Title != _origTitle || SelectedStatus != _origStatus || SelectedPriority != _origPriority ||
+        Street != _origStreet || City != _origCity || State != _origState || Zip != _origZip ||
+        ScopeNotes != _origScopeNotes || SelectedCustomer?.Id != _origCustomerId;
+
+    private void SnapshotOriginal()
+    {
+        _origTitle = Title;
+        _origStatus = SelectedStatus;
+        _origPriority = SelectedPriority;
+        _origStreet = Street;
+        _origCity = City;
+        _origState = State;
+        _origZip = Zip;
+        _origScopeNotes = ScopeNotes;
+        _origCustomerId = SelectedCustomer?.Id;
+    }
 
     [ObservableProperty]
     private string? _jobId;
@@ -57,6 +85,15 @@ public partial class JobEditViewModel : BaseViewModel
 
     [ObservableProperty]
     private string _zip = string.Empty;
+
+    [ObservableProperty]
+    private ObservableCollection<AddressSuggestionResponse> _addressSuggestions = new();
+
+    [ObservableProperty]
+    private bool _showAddressSuggestions;
+
+    private CancellationTokenSource? _addressCts;
+    private bool _skipAddressSearch;
 
     [ObservableProperty]
     private ObservableCollection<CustomerResponse> _allCustomers = new();
@@ -160,8 +197,15 @@ public partial class JobEditViewModel : BaseViewModel
                     if (customer != null)
                         SelectedCustomer = customer;
                     ScopeNotes = job.ScopeNotes ?? string.Empty;
+                    _skipAddressSearch = true;
                     ParseAddress(job.Address);
+                    _skipAddressSearch = false;
+                    SnapshotOriginal();
                 }
+            }
+            else
+            {
+                SnapshotOriginal();
             }
         });
     }
@@ -206,7 +250,9 @@ public partial class JobEditViewModel : BaseViewModel
     {
         var address = SelectedCustomer?.Address;
         if (string.IsNullOrWhiteSpace(address)) return;
+        _skipAddressSearch = true;
         ParseAddress(address);
+        _skipAddressSearch = false;
     }
 
     [RelayCommand]
@@ -260,9 +306,62 @@ public partial class JobEditViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Cancel()
+    private async Task CancelAsync()
     {
+        if (HasUnsavedChanges)
+        {
+            var discard = await Application.Current!.Windows[0].Page!.DisplayAlert(
+                "Unsaved Changes", "You have unsaved changes. Discard them?", "Discard", "Stay");
+            if (!discard) return;
+        }
+        SnapshotOriginal(); // Clear dirty state so NavigateBackToDetail doesn't re-trigger
         NavigateBackToDetail();
+    }
+
+    partial void OnStreetChanged(string value)
+    {
+        if (_skipAddressSearch) return;
+        _addressCts?.Cancel();
+        if (string.IsNullOrWhiteSpace(value) || value.Length < 3)
+        {
+            ShowAddressSuggestions = false;
+            return;
+        }
+
+        _addressCts = new CancellationTokenSource();
+        var token = _addressCts.Token;
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await Task.Delay(300, token);
+                var results = await _apiService.GetAddressSuggestionsAsync(value);
+                if (!token.IsCancellationRequested)
+                {
+                    AddressSuggestions = new ObservableCollection<AddressSuggestionResponse>(results);
+                    ShowAddressSuggestions = results.Count > 0;
+                }
+            }
+            catch (TaskCanceledException) { }
+        });
+    }
+
+    [RelayCommand]
+    private async Task SelectAddressSuggestionAsync(AddressSuggestionResponse suggestion)
+    {
+        ShowAddressSuggestions = false;
+        _addressCts?.Cancel();
+
+        var details = await _apiService.GetAddressDetailsAsync(suggestion.PlaceId);
+        if (details != null)
+        {
+            _skipAddressSearch = true;
+            Street = details.Street;
+            City = details.City;
+            State = details.State;
+            Zip = details.Zip;
+            _skipAddressSearch = false;
+        }
     }
 
     private void ParseAddress(string? address)

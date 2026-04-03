@@ -81,7 +81,12 @@ public partial class JobsListViewModel : BaseViewModel
     private void TrySelectPending()
     {
         if (_pendingSelectId == null || Jobs.Count == 0) return;
-        if (!Guid.TryParse(_pendingSelectId, out var id)) return;
+        if (!Guid.TryParse(_pendingSelectId, out var id))
+        {
+            SelectedJob = null;
+            _pendingSelectId = null;
+            return;
+        }
 
         var match = Jobs.FirstOrDefault(j => j.Id == id);
         if (match != null)

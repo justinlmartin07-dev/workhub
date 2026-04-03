@@ -9,9 +9,43 @@ using WorkHub.Services;
 namespace WorkHub.ViewModels;
 
 [QueryProperty(nameof(CustomerId), "id")]
-public partial class CustomerEditViewModel : BaseViewModel
+public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
 {
     private readonly ApiService _apiService;
+
+    private string _origName = string.Empty;
+    private string _origStreet = string.Empty;
+    private string _origCity = string.Empty;
+    private string _origState = string.Empty;
+    private string _origZip = string.Empty;
+    private string _origNotes = string.Empty;
+    private string _origContactsHash = string.Empty;
+
+    public bool HasUnsavedChanges =>
+        Name != _origName || Street != _origStreet || City != _origCity ||
+        State != _origState || Zip != _origZip || Notes != _origNotes ||
+        GetContactsHash() != _origContactsHash;
+
+    private void SnapshotOriginal()
+    {
+        _origName = Name;
+        _origStreet = Street;
+        _origCity = City;
+        _origState = State;
+        _origZip = Zip;
+        _origNotes = Notes;
+        _origContactsHash = GetContactsHash();
+    }
+
+    private string GetContactsHash()
+    {
+        var parts = new List<string>();
+        foreach (var p in PhoneEntries)
+            parts.Add($"phone:{p.Label}:{p.Value}:{p.IsPrimary}");
+        foreach (var e in EmailEntries)
+            parts.Add($"email:{e.Label}:{e.Value}:{e.IsPrimary}");
+        return string.Join("|", parts);
+    }
 
     [ObservableProperty]
     private string? _customerId;
@@ -43,7 +77,16 @@ public partial class CustomerEditViewModel : BaseViewModel
     public ObservableCollection<ContactEntry> PhoneEntries { get; } = [];
     public ObservableCollection<ContactEntry> EmailEntries { get; } = [];
 
-    public string[] PhoneLabelOptions { get; } = ["Mobile", "Home", "Work", "Other"];
+    [ObservableProperty]
+    private ObservableCollection<AddressSuggestionResponse> _addressSuggestions = new();
+
+    [ObservableProperty]
+    private bool _showAddressSuggestions;
+
+    private CancellationTokenSource? _addressCts;
+    private bool _skipAddressSearch;
+
+    public string[] PhoneLabelOptions { get; } = ["Mobile", "Home", "Work", "Office", "Main", "Other"];
     public string[] EmailLabelOptions { get; } = ["Personal", "Work", "Other"];
 
     public CustomerEditViewModel(ApiService apiService)
@@ -52,6 +95,7 @@ public partial class CustomerEditViewModel : BaseViewModel
         // Start with one empty phone and email entry
         PhoneEntries.Add(new ContactEntry { Label = "Mobile" });
         EmailEntries.Add(new ContactEntry { Label = "Personal" });
+        SnapshotOriginal();
     }
 
     partial void OnCustomerIdChanged(string? value)
@@ -74,7 +118,9 @@ public partial class CustomerEditViewModel : BaseViewModel
             if (customer != null)
             {
                 Name = customer.Name;
+                _skipAddressSearch = true;
                 ParseAddress(customer.Address);
+                _skipAddressSearch = false;
                 Notes = customer.Notes ?? string.Empty;
 
                 PhoneEntries.Clear();
@@ -92,6 +138,8 @@ public partial class CustomerEditViewModel : BaseViewModel
                     PhoneEntries.Add(new ContactEntry { Label = "Mobile" });
                 if (EmailEntries.Count == 0)
                     EmailEntries.Add(new ContactEntry { Label = "Personal" });
+
+                SnapshotOriginal();
             }
         });
     }
@@ -177,9 +225,62 @@ public partial class CustomerEditViewModel : BaseViewModel
         });
     }
 
-    [RelayCommand]
-    private void Cancel()
+    partial void OnStreetChanged(string value)
     {
+        if (_skipAddressSearch) return;
+        _addressCts?.Cancel();
+        if (string.IsNullOrWhiteSpace(value) || value.Length < 3)
+        {
+            ShowAddressSuggestions = false;
+            return;
+        }
+
+        _addressCts = new CancellationTokenSource();
+        var token = _addressCts.Token;
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await Task.Delay(300, token);
+                var results = await _apiService.GetAddressSuggestionsAsync(value);
+                if (!token.IsCancellationRequested)
+                {
+                    AddressSuggestions = new ObservableCollection<AddressSuggestionResponse>(results);
+                    ShowAddressSuggestions = results.Count > 0;
+                }
+            }
+            catch (TaskCanceledException) { }
+        });
+    }
+
+    [RelayCommand]
+    private async Task SelectAddressSuggestionAsync(AddressSuggestionResponse suggestion)
+    {
+        ShowAddressSuggestions = false;
+        _addressCts?.Cancel();
+
+        var details = await _apiService.GetAddressDetailsAsync(suggestion.PlaceId);
+        if (details != null)
+        {
+            _skipAddressSearch = true;
+            Street = details.Street;
+            City = details.City;
+            State = details.State;
+            Zip = details.Zip;
+            _skipAddressSearch = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task CancelAsync()
+    {
+        if (HasUnsavedChanges)
+        {
+            var discard = await Application.Current!.Windows[0].Page!.DisplayAlert(
+                "Unsaved Changes", "You have unsaved changes. Discard them?", "Discard", "Stay");
+            if (!discard) return;
+        }
+        SnapshotOriginal(); // Clear dirty state so NavigateBackToDetail doesn't re-trigger
         NavigateBackToDetail();
     }
 
@@ -211,9 +312,9 @@ public partial class CustomerEditViewModel : BaseViewModel
     {
         var contacts = new List<CustomerContactRequest>();
         foreach (var p in PhoneEntries.Where(e => !string.IsNullOrWhiteSpace(e.Value)))
-            contacts.Add(new CustomerContactRequest { Type = "phone", Label = p.Label, Value = p.Value.Trim(), IsPrimary = p.IsPrimary });
+            contacts.Add(new CustomerContactRequest { Type = "phone", Label = string.IsNullOrEmpty(p.Label) ? "Other" : p.Label, Value = p.Value.Trim(), IsPrimary = p.IsPrimary });
         foreach (var e in EmailEntries.Where(e => !string.IsNullOrWhiteSpace(e.Value)))
-            contacts.Add(new CustomerContactRequest { Type = "email", Label = e.Label, Value = e.Value.Trim(), IsPrimary = e.IsPrimary });
+            contacts.Add(new CustomerContactRequest { Type = "email", Label = string.IsNullOrEmpty(e.Label) ? "Other" : e.Label, Value = e.Value.Trim(), IsPrimary = e.IsPrimary });
         return contacts;
     }
 

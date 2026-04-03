@@ -108,7 +108,7 @@ public class CustomersController : ControllerBase
                 Id = Guid.NewGuid(),
                 CustomerId = customer.Id,
                 Type = c.Type,
-                Label = c.Label,
+                Label = string.IsNullOrEmpty(c.Label) ? "Other" : c.Label,
                 Value = c.Value,
                 IsPrimary = c.IsPrimary,
                 CreatedAt = DateTime.UtcNow,
@@ -140,18 +140,19 @@ public class CustomersController : ControllerBase
 
         if (request.Contacts != null)
         {
-            // Replace all contacts
-            _db.CustomerContacts.RemoveRange(customer.Contacts);
-            customer.Contacts = request.Contacts.Select(c => new CustomerContact
+            customer.Contacts.Clear();
+            foreach (var c in request.Contacts)
             {
-                Id = Guid.NewGuid(),
-                CustomerId = customer.Id,
-                Type = c.Type,
-                Label = c.Label,
-                Value = c.Value,
-                IsPrimary = c.IsPrimary,
-                CreatedAt = DateTime.UtcNow,
-            }).ToList();
+                customer.Contacts.Add(new CustomerContact
+                {
+                    CustomerId = customer.Id,
+                    Type = c.Type,
+                    Label = string.IsNullOrEmpty(c.Label) ? "Other" : c.Label,
+                    Value = c.Value,
+                    IsPrimary = c.IsPrimary,
+                    CreatedAt = DateTime.UtcNow,
+                });
+            }
         }
 
         customer.UpdatedAt = DateTime.UtcNow;

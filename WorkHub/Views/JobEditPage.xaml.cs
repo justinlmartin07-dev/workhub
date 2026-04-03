@@ -33,4 +33,20 @@ public partial class JobEditPage : ContentPage
             _viewModel.LoadDataCommand.Execute(null);
         }
     }
+
+    protected override bool OnBackButtonPressed()
+    {
+        if (_viewModel.HasUnsavedChanges)
+        {
+            Dispatcher.Dispatch(async () =>
+            {
+                var discard = await DisplayAlert(
+                    "Unsaved Changes", "You have unsaved changes. Discard them?", "Discard", "Stay");
+                if (discard)
+                    await Shell.Current.GoToAsync("..");
+            });
+            return true; // Prevent default back
+        }
+        return base.OnBackButtonPressed();
+    }
 }

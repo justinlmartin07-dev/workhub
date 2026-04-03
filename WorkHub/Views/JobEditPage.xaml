@@ -96,6 +96,25 @@
                             Padding="4" FontSize="12" />
                 </Grid>
                 <Entry Placeholder="Street" Text="{Binding Street}" ReturnType="Next" />
+                <!-- Address suggestions dropdown -->
+                <CollectionView ItemsSource="{Binding AddressSuggestions}" IsVisible="{Binding ShowAddressSuggestions}"
+                                SelectionMode="None" HeightRequest="150">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:AddressSuggestionResponse">
+                            <Grid Padding="8,6" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#2a2a2a}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobEditViewModel}}, Path=SelectAddressSuggestionCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Grid.GestureRecognizers>
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding MainText}" FontSize="14" />
+                                    <Label Text="{Binding SecondaryText}" FontSize="12" TextColor="{StaticResource Gray400}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
                 <Grid ColumnDefinitions="2*,*,*" ColumnSpacing="8">
                     <Entry Placeholder="City" Text="{Binding City}" ReturnType="Next" />
                     <Entry Grid.Column="1" Placeholder="State" Text="{Binding State}" ReturnType="Next" />

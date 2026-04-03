@@ -10,6 +10,7 @@ public partial class MainLayout : ContentPage
     private readonly IServiceProvider _serviceProvider;
     private int _lastTabIndex = -1;
     private bool _isWide;
+    private bool _suppressNextDetailRequest;
 
     public static MainLayout? Current { get; private set; }
 
@@ -108,9 +109,16 @@ public partial class MainLayout : ContentPage
         }
     }
 
-    private void LoadTabContent(int tabIndex)
+    private async void LoadTabContent(int tabIndex)
     {
         if (tabIndex == _lastTabIndex) return;
+
+        if (_isWide && await CheckUnsavedChangesAsync())
+        {
+            _viewModel.SelectedTabIndex = _lastTabIndex;
+            return;
+        }
+
         _lastTabIndex = tabIndex;
 
         ResetDetailPanel();
@@ -147,8 +155,41 @@ public partial class MainLayout : ContentPage
         };
     }
 
+    private async Task<bool> CheckUnsavedChangesAsync()
+    {
+        if (DetailPanel.Content?.BindingContext is IHasUnsavedChanges { HasUnsavedChanges: true } vm)
+        {
+            var stay = !await Application.Current!.Windows[0].Page!.DisplayAlert(
+                "Unsaved Changes", "You have unsaved changes. Discard them?", "Discard", "Stay");
+            if (stay)
+            {
+                // Revert list selection back to the item being edited
+                var editId = vm switch
+                {
+                    CustomerEditViewModel c => c.CustomerId,
+                    JobEditViewModel j => j.JobId,
+                    _ => null
+                };
+                _suppressNextDetailRequest = true;
+                WeakReferenceMessenger.Default.Send(new SelectListItemMessage(
+                    new SelectListItemRequest { ItemId = editId ?? "", TabIndex = _viewModel.SelectedTabIndex }));
+            }
+            return stay;
+        }
+        return false;
+    }
+
     private async void HandleDetailRequest(DetailRequest request)
     {
+        if (_suppressNextDetailRequest)
+        {
+            _suppressNextDetailRequest = false;
+            return;
+        }
+
+        if (_isWide && await CheckUnsavedChangesAsync())
+            return;
+
         // Only switch tabs in wide mode — in narrow mode the detail page is pushed
         // via Shell, and switching tabs would leave MainLayout on the wrong tab
         // when the user navigates back.
