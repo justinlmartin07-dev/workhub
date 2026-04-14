@@ -8,7 +8,7 @@
              x:Class="WorkHub.Views.JobsListPage"
              x:DataType="vm:JobsListViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Grid RowDefinitions="Auto,Auto,*">
         <SearchBar Placeholder="Search jobs..." Text="{Binding SearchText}"
                    SearchCommand="{Binding SearchCommand}" Margin="8,8,8,0" />
 
@@ -59,8 +59,9 @@
             </controls:DataStateView.Body>
         </controls:DataStateView>
 
-        <Button Grid.Row="3" Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
+        <!-- FAB (overlaid on list) -->
+        <Button Grid.Row="2" Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
                 CornerRadius="28" Margin="16" HorizontalOptions="End" VerticalOptions="End"
-                Command="{Binding AddJobCommand}" />
+                Command="{Binding AddJobCommand}" ZIndex="10" />
     </Grid>
 </ContentView>

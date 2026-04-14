@@ -7,7 +7,7 @@
              x:Class="WorkHub.Views.CustomersListPage"
              x:DataType="vm:CustomersListViewModel">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*">
         <!-- Search -->
         <SearchBar Grid.Row="0" Placeholder="Search customers..." Text="{Binding SearchText}"
                    SearchCommand="{Binding SearchCommand}" Margin="8" />
@@ -43,9 +43,9 @@
             </controls:DataStateView.Body>
         </controls:DataStateView>
 
-        <!-- FAB -->
-        <Button Grid.Row="2" Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
+        <!-- FAB (overlaid on list) -->
+        <Button Grid.Row="1" Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
                 CornerRadius="28" Margin="16" HorizontalOptions="End" VerticalOptions="End"
-                Command="{Binding AddCustomerCommand}" />
+                Command="{Binding AddCustomerCommand}" ZIndex="10" />
     </Grid>
 </ContentView>

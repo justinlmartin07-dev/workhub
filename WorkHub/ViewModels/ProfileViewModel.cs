@@ -81,6 +81,12 @@ public partial class ProfileViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task GoBackAsync()
+    {
+        await Shell.Current.GoToAsync("..");
+    }
+
+    [RelayCommand]
     private async Task ChangePasswordAsync()
     {
         await Shell.Current.GoToAsync("changePassword");

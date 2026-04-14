@@ -5,7 +5,7 @@
              xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Views.ProfilePage"
              x:DataType="vm:ProfileViewModel"
-             Title="Profile">
+             Title="">
 
     <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
                             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
@@ -13,6 +13,14 @@
         <controls:DataStateView.Body>
             <ScrollView>
                 <VerticalStackLayout Spacing="20" Padding="24" HorizontalOptions="Fill">
+                    <!-- Header with Back Button -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                        <Button Text="&#x2190;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                Command="{Binding GoBackCommand}" FontSize="20" Padding="0" WidthRequest="40" />
+                        <Label Grid.Column="1" Text="Profile" FontSize="20" FontAttributes="Bold"
+                               VerticalTextAlignment="Center" />
+                    </Grid>
+
                     <!-- Avatar -->
                     <VerticalStackLayout HorizontalOptions="Center" Spacing="8">
                         <Border StrokeShape="RoundRectangle 50" WidthRequest="100" HeightRequest="100"
