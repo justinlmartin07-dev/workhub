@@ -33,7 +33,10 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     private string _pageTitle = "New Item";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EditButtonText))]
     private bool _isEditing = true;
+
+    public string EditButtonText => IsEditing ? "Cancel" : "Edit";
 
     public InventoryItemDetailViewModel(ApiService apiService)
     {
