@@ -74,18 +74,18 @@ public partial class JobsListViewModel : BaseViewModel
             Jobs = new ObservableCollection<JobListItemResponse>(all);
             if (Jobs.Count == 0) SetEmpty();
             else SetContent();
-            TrySelectPending();
+            if (TrySelectPending()) _pendingSelectId = null;
         });
     }
 
-    private void TrySelectPending()
+    private bool TrySelectPending()
     {
-        if (_pendingSelectId == null || Jobs.Count == 0) return;
+        if (_pendingSelectId == null || Jobs.Count == 0) return false;
         if (!Guid.TryParse(_pendingSelectId, out var id))
         {
             SelectedJob = null;
             _pendingSelectId = null;
-            return;
+            return false;
         }
 
         var match = Jobs.FirstOrDefault(j => j.Id == id);
@@ -93,8 +93,9 @@ public partial class JobsListViewModel : BaseViewModel
         {
             SelectedJob = match;
             ScrollToRequested?.Invoke(match);
-            _pendingSelectId = null;
+            return true;
         }
+        return false;
     }
 
     partial void OnSearchTextChanged(string value)

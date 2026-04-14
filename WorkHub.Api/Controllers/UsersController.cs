@@ -16,12 +16,14 @@ public class UsersController : ControllerBase
     private readonly WorkHubDbContext _db;
     private readonly PhotoService _photos;
     private readonly AuthService _auth;
+    private readonly ILogger<UsersController> _logger;
 
-    public UsersController(WorkHubDbContext db, PhotoService photos, AuthService auth)
+    public UsersController(WorkHubDbContext db, PhotoService photos, AuthService auth, ILogger<UsersController> logger)
     {
         _db = db;
         _photos = photos;
         _auth = auth;
+        _logger = logger;
     }
 
     [HttpGet("users")]
@@ -103,6 +105,9 @@ public class UsersController : ControllerBase
     [HttpPost("me/photo")]
     public async Task<IActionResult> UploadProfilePhoto(IFormFile file)
     {
+        if (file == null || file.Length == 0)
+            return BadRequest(new ErrorResponse { Error = "No file provided" });
+
         var userId = this.GetUserId();
         var user = await _db.Users.FindAsync(userId);
         if (user == null)
@@ -110,13 +115,24 @@ public class UsersController : ControllerBase
 
         // Delete old photo if exists
         if (user.ProfilePhotoR2Key != null)
-            await _photos.DeleteAsync(user.ProfilePhotoR2Key);
+        {
+            try { await _photos.DeleteAsync(user.ProfilePhotoR2Key); }
+            catch (Exception ex) { _logger.LogWarning(ex, "Failed to delete old profile photo {Key}", user.ProfilePhotoR2Key); }
+        }
 
         var photoId = Guid.NewGuid();
         var objectKey = $"profiles/{userId}/{photoId}.jpg";
 
-        using var stream = file.OpenReadStream();
-        await _photos.UploadAsync(objectKey, stream, file.ContentType);
+        try
+        {
+            using var stream = file.OpenReadStream();
+            await _photos.UploadAsync(objectKey, stream, file.ContentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to upload profile photo for {UserId}", userId);
+            return StatusCode(500, new ErrorResponse { Error = $"Photo upload failed: {ex.Message}" });
+        }
 
         user.ProfilePhotoR2Key = objectKey;
         await _db.SaveChangesAsync();

@@ -340,4 +340,24 @@ public static class SeedData
         db.CalendarEventAssignments.AddRange(allAssignments);
         await db.SaveChangesAsync();
     }
+
+    public static async Task SeedContactLabelsAsync(WorkHubDbContext db)
+    {
+        if (await db.ContactLabels.AnyAsync())
+            return;
+
+        var now = DateTime.UtcNow;
+        var labels = new List<ContactLabel>();
+
+        var phoneLabels = new[] { "Mobile", "Home", "Work", "Office", "Main", "Other" };
+        for (var i = 0; i < phoneLabels.Length; i++)
+            labels.Add(new ContactLabel { Id = Guid.NewGuid(), Type = "phone", Label = phoneLabels[i], SortOrder = i, CreatedAt = now });
+
+        var emailLabels = new[] { "Personal", "Work", "Other" };
+        for (var i = 0; i < emailLabels.Length; i++)
+            labels.Add(new ContactLabel { Id = Guid.NewGuid(), Type = "email", Label = emailLabels[i], SortOrder = i, CreatedAt = now });
+
+        db.ContactLabels.AddRange(labels);
+        await db.SaveChangesAsync();
+    }
 }

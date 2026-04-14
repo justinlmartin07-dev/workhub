@@ -20,6 +20,7 @@ public class WorkHubDbContext : DbContext
     public DbSet<JobAdhocItem> JobAdhocItems => Set<JobAdhocItem>();
     public DbSet<CalendarEvent> CalendarEvents => Set<CalendarEvent>();
     public DbSet<CalendarEventAssignment> CalendarEventAssignments => Set<CalendarEventAssignment>();
+    public DbSet<ContactLabel> ContactLabels => Set<ContactLabel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -242,6 +243,19 @@ public class WorkHubDbContext : DbContext
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(x => x.CalendarEventId).HasDatabaseName("idx_calendar_event_assignments_event_id");
             e.HasIndex(x => x.UserId).HasDatabaseName("idx_calendar_event_assignments_user_id");
+        });
+
+        // Contact Labels
+        modelBuilder.Entity<ContactLabel>(e =>
+        {
+            e.ToTable("contact_labels");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.Type).HasColumnName("type").HasMaxLength(20).IsRequired();
+            e.Property(x => x.Label).HasColumnName("label").HasMaxLength(50).IsRequired();
+            e.Property(x => x.SortOrder).HasColumnName("sort_order").HasDefaultValue(0);
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.HasIndex(x => x.Type).HasDatabaseName("idx_contact_labels_type");
         });
     }
 }

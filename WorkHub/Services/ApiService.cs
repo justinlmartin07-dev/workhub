@@ -188,6 +188,12 @@ public class ApiService
         response.EnsureSuccessStatusCode();
     }
 
+    // Contact Labels
+    public async Task<List<ContactLabelResponse>> GetContactLabelsAsync()
+    {
+        return await _httpClient.GetFromJsonAsync<List<ContactLabelResponse>>("v1/contact-labels") ?? [];
+    }
+
     // Address Autocomplete
     public async Task<List<AddressSuggestionResponse>> GetAddressSuggestionsAsync(string query)
     {
@@ -258,6 +264,7 @@ public class ApiService
     {
         using var content = new MultipartFormDataContent();
         using var streamContent = new StreamContent(fileStream);
+        streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
         content.Add(streamContent, "file", fileName);
         var response = await _httpClient.PostAsync($"v1/customers/{customerId}/photos", content);
         response.EnsureSuccessStatusCode();
@@ -268,6 +275,7 @@ public class ApiService
     {
         using var content = new MultipartFormDataContent();
         using var streamContent = new StreamContent(fileStream);
+        streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
         content.Add(streamContent, "file", fileName);
         var response = await _httpClient.PostAsync($"v1/jobs/{jobId}/photos", content);
         response.EnsureSuccessStatusCode();
@@ -323,6 +331,7 @@ public class ApiService
     {
         using var content = new MultipartFormDataContent();
         using var streamContent = new StreamContent(fileStream);
+        streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
         content.Add(streamContent, "file", fileName);
         var response = await _httpClient.PostAsync("v1/me/photo", content);
         response.EnsureSuccessStatusCode();

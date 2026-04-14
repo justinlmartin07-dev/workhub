@@ -63,18 +63,18 @@ public partial class CustomersListViewModel : BaseViewModel
             Customers = new ObservableCollection<CustomerResponse>(all);
             if (Customers.Count == 0) SetEmpty();
             else SetContent();
-            TrySelectPending();
+            if (TrySelectPending()) _pendingSelectId = null;
         });
     }
 
-    private void TrySelectPending()
+    private bool TrySelectPending()
     {
-        if (_pendingSelectId == null || Customers.Count == 0) return;
+        if (_pendingSelectId == null || Customers.Count == 0) return false;
         if (!Guid.TryParse(_pendingSelectId, out var id))
         {
             SelectedCustomer = null;
             _pendingSelectId = null;
-            return;
+            return false;
         }
 
         var match = Customers.FirstOrDefault(c => c.Id == id);
@@ -82,8 +82,9 @@ public partial class CustomersListViewModel : BaseViewModel
         {
             SelectedCustomer = match;
             ScrollToRequested?.Invoke(match);
-            _pendingSelectId = null;
+            return true;
         }
+        return false;
     }
 
     partial void OnSearchTextChanged(string value)

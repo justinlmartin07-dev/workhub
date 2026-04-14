@@ -298,10 +298,11 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
                 };
                 await _apiService.UpdateJobAsync(Guid.Parse(JobId!), request);
             }
+            SnapshotOriginal();
             WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
+            NavigateBackToDetail();
             if (!string.IsNullOrEmpty(JobId))
                 WeakReferenceMessenger.Default.Send(new SelectListItemMessage(new SelectListItemRequest { ItemId = JobId, TabIndex = 1 }));
-            NavigateBackToDetail();
         });
     }
 

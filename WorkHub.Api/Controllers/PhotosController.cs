@@ -15,16 +15,21 @@ public class PhotosController : ControllerBase
 {
     private readonly WorkHubDbContext _db;
     private readonly PhotoService _photos;
+    private readonly ILogger<PhotosController> _logger;
 
-    public PhotosController(WorkHubDbContext db, PhotoService photos)
+    public PhotosController(WorkHubDbContext db, PhotoService photos, ILogger<PhotosController> logger)
     {
         _db = db;
         _photos = photos;
+        _logger = logger;
     }
 
     [HttpPost("customers/{customerId:guid}/photos")]
     public async Task<IActionResult> UploadCustomerPhoto(Guid customerId, IFormFile file)
     {
+        if (file == null || file.Length == 0)
+            return BadRequest(new ErrorResponse { Error = "No file provided" });
+
         var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == customerId && c.DeletedAt == null);
         if (customer == null)
             return NotFound(new ErrorResponse { Error = "Customer not found" });
@@ -32,8 +37,16 @@ public class PhotosController : ControllerBase
         var photoId = Guid.NewGuid();
         var objectKey = $"customers/{customerId}/{photoId}.jpg";
 
-        using var stream = file.OpenReadStream();
-        await _photos.UploadAsync(objectKey, stream, file.ContentType);
+        try
+        {
+            using var stream = file.OpenReadStream();
+            await _photos.UploadAsync(objectKey, stream, file.ContentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to upload customer photo for {CustomerId}", customerId);
+            return StatusCode(500, new ErrorResponse { Error = $"Photo upload failed: {ex.Message}" });
+        }
 
         var photo = new CustomerPhoto
         {
@@ -60,6 +73,9 @@ public class PhotosController : ControllerBase
     [HttpPost("jobs/{jobId:guid}/photos")]
     public async Task<IActionResult> UploadJobPhoto(Guid jobId, IFormFile file)
     {
+        if (file == null || file.Length == 0)
+            return BadRequest(new ErrorResponse { Error = "No file provided" });
+
         var job = await _db.Jobs.Include(j => j.Customer).FirstOrDefaultAsync(j => j.Id == jobId && j.DeletedAt == null);
         if (job == null)
             return NotFound(new ErrorResponse { Error = "Job not found" });
@@ -67,8 +83,16 @@ public class PhotosController : ControllerBase
         var photoId = Guid.NewGuid();
         var objectKey = $"jobs/{jobId}/{photoId}.jpg";
 
-        using var stream = file.OpenReadStream();
-        await _photos.UploadAsync(objectKey, stream, file.ContentType);
+        try
+        {
+            using var stream = file.OpenReadStream();
+            await _photos.UploadAsync(objectKey, stream, file.ContentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to upload job photo for {JobId}", jobId);
+            return StatusCode(500, new ErrorResponse { Error = $"Photo upload failed: {ex.Message}" });
+        }
 
         var photo = new JobPhoto
         {

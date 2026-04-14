@@ -58,3 +58,9 @@ public class CustomerContactRequest
     public string Value { get; set; } = string.Empty;
     public bool IsPrimary { get; set; }
 }
+
+public class ContactLabelResponse
+{
+    public string Type { get; set; } = string.Empty;
+    public string Label { get; set; } = string.Empty;
+}

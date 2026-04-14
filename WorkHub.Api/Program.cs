@@ -96,6 +96,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<WorkHubDbContext>();
     db.Database.Migrate();
     await SeedData.SeedAsync(db);
+    await SeedData.SeedContactLabelsAsync(db);
 }
 
 app.UseCors();

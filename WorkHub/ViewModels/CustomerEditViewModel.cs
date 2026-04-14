@@ -86,8 +86,11 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
     private CancellationTokenSource? _addressCts;
     private bool _skipAddressSearch;
 
-    public string[] PhoneLabelOptions { get; } = ["Mobile", "Home", "Work", "Office", "Main", "Other"];
-    public string[] EmailLabelOptions { get; } = ["Personal", "Work", "Other"];
+    [ObservableProperty]
+    private ObservableCollection<string> _phoneLabelOptions = new(["Mobile", "Home", "Work", "Office", "Main", "Other"]);
+
+    [ObservableProperty]
+    private ObservableCollection<string> _emailLabelOptions = new(["Personal", "Work", "Other"]);
 
     public CustomerEditViewModel(ApiService apiService)
     {
@@ -96,6 +99,20 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
         PhoneEntries.Add(new ContactEntry { Label = "Mobile" });
         EmailEntries.Add(new ContactEntry { Label = "Personal" });
         SnapshotOriginal();
+        _ = LoadContactLabelsAsync();
+    }
+
+    private async Task LoadContactLabelsAsync()
+    {
+        try
+        {
+            var labels = await _apiService.GetContactLabelsAsync();
+            var phone = labels.Where(l => l.Type == "phone").Select(l => l.Label).ToList();
+            var email = labels.Where(l => l.Type == "email").Select(l => l.Label).ToList();
+            if (phone.Count > 0) PhoneLabelOptions = new ObservableCollection<string>(phone);
+            if (email.Count > 0) EmailLabelOptions = new ObservableCollection<string>(email);
+        }
+        catch { /* keep defaults */ }
     }
 
     partial void OnCustomerIdChanged(string? value)
@@ -218,10 +235,11 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
                 };
                 await _apiService.UpdateCustomerAsync(Guid.Parse(CustomerId!), request);
             }
+            SnapshotOriginal();
             WeakReferenceMessenger.Default.Send(new DataChangedMessage("customer"));
+            NavigateBackToDetail();
             if (!string.IsNullOrEmpty(CustomerId))
                 WeakReferenceMessenger.Default.Send(new SelectListItemMessage(new SelectListItemRequest { ItemId = CustomerId, TabIndex = 0 }));
-            NavigateBackToDetail();
         });
     }
 
