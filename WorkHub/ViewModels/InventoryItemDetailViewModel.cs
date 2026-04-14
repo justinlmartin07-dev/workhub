@@ -1,3 +1,5 @@
+using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -118,7 +120,18 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         if (!confirm) return;
         try
         {
-            await _apiService.DeleteInventoryItemAsync(Guid.Parse(ItemId!));
+            var response = await _apiService.DeleteInventoryItemAsync(Guid.Parse(ItemId!));
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                var body = await response.Content.ReadFromJsonAsync<JsonObject>();
+                var jobs = body?["details"]?["referencingJobs"]?.AsArray();
+                var jobNames = jobs != null
+                    ? string.Join(", ", jobs.Select(j => j?["title"]?.GetValue<string>() ?? "Unknown"))
+                    : "unknown jobs";
+                await Shell.Current.DisplayAlert("Cannot Delete", $"This item is referenced by: {jobNames}", "OK");
+                return;
+            }
+            response.EnsureSuccessStatusCode();
             WeakReferenceMessenger.Default.Send(new DataChangedMessage("inventory"));
             NavigateBack();
         }

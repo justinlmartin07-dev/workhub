@@ -182,10 +182,9 @@ public class ApiService
         return await response.Content.ReadFromJsonAsync<InventoryItemResponse>();
     }
 
-    public async Task DeleteInventoryItemAsync(Guid id)
+    public async Task<HttpResponseMessage> DeleteInventoryItemAsync(Guid id)
     {
-        var response = await _httpClient.DeleteAsync($"v1/inventory/{id}");
-        response.EnsureSuccessStatusCode();
+        return await _httpClient.DeleteAsync($"v1/inventory/{id}");
     }
 
     // Contact Labels
