@@ -7,7 +7,7 @@
              x:Class="WorkHub.Views.InventoryPage"
              x:DataType="vm:InventoryViewModel">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*">
         <SearchBar Placeholder="Search inventory..." Text="{Binding SearchText}"
                    SearchCommand="{Binding SearchCommand}" Margin="8" />
 
@@ -40,8 +40,9 @@
             </controls:DataStateView.Body>
         </controls:DataStateView>
 
-        <Button Grid.Row="2" Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
+        <!-- FAB (overlaid on list) -->
+        <Button Grid.Row="1" Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
                 CornerRadius="28" Margin="16" HorizontalOptions="End" VerticalOptions="End"
-                Command="{Binding AddItemCommand}" />
+                Command="{Binding AddItemCommand}" ZIndex="10" />
     </Grid>
 </ContentView>
