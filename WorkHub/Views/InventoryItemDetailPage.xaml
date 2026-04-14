@@ -7,12 +7,14 @@
              Title="{Binding PageTitle}">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto,Auto">
-            <Label Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
-            <Button Grid.Column="1" Text="{Binding EditButtonText}"
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+            <Button Text="&#x2190;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                    FontSize="20" Padding="0" WidthRequest="40" Command="{Binding CancelCommand}" />
+            <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
+            <Button Grid.Column="2" Text="{Binding EditButtonText}"
                     BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
                     Command="{Binding ToggleEditCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
-            <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent" TextColor="Red"
+            <Button Grid.Column="3" Text="Delete" BackgroundColor="Transparent" TextColor="Red"
                     Command="{Binding DeleteCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
         </Grid>
     </Shell.TitleView>
