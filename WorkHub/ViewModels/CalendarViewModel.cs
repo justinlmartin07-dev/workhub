@@ -57,59 +57,86 @@ public partial class CalendarViewModel : BaseViewModel
     {
         var firstOfMonth = new DateTime(SelectedDate.Year, SelectedDate.Month, 1);
         var daysInMonth = DateTime.DaysInMonth(SelectedDate.Year, SelectedDate.Month);
+        var lastOfMonth = new DateTime(SelectedDate.Year, SelectedDate.Month, daysInMonth);
         MonthYearLabel = firstOfMonth.ToString("MMMM yyyy");
 
-        // Sunday = 0
         int startDow = (int)firstOfMonth.DayOfWeek;
+        var firstSunday = firstOfMonth.AddDays(-startDow);
 
         var weeks = new List<CalendarWeek>();
-        var currentWeek = new CalendarDay[7];
+        var weekStart = firstSunday;
 
-        // Fill leading blanks
-        for (int i = 0; i < startDow; i++)
-            currentWeek[i] = new CalendarDay();
-
-        for (int day = 1; day <= daysInMonth; day++)
+        while (weekStart <= lastOfMonth)
         {
-            var date = new DateTime(SelectedDate.Year, SelectedDate.Month, day);
-            int dow = (int)date.DayOfWeek;
+            var weekEnd = weekStart.AddDays(6);
+            var week = new CalendarWeek { WeekStart = weekStart, WeekEnd = weekEnd };
 
-            var dayEvents = Events
-                .Where(e => e.StartTime.ToLocalTime().Date == date.Date)
-                .OrderBy(e => e.StartTime)
-                .ToList();
-
-            currentWeek[dow] = new CalendarDay
+            for (int i = 0; i < 7; i++)
             {
-                Date = date,
-                DayNumber = day.ToString(),
-                IsCurrentMonth = true,
-                IsToday = date.Date == DateTime.Today,
-                IsSelected = date.Date == SelectedDate.Date,
-                Events = new ObservableCollection<CalendarEventResponse>(dayEvents),
-            };
-
-            if (dow == 6 || day == daysInMonth)
-            {
-                // Fill trailing blanks
-                for (int i = dow + 1; i < 7; i++)
-                    currentWeek[i] = new CalendarDay();
-
-                weeks.Add(new CalendarWeek
+                var date = weekStart.AddDays(i);
+                week.SetDay(i, new CalendarDay
                 {
-                    Sun = currentWeek[0] ?? new(),
-                    Mon = currentWeek[1] ?? new(),
-                    Tue = currentWeek[2] ?? new(),
-                    Wed = currentWeek[3] ?? new(),
-                    Thu = currentWeek[4] ?? new(),
-                    Fri = currentWeek[5] ?? new(),
-                    Sat = currentWeek[6] ?? new(),
+                    Date = date,
+                    DayNumber = date.Day.ToString(),
+                    IsCurrentMonth = date.Month == SelectedDate.Month,
+                    IsToday = date.Date == DateTime.Today,
+                    IsSelected = date.Date == SelectedDate.Date,
+                    Events = new ObservableCollection<CalendarEventResponse>(),
                 });
-                currentWeek = new CalendarDay[7];
             }
+
+            week.EventBars = ComputeWeekBars(weekStart, weekEnd);
+            weeks.Add(week);
+            weekStart = weekStart.AddDays(7);
         }
 
         Weeks = new ObservableCollection<CalendarWeek>(weeks);
+    }
+
+    private List<WeekEventBar> ComputeWeekBars(DateTime weekStart, DateTime weekEnd)
+    {
+        var weekEvents = Events.Where(e =>
+        {
+            var eStart = e.StartTime.ToLocalTime().Date;
+            var eEnd = (e.EndTime?.ToLocalTime() ?? e.StartTime.ToLocalTime()).Date;
+            return eStart <= weekEnd && eEnd >= weekStart;
+        })
+        .OrderBy(e => e.StartTime.ToLocalTime().Date)
+        .ThenByDescending(e => ((e.EndTime ?? e.StartTime) - e.StartTime).TotalDays)
+        .ToList();
+
+        var laneEnds = new List<int>();
+        var bars = new List<WeekEventBar>();
+
+        foreach (var evt in weekEvents)
+        {
+            var eStart = evt.StartTime.ToLocalTime().Date;
+            var eEnd = (evt.EndTime?.ToLocalTime() ?? evt.StartTime.ToLocalTime()).Date;
+
+            int startCol = eStart < weekStart ? 0 : (int)(eStart - weekStart).TotalDays;
+            int endCol = eEnd > weekEnd ? 6 : (int)(eEnd - weekStart).TotalDays;
+            int span = endCol - startCol + 1;
+
+            int lane = 0;
+            while (lane < laneEnds.Count && laneEnds[lane] >= startCol)
+                lane++;
+            if (lane >= laneEnds.Count)
+                laneEnds.Add(endCol);
+            else
+                laneEnds[lane] = endCol;
+
+            bars.Add(new WeekEventBar
+            {
+                Event = evt,
+                StartColumn = startCol,
+                ColumnSpan = span,
+                Lane = lane,
+                ContinuesLeft = eStart < weekStart,
+                ContinuesRight = eEnd > weekEnd,
+            });
+        }
+
+        return bars;
     }
 
     private void FilterDayEvents()
@@ -231,5 +258,33 @@ public class CalendarWeek
     public CalendarDay Fri { get; set; } = new();
     public CalendarDay Sat { get; set; } = new();
 
+    public DateTime WeekStart { get; set; }
+    public DateTime WeekEnd { get; set; }
+    public List<WeekEventBar> EventBars { get; set; } = new();
+
     public CalendarDay[] AllDays => [Sun, Mon, Tue, Wed, Thu, Fri, Sat];
+
+    public void SetDay(int index, CalendarDay day)
+    {
+        switch (index)
+        {
+            case 0: Sun = day; break;
+            case 1: Mon = day; break;
+            case 2: Tue = day; break;
+            case 3: Wed = day; break;
+            case 4: Thu = day; break;
+            case 5: Fri = day; break;
+            case 6: Sat = day; break;
+        }
+    }
+}
+
+public class WeekEventBar
+{
+    public CalendarEventResponse Event { get; set; } = null!;
+    public int StartColumn { get; set; }
+    public int ColumnSpan { get; set; }
+    public int Lane { get; set; }
+    public bool ContinuesLeft { get; set; }
+    public bool ContinuesRight { get; set; }
 }

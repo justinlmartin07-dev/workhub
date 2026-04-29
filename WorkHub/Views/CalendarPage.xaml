@@ -37,7 +37,7 @@
 
         <!-- Month Grid (built in code-behind) -->
         <Grid Grid.Row="2">
-            <Grid x:Name="MonthGrid" Padding="4,0" VerticalOptions="Fill" />
+            <Grid x:Name="MonthGrid" VerticalOptions="Fill" />
 
             <!-- FAB -->
             <Button Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
