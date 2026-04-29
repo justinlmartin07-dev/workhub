@@ -488,3 +488,6 @@ $RECYCLE.BIN/
 
 # App secrets
 appsettings.Development.json
+
+# Claude Code local settings, plans, memory
+.claude/
