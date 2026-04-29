@@ -14,7 +14,7 @@
             <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold"
                    VerticalTextAlignment="Center" TextColor="White" />
             <Button Grid.Column="1" Text="Delete" BackgroundColor="Transparent"
-                    TextColor="Red" Command="{Binding DeleteCurrentPhotoCommand}" />
+                    TextColor="{StaticResource DangerDark}" Command="{Binding DeleteCurrentPhotoCommand}" />
         </Grid>
     </Shell.TitleView>
 

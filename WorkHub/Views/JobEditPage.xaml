@@ -14,8 +14,8 @@
                 <Label Text="Customer *" FontSize="12" TextColor="{StaticResource Gray500}" />
 
                 <!-- Selected customer display / tap to open picker -->
-                <Frame Padding="12" CornerRadius="8" BorderColor="{StaticResource Gray200}"
-                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#2a2a2a}">
+                <Frame Padding="12" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceCardDark}}">
                     <Frame.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding ToggleCustomerPickerCommand}" />
                     </Frame.GestureRecognizers>
@@ -29,7 +29,7 @@
                 </Frame>
 
                 <!-- Searchable customer list (shown when open) -->
-                <Frame Padding="0" CornerRadius="8" BorderColor="{StaticResource Gray300}"
+                <Frame Padding="0" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                        IsVisible="{Binding IsCustomerPickerOpen}" HeightRequest="250">
                     <VerticalStackLayout>
                         <SearchBar x:Name="CustomerSearchBar" Placeholder="Search customers..." Text="{Binding CustomerSearchText}"
@@ -81,9 +81,9 @@
             <VerticalStackLayout Spacing="4">
                 <Label Text="Priority" FontSize="12" TextColor="{StaticResource Gray500}" />
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                    <Label Text="Low" FontSize="12" TextColor="Green" VerticalTextAlignment="Center" />
+                    <Label Text="Low" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Success}, Dark={StaticResource SuccessDark}}" VerticalTextAlignment="Center" />
                     <Slider Grid.Column="1" Minimum="0" Maximum="2" Value="{Binding PrioritySliderValue}" />
-                    <Label Grid.Column="2" Text="High" FontSize="12" TextColor="Red" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="2" Text="High" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" VerticalTextAlignment="Center" />
                 </Grid>
             </VerticalStackLayout>
 
@@ -101,7 +101,7 @@
                                 SelectionMode="None" HeightRequest="150">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:AddressSuggestionResponse">
-                            <Grid Padding="8,6" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#2a2a2a}">
+                            <Grid Padding="8,6" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceCardDark}}">
                                 <Grid.GestureRecognizers>
                                     <TapGestureRecognizer
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobEditViewModel}}, Path=SelectAddressSuggestionCommand}"
@@ -124,7 +124,7 @@
 
             <Editor Placeholder="Scope Notes" Text="{Binding ScopeNotes}" HeightRequest="120" />
 
-            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+            <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" IsVisible="{Binding HasError}" />
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"

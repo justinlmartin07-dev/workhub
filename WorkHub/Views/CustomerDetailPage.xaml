@@ -15,7 +15,7 @@
             <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent"
                     TextColor="{StaticResource Primary}" Command="{Binding EditCommand}" />
             <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent"
-                    TextColor="Red" Command="{Binding DeleteCommand}" />
+                    TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" Command="{Binding DeleteCommand}" />
         </Grid>
     </Shell.TitleView>
 
@@ -32,11 +32,12 @@
                         <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent"
                                 TextColor="{StaticResource Primary}" Command="{Binding EditCommand}" Padding="4" />
                         <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent"
-                                TextColor="Red" Command="{Binding DeleteCommand}" Padding="4" />
+                                TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" Command="{Binding DeleteCommand}" Padding="4" />
                     </Grid>
 
                     <!-- Contact Info -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                    <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
                         <VerticalStackLayout Spacing="8">
                             <Label Text="Contact Information" FontSize="16" FontAttributes="Bold" />
 
@@ -93,7 +94,8 @@
                     </Frame>
 
                     <!-- Notes -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}"
+                    <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                            IsVisible="{Binding Customer.Notes, Converter={StaticResource StringNotEmptyConverter}}">
                         <VerticalStackLayout Spacing="4">
                             <Label Text="Notes" FontSize="16" FontAttributes="Bold" />
@@ -102,7 +104,8 @@
                     </Frame>
 
                     <!-- Photos -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                    <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
                         <VerticalStackLayout Spacing="8">
                             <Grid ColumnDefinitions="*,Auto,Auto">
                                 <Label Text="Photos" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
@@ -143,7 +146,8 @@
                     </Frame>
 
                     <!-- Jobs -->
-                    <Frame Padding="16" CornerRadius="8" BorderColor="{StaticResource Gray200}">
+                    <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
                         <VerticalStackLayout Spacing="8">
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Text="Jobs" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />

@@ -27,7 +27,7 @@
                             <CollectionView ItemsSource="{Binding Photos}" HeightRequest="120" ItemsLayout="HorizontalList">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="models:PhotoResponse">
-                                        <Border StrokeShape="RoundRectangle 8" Margin="0,0,8,0" StrokeThickness="0">
+                                        <Border StrokeShape="RoundRectangle 12" Margin="0,0,8,0" StrokeThickness="0">
                                             <Image Source="{Binding Url}" WidthRequest="120" HeightRequest="120" Aspect="AspectFill" />
                                         </Border>
                                     </DataTemplate>

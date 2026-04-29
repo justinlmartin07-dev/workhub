@@ -20,7 +20,7 @@
                                 SelectionMode="None" HeightRequest="150">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:AddressSuggestionResponse">
-                            <Grid Padding="8,6" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark=#2a2a2a}">
+                            <Grid Padding="8,6" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceCardDark}}">
                                 <Grid.GestureRecognizers>
                                     <TapGestureRecognizer
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerEditViewModel}}, Path=SelectAddressSuggestionCommand}"
@@ -54,7 +54,7 @@
                             <Picker WidthRequest="100" ItemsSource="{Binding BindingContext.PhoneLabelOptions, Source={x:Reference thisPage}}"
                                     SelectedItem="{Binding Label}" />
                             <Entry Grid.Column="1" Placeholder="Phone number" Text="{Binding Value}" Keyboard="Telephone" />
-                            <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="Red"
+                            <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                     WidthRequest="40" Padding="0"
                                     Command="{Binding BindingContext.RemovePhoneCommand, Source={x:Reference thisPage}}"
                                     CommandParameter="{Binding .}" />
@@ -76,7 +76,7 @@
                             <Picker WidthRequest="100" ItemsSource="{Binding BindingContext.EmailLabelOptions, Source={x:Reference thisPage}}"
                                     SelectedItem="{Binding Label}" />
                             <Entry Grid.Column="1" Placeholder="Email address" Text="{Binding Value}" Keyboard="Email" />
-                            <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="Red"
+                            <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                     WidthRequest="40" Padding="0"
                                     Command="{Binding BindingContext.RemoveEmailCommand, Source={x:Reference thisPage}}"
                                     CommandParameter="{Binding .}" />
@@ -87,7 +87,7 @@
 
             <Editor Placeholder="Notes" Text="{Binding Notes}" HeightRequest="120" />
 
-            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+            <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" IsVisible="{Binding HasError}" />
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                 <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"
