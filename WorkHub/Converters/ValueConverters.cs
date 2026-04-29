@@ -17,12 +17,12 @@ public class StatusColorConverter : IValueConverter
     {
         return value?.ToString()?.ToLower() switch
         {
-            "new" => Colors.DodgerBlue,
-            "in_progress" => Colors.Orange,
-            "on_hold" => Colors.Gray,
-            "complete" => Colors.Green,
-            "cancelled" => Colors.Red,
-            _ => Colors.Gray
+            "new" => Color.FromArgb("#3B82F6"),       // Info blue
+            "in_progress" => Color.FromArgb("#F59E0B"), // Warning amber
+            "on_hold" => Color.FromArgb("#94A3B8"),     // Slate gray
+            "complete" => Color.FromArgb("#10B981"),     // Success green
+            "cancelled" => Color.FromArgb("#EF4444"),    // Danger red
+            _ => Color.FromArgb("#94A3B8")               // Slate gray
         };
     }
 
@@ -36,10 +36,10 @@ public class PriorityColorConverter : IValueConverter
     {
         return value?.ToString()?.ToLower() switch
         {
-            "high" => Colors.Red,
-            "medium" => Colors.Orange,
-            "low" => Colors.Green,
-            _ => Colors.Gray
+            "high" => Color.FromArgb("#EF4444"),     // Danger red
+            "medium" => Color.FromArgb("#F59E0B"),    // Warning amber
+            "low" => Color.FromArgb("#10B981"),        // Success green
+            _ => Color.FromArgb("#94A3B8")              // Slate gray
         };
     }
 
@@ -75,6 +75,19 @@ public class DateFormatConverter : IValueConverter
             return dt.ToLocalTime().ToString(format);
         }
         return value;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+public class IndexEqualsConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is int idx && parameter is string s && int.TryParse(s, out var p))
+            return idx == p;
+        return false;
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

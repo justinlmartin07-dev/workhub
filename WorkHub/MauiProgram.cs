@@ -27,14 +27,135 @@ public static class MauiProgram
 			.ConfigureMauiHandlers(handlers =>
 			{
 #if WINDOWS
-				Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("CompactEntry", (handler, view) =>
+				// ── Entry: rounded, filled, borderless ──
+				Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("ThemedEntry", (handler, view) =>
 				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					native.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+					native.Padding = new Microsoft.UI.Xaml.Thickness(14, 10, 14, 10);
+
+					// Rounded corners
+					native.Resources["TextControlCornerRadius"] = new Microsoft.UI.Xaml.CornerRadius(10);
+
+					// Fill colors
+					var bgColor = isDark
+						? Windows.UI.Color.FromArgb(255, 30, 41, 59)   // SurfaceCardDark
+						: Windows.UI.Color.FromArgb(255, 241, 245, 249); // Gray100
+					var bgBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(bgColor);
+					native.Resources["TextControlBackground"] = bgBrush;
+					native.Resources["TextControlBackgroundPointerOver"] = bgBrush;
+					native.Resources["TextControlBackgroundFocused"] = bgBrush;
+
+					// Border on focus
+					var borderColor = isDark
+						? Windows.UI.Color.FromArgb(255, 45, 212, 191)  // PrimaryDark
+						: Windows.UI.Color.FromArgb(255, 20, 184, 166); // Primary
+					var borderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(borderColor);
+					native.Resources["TextControlBorderBrushFocused"] = borderBrush;
+					native.Resources["TextControlBorderThemeThicknessFocused"] = new Microsoft.UI.Xaml.Thickness(2);
+
+					// Remove bottom highlight bar
+					var transparentBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+					native.Resources["TextControlBorderBrush"] = transparentBrush;
+					native.Resources["TextControlBorderBrushPointerOver"] = transparentBrush;
+
+					// Compact entries override
 					if (view is Entry entry && entry.HeightRequest > 0 && entry.HeightRequest <= 32)
 					{
-						handler.PlatformView.Padding = new Microsoft.UI.Xaml.Thickness(4, 0, 4, 0);
-						handler.PlatformView.MinHeight = 0;
+						native.Padding = new Microsoft.UI.Xaml.Thickness(4, 0, 4, 0);
+						native.MinHeight = 0;
 					}
 				});
+
+				// ── Editor: rounded, filled ──
+				Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping("ThemedEditor", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					native.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+					native.Padding = new Microsoft.UI.Xaml.Thickness(14, 10, 14, 10);
+
+					native.Resources["TextControlCornerRadius"] = new Microsoft.UI.Xaml.CornerRadius(10);
+
+					var bgColor = isDark
+						? Windows.UI.Color.FromArgb(255, 30, 41, 59)
+						: Windows.UI.Color.FromArgb(255, 241, 245, 249);
+					var bgBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(bgColor);
+					native.Resources["TextControlBackground"] = bgBrush;
+					native.Resources["TextControlBackgroundPointerOver"] = bgBrush;
+					native.Resources["TextControlBackgroundFocused"] = bgBrush;
+
+					var borderColor = isDark
+						? Windows.UI.Color.FromArgb(255, 45, 212, 191)
+						: Windows.UI.Color.FromArgb(255, 20, 184, 166);
+					native.Resources["TextControlBorderBrushFocused"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(borderColor);
+					native.Resources["TextControlBorderThemeThicknessFocused"] = new Microsoft.UI.Xaml.Thickness(2);
+
+					var transparentBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+					native.Resources["TextControlBorderBrush"] = transparentBrush;
+					native.Resources["TextControlBorderBrushPointerOver"] = transparentBrush;
+				});
+
+				// ── Picker (ComboBox): rounded, filled ──
+				Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping("ThemedPicker", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(10);
+					native.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+					native.Padding = new Microsoft.UI.Xaml.Thickness(14, 8, 14, 8);
+
+					var bgColor = isDark
+						? Windows.UI.Color.FromArgb(255, 30, 41, 59)
+						: Windows.UI.Color.FromArgb(255, 241, 245, 249);
+					var bgBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(bgColor);
+					native.Resources["ComboBoxBackground"] = bgBrush;
+					native.Resources["ComboBoxBackgroundPointerOver"] = bgBrush;
+					native.Resources["ComboBoxBackgroundPressed"] = bgBrush;
+					native.Resources["ComboBoxBackgroundFocused"] = bgBrush;
+
+					var transparentBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+					native.Resources["ComboBoxBorderBrush"] = transparentBrush;
+					native.Resources["ComboBoxBorderBrushPointerOver"] = transparentBrush;
+					native.Resources["ComboBoxBorderBrushPressed"] = transparentBrush;
+				});
+
+				// ── DatePicker: rounded, filled ──
+				Microsoft.Maui.Handlers.DatePickerHandler.Mapper.AppendToMapping("ThemedDatePicker", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(10);
+					native.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+
+					var bgColor = isDark
+						? Windows.UI.Color.FromArgb(255, 30, 41, 59)
+						: Windows.UI.Color.FromArgb(255, 241, 245, 249);
+					var bgBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(bgColor);
+					native.Background = bgBrush;
+				});
+
+				// ── TimePicker: rounded, filled ──
+				Microsoft.Maui.Handlers.TimePickerHandler.Mapper.AppendToMapping("ThemedTimePicker", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(10);
+					native.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+
+					var bgColor = isDark
+						? Windows.UI.Color.FromArgb(255, 30, 41, 59)
+						: Windows.UI.Color.FromArgb(255, 241, 245, 249);
+					native.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(bgColor);
+				});
+
+				// ── Button: compact override ──
 				Microsoft.Maui.Handlers.ButtonHandler.Mapper.AppendToMapping("CompactButton", (handler, view) =>
 				{
 					if (view is Button button && button.HeightRequest > 0 && button.HeightRequest <= 32)
@@ -45,13 +166,126 @@ public static class MauiProgram
 						native.MinWidth = 0;
 						native.Height = button.HeightRequest;
 						native.Width = button.WidthRequest;
-						// Remove internal content margin
 						if (native.Content is Microsoft.UI.Xaml.FrameworkElement content)
 						{
 							content.Margin = new Microsoft.UI.Xaml.Thickness(0);
 						}
-						// Strip WinUI default style padding via resources
 						native.Resources["ButtonPadding"] = new Microsoft.UI.Xaml.Thickness(0);
+					}
+				});
+
+				// ── SearchBar: rounded, filled ──
+				Microsoft.Maui.Handlers.SearchBarHandler.Mapper.AppendToMapping("ThemedSearchBar", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(12);
+
+					var bgColor = isDark
+						? Windows.UI.Color.FromArgb(255, 30, 41, 59)
+						: Windows.UI.Color.FromArgb(255, 241, 245, 249);
+					var bgBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(bgColor);
+					native.Resources["AutoSuggestBoxBackground"] = bgBrush;
+
+					var transparentBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+					native.Resources["AutoSuggestBoxBorderBrush"] = transparentBrush;
+				});
+
+				// ── Frame: increase corner radius globally ──
+				Microsoft.Maui.Handlers.ContentViewHandler.Mapper.AppendToMapping("ThemedFrame", (handler, view) =>
+				{
+					// Frame corner radius is handled in XAML, no native override needed
+				});
+
+				// ── Border: set horizontal-resize cursor when StyleId="ResizeHorizontal" ──
+				Microsoft.Maui.Handlers.BorderHandler.Mapper.AppendToMapping("ResizeCursor", (handler, view) =>
+				{
+					if (view is Border b && b.StyleId == "ResizeHorizontal" && handler.PlatformView is not null)
+					{
+						var cursor = Microsoft.UI.Input.InputSystemCursor.Create(Microsoft.UI.Input.InputSystemCursorShape.SizeWestEast);
+						var prop = typeof(Microsoft.UI.Xaml.UIElement).GetProperty(
+							"ProtectedCursor",
+							System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+						prop?.SetValue(handler.PlatformView, cursor);
+					}
+				});
+#endif
+
+#if ANDROID
+				// ── Entry: remove underline, rounded fill ──
+				Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("ThemedEntry", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					// Remove underline
+					native.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+
+					// Rounded filled background
+					var bgColor = isDark
+						? Android.Graphics.Color.Argb(255, 30, 41, 59)
+						: Android.Graphics.Color.Argb(255, 241, 245, 249);
+
+					var shape = new Android.Graphics.Drawables.GradientDrawable();
+					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
+					shape.SetCornerRadius(28f); // ~10dp
+					shape.SetColor(bgColor);
+					native.Background = shape;
+					native.SetPadding(40, 24, 40, 24);
+				});
+
+				// ── Editor: remove underline, rounded fill ──
+				Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping("ThemedEditor", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					native.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+
+					var bgColor = isDark
+						? Android.Graphics.Color.Argb(255, 30, 41, 59)
+						: Android.Graphics.Color.Argb(255, 241, 245, 249);
+
+					var shape = new Android.Graphics.Drawables.GradientDrawable();
+					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
+					shape.SetCornerRadius(28f);
+					shape.SetColor(bgColor);
+					native.Background = shape;
+					native.SetPadding(40, 24, 40, 24);
+				});
+
+				// ── Picker: remove underline, rounded fill ──
+				Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping("ThemedPicker", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					native.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+
+					var bgColor = isDark
+						? Android.Graphics.Color.Argb(255, 30, 41, 59)
+						: Android.Graphics.Color.Argb(255, 241, 245, 249);
+
+					var shape = new Android.Graphics.Drawables.GradientDrawable();
+					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
+					shape.SetCornerRadius(28f);
+					shape.SetColor(bgColor);
+					native.Background = shape;
+					native.SetPadding(40, 24, 40, 24);
+				});
+
+				// ── SearchBar: remove underline ──
+				Microsoft.Maui.Handlers.SearchBarHandler.Mapper.AppendToMapping("ThemedSearchBar", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+					// Remove the default underline from the inner EditText
+					var searchEditText = native.FindViewById<Android.Widget.EditText>(
+						Android.Resource.Id.Search_src_text);
+					if (searchEditText != null)
+					{
+						searchEditText.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(
+							Android.Graphics.Color.Transparent);
 					}
 				});
 #endif
