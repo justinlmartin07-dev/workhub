@@ -6,11 +6,19 @@ namespace WorkHub.Views;
 
 public partial class MainLayout : ContentPage
 {
+    private const double SplitterWidth = 8.0;
+    private const double MinListColumnWidth = 240.0;
+    private const double MinDetailColumnWidth = 280.0;
+    private const double DefaultListColumnWidth = 400.0;
+    private const string ListColumnWidthKey = "MainLayout.ListColumnWidth";
+
     private readonly MainLayoutViewModel _viewModel;
     private readonly IServiceProvider _serviceProvider;
     private int _lastTabIndex = -1;
     private bool _isWide;
     private bool _suppressNextDetailRequest;
+    private double _listColumnWidth;
+    private double _splitterDragStartWidth;
 
     public static MainLayout? Current { get; private set; }
 
@@ -20,6 +28,12 @@ public partial class MainLayout : ContentPage
         _viewModel = viewModel;
         _serviceProvider = serviceProvider;
         BindingContext = viewModel;
+
+        _listColumnWidth = Preferences.Get(ListColumnWidthKey, DefaultListColumnWidth);
+
+#if WINDOWS
+        Splitter.HandlerChanged += OnSplitterHandlerChanged;
+#endif
 
         _viewModel.PropertyChanged += OnViewModelPropertyChanged;
 
@@ -64,7 +78,7 @@ public partial class MainLayout : ContentPage
             NavRail.IsVisible = true;
             DetailPanel.IsVisible = true;
             BottomTabs.IsVisible = false;
-            ListPanel.Margin = new Thickness(72, 0, 0, 0);
+            ListPanel.Margin = new Thickness(80, 0, 0, 0);
 
             UpdateColumnProportions();
             Grid.SetColumn(NavRail, 0);
@@ -74,6 +88,7 @@ public partial class MainLayout : ContentPage
             // Narrow: list only, bottom tabs
             NavRail.IsVisible = false;
             DetailPanel.IsVisible = false;
+            Splitter.IsVisible = false;
             BottomTabs.IsVisible = true;
             ListPanel.Margin = new Thickness(0);
 
@@ -88,11 +103,144 @@ public partial class MainLayout : ContentPage
     {
         bool isCalendar = _viewModel.SelectedTabIndex == 3;
         ContentGrid.ColumnDefinitions.Clear();
-        ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(isCalendar ? 2 : 1, GridUnitType.Star)));
-        ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(1, GridUnitType.Star)));
+
+        if (isCalendar)
+        {
+            // Calendar: fixed 2:1 ratio, no splitter (zero-width middle column keeps DetailPanel at col 2)
+            ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(2, GridUnitType.Star)));
+            ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(0, GridUnitType.Absolute)));
+            ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(1, GridUnitType.Star)));
+            Splitter.IsVisible = false;
+        }
+        else
+        {
+            // Customers / Jobs / Inventory: resizable list column, draggable splitter, star detail
+            var clampedWidth = ClampListColumnWidth(_listColumnWidth);
+            _listColumnWidth = clampedWidth;
+            ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(clampedWidth, GridUnitType.Absolute)));
+            ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(SplitterWidth, GridUnitType.Absolute)));
+            ContentGrid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(1, GridUnitType.Star)));
+            Splitter.IsVisible = true;
+        }
+
         Grid.SetColumn(ListPanel, 0);
-        Grid.SetColumn(DetailPanel, 1);
+        Grid.SetColumn(Splitter, 1);
+        Grid.SetColumn(DetailPanel, 2);
     }
+
+    private double ClampListColumnWidth(double width)
+    {
+        var available = ContentGrid.Width;
+        var maxList = double.IsNaN(available) || available <= 0
+            ? double.PositiveInfinity
+            : Math.Max(MinListColumnWidth, available - MinDetailColumnWidth - SplitterWidth);
+        return Math.Clamp(width, MinListColumnWidth, maxList);
+    }
+
+    private void OnSplitterPanUpdated(object? sender, PanUpdatedEventArgs e)
+    {
+#if WINDOWS
+        // Windows uses native PointerMoved events for smoother drag — bypass MAUI gesture pipeline
+        return;
+#else
+        if (!_isWide || ContentGrid.ColumnDefinitions.Count < 3) return;
+
+        switch (e.StatusType)
+        {
+            case GestureStatus.Started:
+                _splitterDragStartWidth = _listColumnWidth;
+                break;
+            case GestureStatus.Running:
+                var newWidth = ClampListColumnWidth(_splitterDragStartWidth + e.TotalX);
+                _listColumnWidth = newWidth;
+                ContentGrid.ColumnDefinitions[0].Width = new GridLength(newWidth, GridUnitType.Absolute);
+                break;
+            case GestureStatus.Completed:
+            case GestureStatus.Canceled:
+                Preferences.Set(ListColumnWidthKey, _listColumnWidth);
+                break;
+        }
+#endif
+    }
+
+#if WINDOWS
+    private bool _isDraggingSplitter;
+    private double _splitterPointerStartX;
+    private Microsoft.UI.Xaml.FrameworkElement? _splitterNative;
+
+    private void OnSplitterHandlerChanged(object? sender, EventArgs e)
+    {
+        if (_splitterNative is not null)
+        {
+            _splitterNative.PointerPressed -= OnSplitterPointerPressed;
+            _splitterNative.PointerMoved -= OnSplitterPointerMoved;
+            _splitterNative.PointerReleased -= OnSplitterPointerReleased;
+            _splitterNative.PointerCaptureLost -= OnSplitterPointerCaptureLost;
+            _splitterNative = null;
+        }
+        if (Splitter.Handler?.PlatformView is Microsoft.UI.Xaml.FrameworkElement fe)
+        {
+            _splitterNative = fe;
+            fe.PointerPressed += OnSplitterPointerPressed;
+            fe.PointerMoved += OnSplitterPointerMoved;
+            fe.PointerReleased += OnSplitterPointerReleased;
+            fe.PointerCaptureLost += OnSplitterPointerCaptureLost;
+        }
+    }
+
+    private void OnSplitterPointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        if (sender is Microsoft.UI.Xaml.UIElement ue
+            && ContentGrid.Handler?.PlatformView is Microsoft.UI.Xaml.UIElement gridUe)
+        {
+            ue.CapturePointer(e.Pointer);
+            _isDraggingSplitter = true;
+            _splitterDragStartWidth = _listColumnWidth;
+            _splitterPointerStartX = e.GetCurrentPoint(gridUe).Position.X;
+            e.Handled = true;
+        }
+    }
+
+    private void OnSplitterPointerMoved(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        if (!_isDraggingSplitter) return;
+        if (ContentGrid.Handler?.PlatformView is Microsoft.UI.Xaml.UIElement gridUe)
+        {
+            var currentX = e.GetCurrentPoint(gridUe).Position.X;
+            var deltaX = currentX - _splitterPointerStartX;
+            var newWidth = ClampListColumnWidth(_splitterDragStartWidth + deltaX);
+            if (Math.Abs(newWidth - _listColumnWidth) >= 0.5
+                && _isWide
+                && ContentGrid.ColumnDefinitions.Count >= 3)
+            {
+                _listColumnWidth = newWidth;
+                ContentGrid.ColumnDefinitions[0].Width = new GridLength(newWidth, GridUnitType.Absolute);
+            }
+            e.Handled = true;
+        }
+    }
+
+    private void OnSplitterPointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        if (!_isDraggingSplitter) return;
+        _isDraggingSplitter = false;
+        if (sender is Microsoft.UI.Xaml.UIElement ue)
+        {
+            ue.ReleasePointerCapture(e.Pointer);
+        }
+        Preferences.Set(ListColumnWidthKey, _listColumnWidth);
+        e.Handled = true;
+    }
+
+    private void OnSplitterPointerCaptureLost(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        if (_isDraggingSplitter)
+        {
+            _isDraggingSplitter = false;
+            Preferences.Set(ListColumnWidthKey, _listColumnWidth);
+        }
+    }
+#endif
 
     public bool IsWideLayout => _isWide;
 

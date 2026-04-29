@@ -16,32 +16,182 @@
         <Grid x:Name="ContentGrid" Grid.Row="0" ColumnDefinitions="*">
             <!-- Left Navigation Rail (wide only) -->
             <Grid x:Name="NavRail" Grid.Column="0" ZIndex="10"
-                  WidthRequest="72" BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark=#1a1a2e}"
-                  IsVisible="False" RowDefinitions="*,Auto" Padding="0,8" HorizontalOptions="Start">
-                <VerticalStackLayout Spacing="4" VerticalOptions="Start" Padding="0,8">
-                    <Button Text="&#x1F465;" FontSize="20" BackgroundColor="Transparent"
-                            Command="{Binding SelectTabCommand}" CommandParameter="0"
-                            WidthRequest="56" HeightRequest="56" CornerRadius="16" Margin="8,0" />
-                    <Button Text="&#x1F527;" FontSize="20" BackgroundColor="Transparent"
-                            Command="{Binding SelectTabCommand}" CommandParameter="1"
-                            WidthRequest="56" HeightRequest="56" CornerRadius="16" Margin="8,0" />
-                    <Button Text="&#x1F4E6;" FontSize="20" BackgroundColor="Transparent"
-                            Command="{Binding SelectTabCommand}" CommandParameter="2"
-                            WidthRequest="56" HeightRequest="56" CornerRadius="16" Margin="8,0" />
-                    <Button Text="&#x1F4C5;" FontSize="20" BackgroundColor="Transparent"
-                            Command="{Binding SelectTabCommand}" CommandParameter="3"
-                            WidthRequest="56" HeightRequest="56" CornerRadius="16" Margin="8,0" />
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Padding="0,0,0,8">
-                    <Border StrokeShape="RoundRectangle 20" WidthRequest="40" HeightRequest="40"
-                            BackgroundColor="{StaticResource Secondary}" StrokeThickness="0"
-                            HorizontalOptions="Center">
+                  WidthRequest="80"
+                  BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                  IsVisible="False" Padding="0,8" HorizontalOptions="Start">
+                <VerticalStackLayout Spacing="4" VerticalOptions="Start" Padding="6,8">
+                    <!-- Tab 0: Customers -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=0}"
+                                         Value="True">
+                                <Setter Property="BackgroundColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="0" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
+                            <Label Text="&#x1F465;" FontSize="20" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=0}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Text="Customers" FontSize="10" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=0}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tab 1: Jobs -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=1}"
+                                         Value="True">
+                                <Setter Property="BackgroundColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="1" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
+                            <Label Text="&#x1F527;" FontSize="20" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=1}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Text="Jobs" FontSize="10" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=1}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tab 2: Inventory -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=2}"
+                                         Value="True">
+                                <Setter Property="BackgroundColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="2" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
+                            <Label Text="&#x1F4E6;" FontSize="20" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=2}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Text="Inventory" FontSize="10" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=2}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tab 3: Calendar -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=3}"
+                                         Value="True">
+                                <Setter Property="BackgroundColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="3" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
+                            <Label Text="&#x1F4C5;" FontSize="20" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=3}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Text="Calendar" FontSize="10" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=3}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tab 4: Profile (no selected state, navigates via Shell) -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToProfileCommand}" />
                         </Border.GestureRecognizers>
-                        <Label Text="{Binding UserInitial}" HorizontalTextAlignment="Center"
-                               VerticalTextAlignment="Center" FontSize="16" FontAttributes="Bold"
-                               TextColor="{StaticResource Primary}" />
+                        <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
+                            <Label Text="&#x1F464;" FontSize="20" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                            <Label Text="Profile" FontSize="10" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>
             </Grid>
@@ -50,11 +200,23 @@
             <ContentView x:Name="ListPanel" Grid.Column="0"
                          HorizontalOptions="Fill" VerticalOptions="Fill" />
 
-            <!-- Detail Panel (wide only, added dynamically as second column) -->
-            <ContentView x:Name="DetailPanel" Grid.Column="1" IsVisible="False"
+            <!-- Splitter (wide only, between list and detail; hidden on calendar tab) -->
+            <Border x:Name="Splitter" Grid.Column="1" IsVisible="False"
+                    StyleId="ResizeHorizontal"
+                    StrokeThickness="0" BackgroundColor="Transparent" Padding="0">
+                <Border.GestureRecognizers>
+                    <PanGestureRecognizer PanUpdated="OnSplitterPanUpdated" />
+                </Border.GestureRecognizers>
+                <BoxView WidthRequest="2" HorizontalOptions="Center" VerticalOptions="Fill"
+                         BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}" />
+            </Border>
+
+            <!-- Detail Panel (wide only, dynamically positioned) -->
+            <ContentView x:Name="DetailPanel" Grid.Column="2" IsVisible="False"
                          HorizontalOptions="Fill" VerticalOptions="Fill">
                 <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="Select an item to view details" TextColor="{StaticResource Gray400}"
+                    <Label Text="Select an item to view details"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                            FontSize="16" HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
             </ContentView>
@@ -62,30 +224,185 @@
 
         <!-- Bottom Tab Bar (narrow only) -->
         <Grid x:Name="BottomTabs" Grid.Row="1"
-              ColumnDefinitions="*,*,*,*,Auto" HeightRequest="56"
-              BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark=#1a1a2e}"
+              ColumnDefinitions="*,*,*,*,*" HeightRequest="64"
+              BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
               Padding="0">
-            <Button Text="Customers" FontSize="11" BackgroundColor="Transparent"
-                    TextColor="{StaticResource White}"
-                    Command="{Binding SelectTabCommand}" CommandParameter="0" />
-            <Button Grid.Column="1" Text="Jobs" FontSize="11" BackgroundColor="Transparent"
-                    TextColor="{AppThemeBinding Light=#BBDEFB, Dark={StaticResource Gray300}}"
-                    Command="{Binding SelectTabCommand}" CommandParameter="1" />
-            <Button Grid.Column="2" Text="Inventory" FontSize="11" BackgroundColor="Transparent"
-                    TextColor="{AppThemeBinding Light=#BBDEFB, Dark={StaticResource Gray300}}"
-                    Command="{Binding SelectTabCommand}" CommandParameter="2" />
-            <Button Grid.Column="3" Text="Calendar" FontSize="11" BackgroundColor="Transparent"
-                    TextColor="{AppThemeBinding Light=#BBDEFB, Dark={StaticResource Gray300}}"
-                    Command="{Binding SelectTabCommand}" CommandParameter="3" />
-            <Border Grid.Column="4" StrokeShape="RoundRectangle 18" WidthRequest="36" HeightRequest="36"
-                    BackgroundColor="{StaticResource Secondary}" StrokeThickness="0"
-                    HorizontalOptions="Center" VerticalOptions="Center" Margin="8,0,12,0">
+            <!-- Thin top border line -->
+            <BoxView Grid.ColumnSpan="5" HeightRequest="0.5" VerticalOptions="Start"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}" />
+
+            <!-- Tab 0: Customers -->
+            <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border"
+                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=0}"
+                                 Value="True">
+                        <Setter Property="BackgroundColor"
+                                Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="0" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="&#x1F465;" FontSize="18" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=0}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Label Text="Customers" FontSize="10" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=0}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Tab 1: Jobs -->
+            <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border"
+                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=1}"
+                                 Value="True">
+                        <Setter Property="BackgroundColor"
+                                Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="1" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="&#x1F527;" FontSize="18" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=1}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Label Text="Jobs" FontSize="10" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=1}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Tab 2: Inventory -->
+            <Border Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border"
+                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=2}"
+                                 Value="True">
+                        <Setter Property="BackgroundColor"
+                                Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="2" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="&#x1F4E6;" FontSize="18" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=2}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Label Text="Inventory" FontSize="10" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=2}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Tab 3: Calendar -->
+            <Border Grid.Column="3" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border"
+                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=3}"
+                                 Value="True">
+                        <Setter Property="BackgroundColor"
+                                Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="3" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="&#x1F4C5;" FontSize="18" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=3}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Label Text="Calendar" FontSize="10" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=3}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Tab 4: Profile (no selected state, navigates via Shell) -->
+            <Border Grid.Column="4" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding GoToProfileCommand}" />
                 </Border.GestureRecognizers>
-                <Label Text="{Binding UserInitial}" HorizontalTextAlignment="Center"
-                       VerticalTextAlignment="Center" FontSize="14" FontAttributes="Bold"
-                       TextColor="{StaticResource Primary}" />
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="&#x1F464;" FontSize="18" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                    <Label Text="Profile" FontSize="10" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                </VerticalStackLayout>
             </Border>
         </Grid>
     </Grid>
