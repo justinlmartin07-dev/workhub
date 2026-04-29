@@ -12,6 +12,7 @@ public partial class ProfileViewModel : BaseViewModel
     private readonly PhotoService _photoService;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UserInitial))]
     private UserProfileResponse? _profile;
 
     [ObservableProperty]
@@ -19,6 +20,9 @@ public partial class ProfileViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool _isEditing;
+
+    public string UserInitial =>
+        !string.IsNullOrEmpty(Profile?.Name) ? Profile.Name[..1].ToUpper() : "?";
 
     public ProfileViewModel(ApiService apiService, AuthService authService, PhotoService photoService)
     {
