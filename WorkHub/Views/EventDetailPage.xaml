@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Views.EventDetailPage"
              x:DataType="vm:EventDetailViewModel"
              Shell.NavBarIsVisible="False"
@@ -11,8 +12,7 @@
     <ScrollView>
         <VerticalStackLayout Spacing="16" Padding="16" HorizontalOptions="Fill">
             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4">
-                <Button Text="&#x2190;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                        Command="{Binding GoBackCommand}" FontSize="20" Padding="0" WidthRequest="40" />
+                <controls:BackButton Command="{Binding GoBackCommand}" />
                 <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center" />
                 <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                         Command="{Binding DeleteCommand}"
@@ -76,7 +76,7 @@
                 <Frame Padding="0" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                        IsVisible="{Binding IsCustomerPickerOpen}" HeightRequest="250">
                     <VerticalStackLayout>
-                        <SearchBar Placeholder="Search customers..." Text="{Binding CustomerSearchText}" Margin="0" />
+                        <SearchBar x:Name="CustomerSearchBar" Placeholder="Search customers..." Text="{Binding CustomerSearchText}" Margin="0" />
                         <CollectionView ItemsSource="{Binding FilteredCustomers}" HeightRequest="200"
                                         SelectionMode="None">
                             <CollectionView.EmptyView>

@@ -17,10 +17,7 @@
 
                     <!-- Header -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
-                        <Button Text="&#x2190;" BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                Command="{Binding GoBackCommand}" FontSize="20"
-                                Padding="0" WidthRequest="44" HeightRequest="44" />
+                        <controls:BackButton Command="{Binding GoBackCommand}" />
                         <Label Grid.Column="1" Text="Profile"
                                FontSize="20" FontAttributes="Bold"
                                VerticalTextAlignment="Center" />

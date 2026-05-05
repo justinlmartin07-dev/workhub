@@ -9,11 +9,11 @@
          Inspired by TB Order Pro aesthetic
          ══════════════════════════════════════════════════════════ -->
 
-    <!-- Primary Accent — Teal -->
-    <Color x:Key="Primary">#14B8A6</Color>
-    <Color x:Key="PrimaryDark">#2DD4BF</Color>
-    <Color x:Key="PrimaryLight">#99F6E4</Color>
-    <Color x:Key="PrimaryMuted">#0D9488</Color>
+    <!-- Primary Accent — Navy Blue -->
+    <Color x:Key="Primary">#0E4A89</Color>
+    <Color x:Key="PrimaryDark">#4A8BD0</Color>
+    <Color x:Key="PrimaryLight">#C9DCEF</Color>
+    <Color x:Key="PrimaryMuted">#093D75</Color>
 
     <!-- Secondary — Slate blue tones -->
     <Color x:Key="Secondary">#1E293B</Color>
@@ -56,10 +56,10 @@
 
     <!-- Legacy compatibility aliases -->
     <Color x:Key="PrimaryDarkText">#0F172A</Color>
-    <Color x:Key="SecondaryDarkText">#2DD4BF</Color>
-    <Color x:Key="Tertiary">#0D9488</Color>
+    <Color x:Key="SecondaryDarkText">#4A8BD0</Color>
+    <Color x:Key="Tertiary">#093D75</Color>
     <Color x:Key="MidnightBlue">#0F172A</Color>
-    <Color x:Key="Magenta">#14B8A6</Color>
+    <Color x:Key="Magenta">#0E4A89</Color>
 
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>

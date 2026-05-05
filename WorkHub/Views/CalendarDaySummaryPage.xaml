@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Views.CalendarDaySummaryPage"
              x:DataType="vm:CalendarDaySummaryViewModel"
              Shell.NavBarIsVisible="False"
@@ -12,8 +13,7 @@
         <!-- Date Header -->
         <VerticalStackLayout Spacing="2" Padding="0,0,0,12">
             <Grid ColumnDefinitions="Auto,*">
-                <Button x:Name="BackButton" Text="&#x2190;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                        Command="{Binding GoBackCommand}" FontSize="20" Padding="0" WidthRequest="40" />
+                <controls:BackButton x:Name="BackBtn" Command="{Binding GoBackCommand}" />
                 <VerticalStackLayout Grid.Column="1" Spacing="2">
                     <Label Text="{Binding DayOfWeekLabel}" FontSize="14" TextColor="{StaticResource Gray500}" />
                     <Label Text="{Binding DateLabel}" FontSize="22" FontAttributes="Bold" />

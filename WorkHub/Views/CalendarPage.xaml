@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
              xmlns:controls="clr-namespace:WorkHub.Controls"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.CalendarPage"
              x:DataType="vm:CalendarViewModel">
 
@@ -14,25 +15,50 @@
         </Grid.GestureRecognizers>
 
         <!-- Month Navigation -->
-        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,8">
-            <Button Text="&lt;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                    Command="{Binding PreviousMonthCommand}" FontSize="20" />
-            <Label Grid.Column="1" Text="{Binding MonthYearLabel}"
-                   FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="Center"
+        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center"
+                               Spacing="4" Padding="16,8">
+            <Border StrokeThickness="0" BackgroundColor="Transparent"
+                    WidthRequest="40" HeightRequest="40">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding PreviousMonthCommand}" />
+                </Border.GestureRecognizers>
+                <shapes:Path Data="M 15 18 L 9 12 L 15 6"
+                             Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                             StrokeThickness="2"
+                             StrokeLineCap="Round"
+                             StrokeLineJoin="Round"
+                             Aspect="Uniform"
+                             WidthRequest="16.5" HeightRequest="16.5"
+                             HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Label Text="{Binding MonthYearLabel}"
+                   FontSize="18" FontFamily="OpenSansSemibold"
                    VerticalTextAlignment="Center" />
-            <Button Grid.Column="2" Text="&gt;" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
-                    Command="{Binding NextMonthCommand}" FontSize="20" />
-        </Grid>
+            <Border StrokeThickness="0" BackgroundColor="Transparent"
+                    WidthRequest="40" HeightRequest="40">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NextMonthCommand}" />
+                </Border.GestureRecognizers>
+                <shapes:Path Data="M 9 18 L 15 12 L 9 6"
+                             Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                             StrokeThickness="2"
+                             StrokeLineCap="Round"
+                             StrokeLineJoin="Round"
+                             Aspect="Uniform"
+                             WidthRequest="16.5" HeightRequest="16.5"
+                             HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+        </HorizontalStackLayout>
 
         <!-- Day-of-week headers -->
         <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*,*,*" Padding="4,0" HeightRequest="24">
-            <Label Text="Sun" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
-            <Label Grid.Column="1" Text="Mon" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
-            <Label Grid.Column="2" Text="Tue" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
-            <Label Grid.Column="3" Text="Wed" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
-            <Label Grid.Column="4" Text="Thu" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
-            <Label Grid.Column="5" Text="Fri" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
-            <Label Grid.Column="6" Text="Sat" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontAttributes="Bold" />
+            <Label Text="Sun" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="1" Text="Mon" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="2" Text="Tue" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="3" Text="Wed" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="4" Text="Thu" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="5" Text="Fri" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="6" Text="Sat" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
         </Grid>
 
         <!-- Month Grid (built in code-behind) -->
@@ -40,9 +66,7 @@
             <Grid x:Name="MonthGrid" VerticalOptions="Fill" />
 
             <!-- FAB -->
-            <Button Text="+" FontSize="24" WidthRequest="56" HeightRequest="56"
-                    CornerRadius="28" Margin="16" HorizontalOptions="End" VerticalOptions="End"
-                    Command="{Binding AddEventCommand}" ZIndex="10" />
+            <controls:FloatingActionButton Command="{Binding AddEventCommand}" ZIndex="10" />
         </Grid>
     </Grid>
 </ContentView>

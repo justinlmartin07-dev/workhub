@@ -226,7 +226,7 @@ public partial class CalendarPage : ContentView
         {
             Text = day.DayNumber,
             FontSize = 12,
-            FontAttributes = day.IsToday ? FontAttributes.Bold : FontAttributes.None,
+            FontFamily = day.IsToday ? "OpenSansSemibold" : "OpenSansRegular",
             TextColor = day.IsToday ? Colors.White : color,
             HorizontalTextAlignment = TextAlignment.Center,
             VerticalTextAlignment = TextAlignment.Center,
@@ -294,7 +294,7 @@ public partial class CalendarPage : ContentView
             {
                 Text = bar.Event.Title,
                 FontSize = 10,
-                FontAttributes = FontAttributes.Bold,
+                FontFamily = "OpenSansSemibold",
                 TextColor = Colors.White,
                 LineBreakMode = LineBreakMode.NoWrap,
                 VerticalTextAlignment = TextAlignment.Center,

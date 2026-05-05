@@ -23,6 +23,11 @@ public partial class EventDetailPage : ContentPage
                 _viewModel.AssignedUsers.CollectionChanged += (s2, e2) => RebuildChips();
                 RebuildChips();
             }
+            else if (e.PropertyName == nameof(EventDetailViewModel.IsCustomerPickerOpen)
+                     && _viewModel.IsCustomerPickerOpen)
+            {
+                Dispatcher.Dispatch(() => CustomerSearchBar.Focus());
+            }
         };
 
         RebuildChips();

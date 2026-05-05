@@ -8,6 +8,6 @@ public partial class CalendarDaySummaryPage : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
-        BackButton.IsVisible = MainLayout.Current?.IsWideLayout != true;
+        BackBtn.IsVisible = MainLayout.Current?.IsWideLayout != true;
     }
 }
