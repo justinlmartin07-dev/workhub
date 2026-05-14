@@ -12,7 +12,7 @@
             <controls:BackButton Command="{Binding CancelCommand}" />
             <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
             <Button Grid.Column="2" Text="{Binding EditButtonText}"
-                    BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                     Command="{Binding ToggleEditCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
             <Button Grid.Column="3" Text="Delete" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                     Command="{Binding DeleteCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />

@@ -52,13 +52,13 @@
 
         <!-- Day-of-week headers -->
         <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*,*,*" Padding="4,0" HeightRequest="24">
-            <Label Text="Sun" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
-            <Label Grid.Column="1" Text="Mon" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
-            <Label Grid.Column="2" Text="Tue" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
-            <Label Grid.Column="3" Text="Wed" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
-            <Label Grid.Column="4" Text="Thu" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
-            <Label Grid.Column="5" Text="Fri" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
-            <Label Grid.Column="6" Text="Sat" HorizontalTextAlignment="Center" FontSize="11" TextColor="{StaticResource Gray400}" FontFamily="OpenSansSemibold" />
+            <Label Text="Sun" HorizontalTextAlignment="Center" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="1" Text="Mon" HorizontalTextAlignment="Center" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="2" Text="Tue" HorizontalTextAlignment="Center" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="3" Text="Wed" HorizontalTextAlignment="Center" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="4" Text="Thu" HorizontalTextAlignment="Center" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="5" Text="Fri" HorizontalTextAlignment="Center" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" FontFamily="OpenSansSemibold" />
+            <Label Grid.Column="6" Text="Sat" HorizontalTextAlignment="Center" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" FontFamily="OpenSansSemibold" />
         </Grid>
 
         <!-- Month Grid (built in code-behind) -->

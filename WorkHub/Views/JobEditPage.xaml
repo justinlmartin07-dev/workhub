@@ -11,7 +11,7 @@
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
             <!-- Customer picker (new only) -->
             <VerticalStackLayout IsVisible="{Binding IsNew}" Spacing="4">
-                <Label Text="Customer *" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Label Text="Customer *" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
 
                 <!-- Selected customer display / tap to open picker -->
                 <Frame Padding="12" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
@@ -23,7 +23,7 @@
                         <Label Text="{Binding SelectedCustomer.Name, FallbackValue='Tap to select a customer...'}"
                                TextColor="{Binding SelectedCustomer, Converter={StaticResource StringNotEmptyConverter}, FallbackValue={StaticResource Gray400}}"
                                VerticalTextAlignment="Center" FontSize="15" />
-                        <Label Grid.Column="1" Text="v" FontSize="14" TextColor="{StaticResource Gray400}"
+                        <Label Grid.Column="1" Text="v" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                VerticalTextAlignment="Center" />
                     </Grid>
                 </Frame>
@@ -37,7 +37,7 @@
                         <CollectionView ItemsSource="{Binding FilteredCustomers}" HeightRequest="200"
                                         SelectionMode="None">
                             <CollectionView.EmptyView>
-                                <Label Text="No customers found" Padding="16" TextColor="{StaticResource Gray400}"
+                                <Label Text="No customers found" Padding="16" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                        HorizontalTextAlignment="Center" />
                             </CollectionView.EmptyView>
                             <CollectionView.ItemTemplate>
@@ -60,7 +60,7 @@
                                         </Grid.GestureRecognizers>
                                         <VerticalStackLayout>
                                             <Label Text="{Binding Name}" FontSize="15" />
-                                            <Label Text="{Binding Phone}" FontSize="12" TextColor="{StaticResource Gray400}"
+                                            <Label Text="{Binding Phone}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                    IsVisible="{Binding Phone, Converter={StaticResource StringNotEmptyConverter}}" />
                                         </VerticalStackLayout>
                                     </Grid>
@@ -74,12 +74,12 @@
             <Entry Placeholder="Job Title *" Text="{Binding Title}" ReturnType="Next" />
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Status" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Label Text="Status" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                 <Picker ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Priority" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Label Text="Priority" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                     <Label Text="Low" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Success}, Dark={StaticResource SuccessDark}}" VerticalTextAlignment="Center" />
                     <Slider Grid.Column="1" Minimum="0" Maximum="2" Value="{Binding PrioritySliderValue}" />
@@ -90,9 +90,9 @@
             <!-- Address -->
             <VerticalStackLayout Spacing="4">
                 <Grid ColumnDefinitions="*,Auto">
-                    <Label Text="Address" FontSize="12" TextColor="{StaticResource Gray500}" VerticalTextAlignment="Center" />
+                    <Label Text="Address" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" VerticalTextAlignment="Center" />
                     <Button Grid.Column="1" Text="Use Customer Address" BackgroundColor="Transparent"
-                            TextColor="{StaticResource Primary}" Command="{Binding UseCustomerAddressCommand}"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding UseCustomerAddressCommand}"
                             Padding="4" FontSize="12" />
                 </Grid>
                 <Entry Placeholder="Street" Text="{Binding Street}" ReturnType="Next" />
@@ -109,7 +109,7 @@
                                 </Grid.GestureRecognizers>
                                 <VerticalStackLayout>
                                     <Label Text="{Binding MainText}" FontSize="14" />
-                                    <Label Text="{Binding SecondaryText}" FontSize="12" TextColor="{StaticResource Gray400}" />
+                                    <Label Text="{Binding SecondaryText}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                                 </VerticalStackLayout>
                             </Grid>
                         </DataTemplate>

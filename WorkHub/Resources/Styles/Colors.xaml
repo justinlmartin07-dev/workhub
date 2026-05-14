@@ -5,8 +5,18 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <!-- ══════════════════════════════════════════════════════════
-         WorkHub Theme — Dark-first, teal accent
-         Inspired by TB Order Pro aesthetic
+         WorkHub Theme — Navy accent, light/dark pairs
+         Canonical pairs: every Light-mode color has a Dark sibling.
+           Accent:  Primary    / PrimaryDark
+           Danger:  Danger     / DangerDark
+           Warning: Warning    / WarningDark
+           Success: Success    / SuccessDark
+           Info:    Info       / InfoDark
+           Muted text: Gray500 (light) / Gray400 (dark)
+           Subtle text: Gray400 (light) / Gray500 (dark)
+           Surface:  SurfaceCardLight / SurfaceCardDark
+           Borders:  SurfaceBorderLight / SurfaceBorderDark
+         Use AppThemeBinding at the call site to pick the right one.
          ══════════════════════════════════════════════════════════ -->
 
     <!-- Primary Accent — Navy Blue -->
@@ -54,17 +64,12 @@
     <Color x:Key="Gray900">#0F172A</Color>
     <Color x:Key="Gray950">#020617</Color>
 
-    <!-- Legacy compatibility aliases -->
+    <!-- Used by FloatingActionButton + the default Button style for dark-mode text -->
     <Color x:Key="PrimaryDarkText">#0F172A</Color>
-    <Color x:Key="SecondaryDarkText">#4A8BD0</Color>
-    <Color x:Key="Tertiary">#093D75</Color>
-    <Color x:Key="MidnightBlue">#0F172A</Color>
-    <Color x:Key="Magenta">#0E4A89</Color>
 
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
-    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
 

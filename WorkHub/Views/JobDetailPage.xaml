@@ -13,7 +13,7 @@
             <Label Text="{Binding Job.Title, FallbackValue='Job'}" FontSize="18" FontAttributes="Bold"
                    VerticalTextAlignment="Center" />
             <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent"
-                    TextColor="{StaticResource Primary}" Command="{Binding EditCommand}" />
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding EditCommand}" />
             <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent"
                     TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" Command="{Binding DeleteCommand}" />
         </Grid>
@@ -32,7 +32,7 @@
                             <Label Text="{Binding Job.Title, FallbackValue='Job'}" FontSize="20" FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
                             <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent"
-                                    TextColor="{StaticResource Primary}" Command="{Binding EditCommand}" Padding="4" />
+                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding EditCommand}" Padding="4" />
                             <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent"
                                     TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" Command="{Binding DeleteCommand}" Padding="4" />
                         </Grid>
@@ -41,16 +41,16 @@
                         <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
-                                <Label Text="Customer" TextColor="{StaticResource Gray500}" />
-                                <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{StaticResource Primary}">
+                                <Label Text="Customer" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding ViewCustomerCommand}" />
                                     </Label.GestureRecognizers>
                                 </Label>
-                                <Label Grid.Row="1" Text="Status" TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Row="1" Text="Status" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                                 <Label Grid.Row="1" Grid.Column="1" Text="{Binding Job.Status}"
                                        TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}" FontAttributes="Bold" />
-                                <Label Grid.Row="2" Text="Priority" TextColor="{StaticResource Gray500}" />
+                                <Label Grid.Row="2" Text="Priority" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                                 <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority}"
                                        TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
                             </Grid>
@@ -62,7 +62,7 @@
                                IsVisible="{Binding Job.Address, Converter={StaticResource StringNotEmptyConverter}}">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Job Address" FontSize="16" FontAttributes="Bold" />
-                                <Label Text="{Binding Job.Address}" TextColor="{StaticResource Primary}">
+                                <Label Text="{Binding Job.Address}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding OpenAddressInMapsCommand}" />
                                     </Label.GestureRecognizers>
@@ -82,7 +82,7 @@
                                IsVisible="{Binding Job.ScopeNotes, Converter={StaticResource StringNotEmptyConverter}}">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Scope Notes" FontSize="16" FontAttributes="Bold" />
-                                <Label Text="{Binding Job.ScopeNotes}" TextColor="{StaticResource Gray600}" />
+                                <Label Text="{Binding Job.ScopeNotes}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
                             </VerticalStackLayout>
                         </Frame>
 
@@ -92,9 +92,9 @@
                             <VerticalStackLayout Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto,Auto">
                                     <Label Text="Photos" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                    <Button Grid.Column="1" Text="Pick" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                    <Button Grid.Column="1" Text="Pick" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                             Command="{Binding PickPhotoCommand}" Padding="4" />
-                                    <Button Grid.Column="2" Text="Camera" BackgroundColor="Transparent" TextColor="{StaticResource Primary}"
+                                    <Button Grid.Column="2" Text="Camera" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                             Command="{Binding TakePhotoCommand}" Padding="4" />
                                 </Grid>
                                 <CollectionView ItemsSource="{Binding Job.Photos}" HeightRequest="120"
@@ -122,24 +122,24 @@
                                 <Grid ColumnDefinitions="*,Auto">
                                     <Label Text="Items Used" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
                                     <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
-                                            TextColor="{StaticResource Primary}" Command="{Binding OpenPartsPanelCommand}"
+                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding OpenPartsPanelCommand}"
                                             CommandParameter="used" Padding="4" />
                                 </Grid>
                                 <CollectionView ItemsSource="{Binding UsedItems}">
                                     <CollectionView.EmptyView>
-                                        <Label Text="No items" TextColor="{StaticResource Gray400}" />
+                                        <Label Text="No items" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:JobItemResponse">
                                             <Grid Padding="4" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
                                                 <VerticalStackLayout VerticalOptions="Center">
                                                     <Label Text="{Binding Name}" FontSize="14" />
-                                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{StaticResource Gray400}"
+                                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
                                                 <Button Grid.Column="1" Text="−" FontSize="14" Padding="0" VerticalOptions="Center"
                                                         WidthRequest="28" HeightRequest="28" CornerRadius="4" MinimumWidthRequest="28" MinimumHeightRequest="28"
-                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{StaticResource Gray600}"
+                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnDecrementClicked" />
                                                 <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
                                                        HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center"
@@ -147,7 +147,7 @@
                                                        Unfocused="OnQuantityEntryUnfocused" />
                                                 <Button Grid.Column="3" Text="+" FontSize="14" Padding="0" VerticalOptions="Center"
                                                         WidthRequest="28" HeightRequest="28" CornerRadius="4" MinimumWidthRequest="28" MinimumHeightRequest="28"
-                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{StaticResource Gray600}"
+                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnIncrementClicked" />
                                                 <Label Grid.Column="4" Text="✕" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                                        VerticalTextAlignment="Center" VerticalOptions="Center" Padding="8,0">
@@ -171,24 +171,24 @@
                                 <Grid ColumnDefinitions="*,Auto">
                                     <Label Text="Items To Order" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
                                     <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
-                                            TextColor="{StaticResource Primary}" Command="{Binding OpenPartsPanelCommand}"
+                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding OpenPartsPanelCommand}"
                                             CommandParameter="to_order" Padding="4" />
                                 </Grid>
                                 <CollectionView ItemsSource="{Binding ToOrderItems}">
                                     <CollectionView.EmptyView>
-                                        <Label Text="No items" TextColor="{StaticResource Gray400}" />
+                                        <Label Text="No items" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:JobItemResponse">
                                             <Grid Padding="4" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
                                                 <VerticalStackLayout VerticalOptions="Center">
                                                     <Label Text="{Binding Name}" FontSize="14" />
-                                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{StaticResource Gray400}"
+                                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
                                                 <Button Grid.Column="1" Text="−" FontSize="14" Padding="0" VerticalOptions="Center"
                                                         WidthRequest="28" HeightRequest="28" CornerRadius="4" MinimumWidthRequest="28" MinimumHeightRequest="28"
-                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{StaticResource Gray600}"
+                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnDecrementClicked" />
                                                 <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
                                                        HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center"
@@ -196,7 +196,7 @@
                                                        Unfocused="OnQuantityEntryUnfocused" />
                                                 <Button Grid.Column="3" Text="+" FontSize="14" Padding="0" VerticalOptions="Center"
                                                         WidthRequest="28" HeightRequest="28" CornerRadius="4" MinimumWidthRequest="28" MinimumHeightRequest="28"
-                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{StaticResource Gray600}"
+                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnIncrementClicked" />
                                                 <Label Grid.Column="4" Text="✕" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                                        VerticalTextAlignment="Center" VerticalOptions="Center" Padding="8,0">
@@ -236,9 +236,9 @@
                                                 <VerticalStackLayout Padding="4,8">
                                                     <Label Text="{Binding Content}" FontSize="14" />
                                                     <HorizontalStackLayout Spacing="4">
-                                                        <Label Text="{Binding CreatedByName}" FontSize="11" TextColor="{StaticResource Gray400}" />
+                                                        <Label Text="{Binding CreatedByName}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                                                         <Label Text="{Binding CreatedAt, Converter={StaticResource DateFormatConverter}}"
-                                                               FontSize="11" TextColor="{StaticResource Gray400}" />
+                                                               FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                                                     </HorizontalStackLayout>
                                                 </VerticalStackLayout>
                                             </SwipeView>
@@ -267,12 +267,12 @@
             <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Padding="16">
                 <!-- Header -->
                 <Grid ColumnDefinitions="Auto,*,Auto">
-                    <Button Text="✕" BackgroundColor="Transparent" TextColor="{StaticResource Gray500}"
+                    <Button Text="✕" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
                             Command="{Binding ClosePartsPanelCommand}" FontSize="18" Padding="0" WidthRequest="36" />
                     <Label Grid.Column="1" Text="{Binding PartsPanelTitle}" FontSize="18" FontAttributes="Bold"
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
                     <Label Grid.Column="2" Text="{Binding SelectedCount, StringFormat='{0} selected'}"
-                           FontSize="12" TextColor="{StaticResource Gray400}" VerticalTextAlignment="Center" />
+                           FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" VerticalTextAlignment="Center" />
                 </Grid>
 
                 <!-- Search -->
@@ -283,7 +283,7 @@
                 <CollectionView Grid.Row="2" ItemsSource="{Binding SelectableInventory}" SelectionMode="None"
                                 Margin="0,8,0,0">
                     <CollectionView.EmptyView>
-                        <Label Text="No parts found" TextColor="{StaticResource Gray400}" Padding="0,16"
+                        <Label Text="No parts found" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" Padding="0,16"
                                HorizontalTextAlignment="Center" />
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
@@ -292,7 +292,7 @@
                                 <CheckBox IsChecked="{Binding IsSelected}" VerticalOptions="Center" />
                                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
                                     <Label Text="{Binding Name}" FontSize="14" />
-                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{StaticResource Gray400}"
+                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                 </VerticalStackLayout>
                             </Grid>

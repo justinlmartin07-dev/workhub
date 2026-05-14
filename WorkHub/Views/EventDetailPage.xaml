@@ -24,12 +24,12 @@
             <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="80" />
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Date" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Label Text="Date" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                 <DatePicker Date="{Binding StartDate}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
-                <Label Text="Start Time" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Label Text="Start Time" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                 <TimePicker Time="{Binding StartTime}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
@@ -39,17 +39,17 @@
             </HorizontalStackLayout>
 
             <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
-                <Label Text="End Date" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Label Text="End Date" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                 <DatePicker Date="{Binding EndDate}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
-                <Label Text="End Time" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Label Text="End Time" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                 <TimePicker Time="{Binding EndTime}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Customer (optional)" FontSize="12" TextColor="{StaticResource Gray500}" />
+                <Label Text="Customer (optional)" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
 
                 <!-- Selected customer display / tap to open picker -->
                 <Frame Padding="12" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
@@ -67,7 +67,7 @@
                                 <TapGestureRecognizer Command="{Binding ClearCustomerCommand}" />
                             </Label.GestureRecognizers>
                         </Label>
-                        <Label Grid.Column="2" Text="▾" FontSize="14" TextColor="{StaticResource Gray400}"
+                        <Label Grid.Column="2" Text="▾" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                VerticalTextAlignment="Center" />
                     </Grid>
                 </Frame>
@@ -80,7 +80,7 @@
                         <CollectionView ItemsSource="{Binding FilteredCustomers}" HeightRequest="200"
                                         SelectionMode="None">
                             <CollectionView.EmptyView>
-                                <Label Text="No customers found" Padding="16" TextColor="{StaticResource Gray400}"
+                                <Label Text="No customers found" Padding="16" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                        HorizontalTextAlignment="Center" />
                             </CollectionView.EmptyView>
                             <CollectionView.ItemTemplate>
@@ -93,7 +93,7 @@
                                         </Grid.GestureRecognizers>
                                         <VerticalStackLayout>
                                             <Label Text="{Binding Name}" FontSize="15" />
-                                            <Label Text="{Binding PrimaryPhone}" FontSize="12" TextColor="{StaticResource Gray400}"
+                                            <Label Text="{Binding PrimaryPhone}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                    IsVisible="{Binding PrimaryPhone, Converter={StaticResource StringNotEmptyConverter}}" />
                                         </VerticalStackLayout>
                                     </Grid>

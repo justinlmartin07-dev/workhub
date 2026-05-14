@@ -15,7 +15,7 @@
             <Grid ColumnDefinitions="Auto,*">
                 <controls:BackButton x:Name="BackBtn" Command="{Binding GoBackCommand}" />
                 <VerticalStackLayout Grid.Column="1" Spacing="2">
-                    <Label Text="{Binding DayOfWeekLabel}" FontSize="14" TextColor="{StaticResource Gray500}" />
+                    <Label Text="{Binding DayOfWeekLabel}" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                     <Label Text="{Binding DateLabel}" FontSize="22" FontAttributes="Bold" />
                 </VerticalStackLayout>
             </Grid>
@@ -26,9 +26,9 @@
         <CollectionView Grid.Row="1" ItemsSource="{Binding Events}">
             <CollectionView.EmptyView>
                 <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8" Padding="0,40">
-                    <Label Text="No events" FontSize="16" TextColor="{StaticResource Gray400}"
+                    <Label Text="No events" FontSize="16" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                            HorizontalTextAlignment="Center" />
-                    <Label Text="Tap + to add an event" FontSize="13" TextColor="{StaticResource Gray400}"
+                    <Label Text="Tap + to add an event" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
@@ -44,21 +44,21 @@
                         </Border.GestureRecognizers>
                         <Grid ColumnDefinitions="4,*" ColumnSpacing="12">
                             <!-- Color accent bar -->
-                            <BoxView Color="{StaticResource Primary}" WidthRequest="4"
+                            <BoxView Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" WidthRequest="4"
                                      VerticalOptions="Fill" />
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="{Binding Title}" FontSize="15" FontAttributes="Bold"
                                        LineBreakMode="TailTruncation" MaxLines="1" />
                                 <HorizontalStackLayout Spacing="4">
                                     <Label Text="{Binding StartTime, StringFormat='{0:h:mm tt}'}"
-                                           FontSize="13" TextColor="{StaticResource Gray500}" />
-                                    <Label Text="-" FontSize="13" TextColor="{StaticResource Gray500}"
+                                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                    <Label Text="-" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
                                            IsVisible="{Binding EndTime, Converter={StaticResource IsNotNullConverter}}" />
                                     <Label Text="{Binding EndTime, StringFormat='{0:h:mm tt}'}"
-                                           FontSize="13" TextColor="{StaticResource Gray500}"
+                                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
                                            IsVisible="{Binding EndTime, Converter={StaticResource IsNotNullConverter}}" />
                                 </HorizontalStackLayout>
-                                <Label Text="{Binding Description}" FontSize="12" TextColor="{StaticResource Gray400}"
+                                <Label Text="{Binding Description}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                        LineBreakMode="TailTruncation" MaxLines="2"
                                        IsVisible="{Binding Description, Converter={StaticResource IsNotNullConverter}}" />
                             </VerticalStackLayout>

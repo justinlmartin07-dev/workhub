@@ -28,7 +28,7 @@
                                 </Grid.GestureRecognizers>
                                 <VerticalStackLayout>
                                     <Label Text="{Binding MainText}" FontSize="14" />
-                                    <Label Text="{Binding SecondaryText}" FontSize="12" TextColor="{StaticResource Gray400}" />
+                                    <Label Text="{Binding SecondaryText}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                                 </VerticalStackLayout>
                             </Grid>
                         </DataTemplate>
@@ -45,7 +45,7 @@
             <Grid ColumnDefinitions="*,Auto">
                 <Label Text="Phone Numbers" FontSize="14" FontAttributes="Bold" VerticalTextAlignment="Center" />
                 <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
-                        TextColor="{StaticResource Primary}" Command="{Binding AddPhoneCommand}" Padding="4" />
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding AddPhoneCommand}" Padding="4" />
             </Grid>
             <CollectionView ItemsSource="{Binding PhoneEntries}">
                 <CollectionView.ItemTemplate>
@@ -67,7 +67,7 @@
             <Grid ColumnDefinitions="*,Auto">
                 <Label Text="Email Addresses" FontSize="14" FontAttributes="Bold" VerticalTextAlignment="Center" />
                 <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
-                        TextColor="{StaticResource Primary}" Command="{Binding AddEmailCommand}" Padding="4" />
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding AddEmailCommand}" Padding="4" />
             </Grid>
             <CollectionView ItemsSource="{Binding EmailEntries}">
                 <CollectionView.ItemTemplate>

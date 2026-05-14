@@ -8,10 +8,17 @@ public partial class CalendarPage : ContentView
 {
     private const int MaxLanesPerWeek = 3;
 
+    private static readonly Color NavyFallback = Color.FromArgb("#0E4A89");
+    private static readonly Color NavyDarkFallback = Color.FromArgb("#4A8BD0");
+    private static readonly Color InfoFallback = Color.FromArgb("#3B82F6");
+    private static readonly Color InfoDarkFallback = Color.FromArgb("#60A5FA");
+    private static readonly Color WarningFallback = Color.FromArgb("#F59E0B");
+    private static readonly Color WarningDarkFallback = Color.FromArgb("#FBBF24");
+
     private readonly CalendarViewModel _viewModel;
-    private Color _primaryColor = Colors.Teal;
-    private Color _infoColor = Colors.SteelBlue;
-    private Color _warningColor = Colors.Orange;
+    private Color _primaryColor = NavyFallback;
+    private Color _infoColor = InfoFallback;
+    private Color _warningColor = WarningFallback;
     private Color _textColor = Colors.Black;
     private Color _mutedTextColor = Colors.Gray;
     private Color _separatorColor = Colors.LightGray;
@@ -22,11 +29,17 @@ public partial class CalendarPage : ContentView
         _viewModel = viewModel;
         BindingContext = viewModel;
 
-        _primaryColor = ResolveColor("Primary", Colors.Teal);
-        _infoColor = ResolveColor("Info", Colors.SteelBlue);
-        _warningColor = ResolveColor("Warning", Colors.Orange);
-
         var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+        _primaryColor = isDark
+            ? ResolveColor("PrimaryDark", NavyDarkFallback)
+            : ResolveColor("Primary", NavyFallback);
+        _infoColor = isDark
+            ? ResolveColor("InfoDark", InfoDarkFallback)
+            : ResolveColor("Info", InfoFallback);
+        _warningColor = isDark
+            ? ResolveColor("WarningDark", WarningDarkFallback)
+            : ResolveColor("Warning", WarningFallback);
+
         _textColor = isDark
             ? ResolveColor("Gray100", Colors.White)
             : ResolveColor("Gray900", Colors.Black);
