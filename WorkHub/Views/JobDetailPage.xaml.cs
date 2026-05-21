@@ -5,8 +5,11 @@ namespace WorkHub.Views;
 
 public partial class JobDetailPage : ContentPage
 {
+    public bool IsNarrowLayout { get; }
+
     public JobDetailPage(JobDetailViewModel viewModel)
     {
+        IsNarrowLayout = !(MainLayout.Current?.IsWideLayout ?? false);
         InitializeComponent();
         BindingContext = viewModel;
     }

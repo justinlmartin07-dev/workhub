@@ -12,6 +12,8 @@ public static class MauiProgram
 {
 	private const string ApiBaseUrl = "http://localhost:5180/";
 
+	public static IServiceProvider Services { get; private set; } = null!;
+
 	public static MauiApp CreateMauiApp()
 	{
 		var builder = MauiApp.CreateBuilder();
@@ -279,9 +281,8 @@ public static class MauiProgram
 				Microsoft.Maui.Handlers.SearchBarHandler.Mapper.AppendToMapping("ThemedSearchBar", (handler, view) =>
 				{
 					var native = handler.PlatformView;
-					// Remove the default underline from the inner EditText
-					var searchEditText = native.FindViewById<Android.Widget.EditText>(
-						Android.Resource.Id.Search_src_text);
+					// Walk for the inner EditText — AppCompat resource IDs aren't exposed to consumers
+					var searchEditText = FindFirstChildOfType<Android.Widget.EditText>(native);
 					if (searchEditText != null)
 					{
 						searchEditText.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(
@@ -348,7 +349,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<CalendarPage>();
 		builder.Services.AddTransient<EventDetailPage>();
 		builder.Services.AddTransient<CalendarDaySummaryPage>();
-		builder.Services.AddTransient<PhotoViewerPage>();
+		builder.Services.AddTransient<PhotoViewerPopup>();
 		builder.Services.AddTransient<LocationPhotosPage>();
 		builder.Services.AddTransient<ProfilePage>();
 		builder.Services.AddTransient<ChangePasswordPage>();
@@ -357,6 +358,26 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-		return builder.Build();
+		var app = builder.Build();
+		Services = app.Services;
+		return app;
 	}
+
+#if ANDROID
+	private static T? FindFirstChildOfType<T>(Android.Views.View view) where T : Android.Views.View
+	{
+		if (view is T match) return match;
+		if (view is Android.Views.ViewGroup group)
+		{
+			for (int i = 0; i < group.ChildCount; i++)
+			{
+				var child = group.GetChildAt(i);
+				if (child == null) continue;
+				var found = FindFirstChildOfType<T>(child);
+				if (found != null) return found;
+			}
+		}
+		return null;
+	}
+#endif
 }

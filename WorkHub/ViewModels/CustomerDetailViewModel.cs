@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using WorkHub.Messages;
 using WorkHub.Models;
 using WorkHub.Services;
+using WorkHub.Views;
 
 namespace WorkHub.ViewModels;
 
@@ -72,6 +73,9 @@ public partial class CustomerDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
+
+    [RelayCommand]
     private async Task DeleteAsync()
     {
         if (Customer == null) return;
@@ -125,9 +129,9 @@ public partial class CustomerDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task ViewPhotosAsync(PhotoResponse photo)
     {
-        if (Customer?.Photos == null) return;
+        if (Customer?.Photos == null || string.IsNullOrEmpty(CustomerId)) return;
         var index = Customer.Photos.IndexOf(photo);
-        await Shell.Current.GoToAsync($"photoViewer?entityType=customer&entityId={CustomerId}&startIndex={index}");
+        await PhotoViewerLauncher.ShowAsync("customer", CustomerId, index);
     }
 
     [RelayCommand]

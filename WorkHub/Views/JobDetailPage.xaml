@@ -6,18 +6,9 @@
              xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Views.JobDetailPage"
              x:DataType="vm:JobDetailViewModel"
+             x:Name="thisPage"
+             Shell.NavBarIsVisible="False"
              Title="{Binding Job.Title, FallbackValue='Job'}">
-
-    <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto,Auto">
-            <Label Text="{Binding Job.Title, FallbackValue='Job'}" FontSize="18" FontAttributes="Bold"
-                   VerticalTextAlignment="Center" />
-            <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent"
-                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding EditCommand}" />
-            <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent"
-                    TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" Command="{Binding DeleteCommand}" />
-        </Grid>
-    </Shell.TitleView>
 
     <Grid>
         <!-- Main content -->
@@ -28,12 +19,14 @@
                 <ScrollView>
                     <VerticalStackLayout Spacing="16" Padding="16">
                         <!-- Header with Edit/Delete -->
-                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                            <Label Text="{Binding Job.Title, FallbackValue='Job'}" FontSize="20" FontAttributes="Bold"
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                            <controls:BackButton Command="{Binding GoBackCommand}"
+                                                 IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
+                            <Label Grid.Column="1" Text="{Binding Job.Title, FallbackValue='Job'}" FontSize="20" FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
-                            <Button Grid.Column="1" Text="Edit" BackgroundColor="Transparent"
+                            <Button Grid.Column="2" Text="Edit" BackgroundColor="Transparent"
                                     TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding EditCommand}" Padding="4" />
-                            <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent"
+                            <Button Grid.Column="3" Text="Delete" BackgroundColor="Transparent"
                                     TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" Command="{Binding DeleteCommand}" Padding="4" />
                         </Grid>
 
@@ -48,10 +41,10 @@
                                     </Label.GestureRecognizers>
                                 </Label>
                                 <Label Grid.Row="1" Text="Status" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Job.Status}"
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Job.Status, Converter={StaticResource LabelCaseConverter}}"
                                        TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}" FontAttributes="Bold" />
                                 <Label Grid.Row="2" Text="Priority" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority}"
+                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority, Converter={StaticResource LabelCaseConverter}}"
                                        TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
                             </Grid>
                         </Frame>

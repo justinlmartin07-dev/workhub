@@ -51,7 +51,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:ContactEntry">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="0,2">
-                            <Picker WidthRequest="100" ItemsSource="{Binding BindingContext.PhoneLabelOptions, Source={x:Reference thisPage}}"
+                            <Picker WidthRequest="130" ItemsSource="{Binding BindingContext.PhoneLabelOptions, Source={x:Reference thisPage}}"
                                     SelectedItem="{Binding Label}" />
                             <Entry Grid.Column="1" Placeholder="Phone number" Text="{Binding Value}" Keyboard="Telephone" />
                             <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
@@ -73,7 +73,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:ContactEntry">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="0,2">
-                            <Picker WidthRequest="100" ItemsSource="{Binding BindingContext.EmailLabelOptions, Source={x:Reference thisPage}}"
+                            <Picker WidthRequest="130" ItemsSource="{Binding BindingContext.EmailLabelOptions, Source={x:Reference thisPage}}"
                                     SelectedItem="{Binding Label}" />
                             <Entry Grid.Column="1" Placeholder="Email address" Text="{Binding Value}" Keyboard="Email" />
                             <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"

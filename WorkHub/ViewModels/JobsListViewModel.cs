@@ -19,19 +19,10 @@ public partial class JobsListViewModel : BaseViewModel
     private string _searchText = string.Empty;
 
     [ObservableProperty]
-    private string? _statusFilter;
-
-    [ObservableProperty]
-    private string? _priorityFilter;
-
-    [ObservableProperty]
     private JobListItemResponse? _selectedJob;
 
     private string? _pendingSelectId;
     private CancellationTokenSource? _searchCts;
-
-    public List<string> StatusOptions { get; } = new() { "", "new", "in_progress", "on_hold", "complete", "cancelled" };
-    public List<string> PriorityOptions { get; } = new() { "", "low", "medium", "high" };
 
     public event Action<JobListItemResponse>? ScrollToRequested;
 
@@ -58,14 +49,12 @@ public partial class JobsListViewModel : BaseViewModel
     {
         await LoadAsync(async () =>
         {
-            var status = string.IsNullOrEmpty(StatusFilter) ? null : StatusFilter;
-            var priority = string.IsNullOrEmpty(PriorityFilter) ? null : PriorityFilter;
             var all = new List<JobListItemResponse>();
             var page = 1;
             int totalPages;
             do
             {
-                var result = await _apiService.GetJobsAsync(SearchText, status, priority, page: page);
+                var result = await _apiService.GetJobsAsync(SearchText, null, null, page: page);
                 totalPages = result.TotalPages;
                 all.AddRange(result.Items);
                 page++;
@@ -118,12 +107,6 @@ public partial class JobsListViewModel : BaseViewModel
     private async Task SearchAsync()
     {
         _searchCts?.Cancel();
-        await LoadJobsAsync();
-    }
-
-    [RelayCommand]
-    private async Task FilterChangedAsync()
-    {
         await LoadJobsAsync();
     }
 

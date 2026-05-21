@@ -16,6 +16,7 @@
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:DateFormatConverter x:Key="DateFormatConverter" />
+            <converters:LabelCaseConverter x:Key="LabelCaseConverter" />
             <converters:IndexEqualsConverter x:Key="IndexEqualsConverter" />
         </ResourceDictionary>
     </Application.Resources>

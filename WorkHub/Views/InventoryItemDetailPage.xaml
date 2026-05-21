@@ -8,31 +8,33 @@
              Title="{Binding PageTitle}">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <Grid ColumnDefinitions="Auto,*">
             <controls:BackButton Command="{Binding CancelCommand}" />
             <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
-            <Button Grid.Column="2" Text="{Binding EditButtonText}"
-                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    Command="{Binding ToggleEditCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
-            <Button Grid.Column="3" Text="Delete" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                    Command="{Binding DeleteCommand}" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
         </Grid>
     </Shell.TitleView>
 
     <ScrollView>
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
-            <Entry Placeholder="Name *" Text="{Binding Name}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
-            <Entry Placeholder="Part Number" Text="{Binding PartNumber}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
-            <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120"
-                    IsReadOnly="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" />
+            <Entry Placeholder="Name *" Text="{Binding Name}" />
+            <Entry Placeholder="Part Number" Text="{Binding PartNumber}" />
+            <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" />
 
             <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" IsVisible="{Binding HasError}" />
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsEditing}">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsNew}">
                 <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"
                         TextColor="{StaticResource Gray900}" Command="{Binding CancelCommand}" />
                 <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
-                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
+                        IsEnabled="{Binding HasChanges}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}">
+                <Button Text="Delete"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                        TextColor="{StaticResource White}" Command="{Binding DeleteCommand}" />
+                <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding HasChanges}" />
             </Grid>
 
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />

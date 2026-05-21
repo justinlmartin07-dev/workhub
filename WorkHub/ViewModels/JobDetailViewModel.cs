@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using WorkHub.Messages;
 using WorkHub.Models;
 using WorkHub.Services;
+using WorkHub.Views;
 
 namespace WorkHub.ViewModels;
 
@@ -87,6 +88,9 @@ public partial class JobDetailViewModel : BaseViewModel
             QueryParams = new() { ["id"] = JobId! }
         }));
     }
+
+    [RelayCommand]
+    private async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
 
     [RelayCommand]
     private async Task OpenAddressInMapsAsync()
@@ -209,9 +213,9 @@ public partial class JobDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task ViewPhotosAsync(PhotoResponse photo)
     {
-        if (Job?.Photos == null) return;
+        if (Job?.Photos == null || string.IsNullOrEmpty(JobId)) return;
         var index = Job.Photos.IndexOf(photo);
-        await Shell.Current.GoToAsync($"photoViewer?entityType=job&entityId={JobId}&startIndex={index}");
+        await PhotoViewerLauncher.ShowAsync("job", JobId, index);
     }
 
     [RelayCommand]

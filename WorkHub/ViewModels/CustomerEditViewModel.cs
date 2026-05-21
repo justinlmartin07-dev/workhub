@@ -97,7 +97,7 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
         _apiService = apiService;
         // Start with one empty phone and email entry
         PhoneEntries.Add(new ContactEntry { Label = "Mobile" });
-        EmailEntries.Add(new ContactEntry { Label = "Personal" });
+        EmailEntries.Add(new ContactEntry { Label = "Work" });
         SnapshotOriginal();
         _ = LoadContactLabelsAsync();
     }
@@ -154,7 +154,7 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
                 if (PhoneEntries.Count == 0)
                     PhoneEntries.Add(new ContactEntry { Label = "Mobile" });
                 if (EmailEntries.Count == 0)
-                    EmailEntries.Add(new ContactEntry { Label = "Personal" });
+                    EmailEntries.Add(new ContactEntry { Label = "Work" });
 
                 SnapshotOriginal();
             }
@@ -182,7 +182,7 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
     [RelayCommand]
     private void AddEmail()
     {
-        EmailEntries.Add(new ContactEntry { Label = "Personal" });
+        EmailEntries.Add(new ContactEntry { Label = "Work" });
     }
 
     [RelayCommand]
@@ -193,7 +193,7 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
         else
         {
             entry.Value = string.Empty;
-            entry.Label = "Personal";
+            entry.Label = "Work";
         }
     }
 

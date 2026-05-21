@@ -81,6 +81,19 @@ public class DateFormatConverter : IValueConverter
         => throw new NotSupportedException();
 }
 
+public class LabelCaseConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var s = value?.ToString();
+        if (string.IsNullOrEmpty(s)) return s;
+        return culture.TextInfo.ToTitleCase(s.Replace('_', ' ').ToLower());
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
 public class IndexEqualsConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

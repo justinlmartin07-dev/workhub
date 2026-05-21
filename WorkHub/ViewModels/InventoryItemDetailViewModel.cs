@@ -18,12 +18,15 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     private string? _itemId;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
     private string _name = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
     private string _description = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
     private string _partNumber = string.Empty;
 
     [ObservableProperty]
@@ -32,11 +35,14 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     [ObservableProperty]
     private string _pageTitle = "New Item";
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(EditButtonText))]
-    private bool _isEditing = true;
+    private string _originalName = string.Empty;
+    private string _originalDescription = string.Empty;
+    private string _originalPartNumber = string.Empty;
 
-    public string EditButtonText => IsEditing ? "Cancel" : "Edit";
+    public bool HasChanges =>
+        !string.Equals(Name ?? string.Empty, _originalName, StringComparison.Ordinal)
+        || !string.Equals(Description ?? string.Empty, _originalDescription, StringComparison.Ordinal)
+        || !string.Equals(PartNumber ?? string.Empty, _originalPartNumber, StringComparison.Ordinal);
 
     public InventoryItemDetailViewModel(ApiService apiService)
     {
@@ -48,7 +54,6 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         if (Guid.TryParse(value, out _))
         {
             IsNew = false;
-            IsEditing = false;
             PageTitle = "Item Details";
             LoadItemCommand.Execute(null);
         }
@@ -66,15 +71,17 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                 Name = item.Name;
                 Description = item.Description ?? string.Empty;
                 PartNumber = item.PartNumber ?? string.Empty;
+                SnapshotOriginal();
             }
         });
     }
 
-    [RelayCommand]
-    private void ToggleEdit()
+    private void SnapshotOriginal()
     {
-        IsEditing = !IsEditing;
-        PageTitle = IsEditing ? "Edit Item" : "Item Details";
+        _originalName = Name ?? string.Empty;
+        _originalDescription = Description ?? string.Empty;
+        _originalPartNumber = PartNumber ?? string.Empty;
+        OnPropertyChanged(nameof(HasChanges));
     }
 
     [RelayCommand]
@@ -109,8 +116,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                     PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim()
                 };
                 await _apiService.UpdateInventoryItemAsync(Guid.Parse(ItemId!), request);
-                IsEditing = false;
-                PageTitle = "Item Details";
+                SnapshotOriginal();
             }
         });
     }
@@ -145,19 +151,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task CancelAsync()
-    {
-        if (!IsNew && IsEditing)
-        {
-            IsEditing = false;
-            PageTitle = "Item Details";
-            await LoadItemAsync();
-        }
-        else
-        {
-            NavigateBack();
-        }
-    }
+    private void Cancel() => NavigateBack();
 
     private async void NavigateBack()
     {
