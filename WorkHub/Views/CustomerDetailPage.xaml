@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
              xmlns:controls="clr-namespace:WorkHub.Controls"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.CustomerDetailPage"
              x:DataType="vm:CustomerDetailViewModel"
              x:Name="thisPage"
@@ -22,17 +23,36 @@
                                              IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
                         <Label Grid.Column="1" Text="{Binding Customer.Name, FallbackValue='Customer'}" FontSize="20" FontAttributes="Bold"
                                VerticalTextAlignment="Center" />
-                        <Button Grid.Column="2" Text="Edit" BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding EditCommand}" Padding="4" />
-                        <Button Grid.Column="3" Text="Delete" BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" Command="{Binding DeleteCommand}" Padding="4" />
+                        <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="4" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding EditCommand}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                <shapes:Path Data="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
+                                             Fill="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                             Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                <Label Text="Edit" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                            </HorizontalStackLayout>
+                        </Border>
+                        <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="4" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding DeleteCommand}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                <shapes:Path Data="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"
+                                             Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                             Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                <Label Text="Delete" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" />
+                            </HorizontalStackLayout>
+                        </Border>
                     </Grid>
 
                     <!-- Contact Info -->
-                    <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                    <Frame Style="{StaticResource Card}">
                         <VerticalStackLayout Spacing="8">
-                            <Label Text="Contact Information" FontSize="16" FontAttributes="Bold" />
+                            <Label Text="Contact Information" Style="{StaticResource SectionHeading}" />
 
                             <!-- Phone Numbers -->
                             <CollectionView ItemsSource="{Binding PhoneContacts}">
@@ -87,25 +107,21 @@
                     </Frame>
 
                     <!-- Notes -->
-                    <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    <Frame Style="{StaticResource Card}"
                            IsVisible="{Binding Customer.Notes, Converter={StaticResource StringNotEmptyConverter}}">
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="Notes" FontSize="16" FontAttributes="Bold" />
+                            <Label Text="Notes" Style="{StaticResource SectionHeading}" />
                             <Label Text="{Binding Customer.Notes}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
                         </VerticalStackLayout>
                     </Frame>
 
                     <!-- Photos -->
-                    <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                    <Frame Style="{StaticResource Card}">
                         <VerticalStackLayout Spacing="8">
                             <Grid ColumnDefinitions="*,Auto,Auto">
-                                <Label Text="Photos" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                <Button Grid.Column="1" Text="Pick" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                        Command="{Binding PickPhotoCommand}" Padding="4" />
-                                <Button Grid.Column="2" Text="Camera" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                        Command="{Binding TakePhotoCommand}" Padding="4" />
+                                <Label Text="Photos" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="Pick" Style="{StaticResource SecondaryButton}" Command="{Binding PickPhotoCommand}" />
+                                <Button Grid.Column="2" Text="Camera" Style="{StaticResource SecondaryButton}" Command="{Binding TakePhotoCommand}" />
                             </Grid>
                             <CollectionView ItemsSource="{Binding Customer.Photos}" HeightRequest="120"
                                             ItemsLayout="HorizontalList">
@@ -139,13 +155,11 @@
                     </Frame>
 
                     <!-- Jobs -->
-                    <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                           BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                    <Frame Style="{StaticResource Card}">
                         <VerticalStackLayout Spacing="8">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="Jobs" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                <Button Grid.Column="1" Text="+ Add Job" BackgroundColor="Transparent"
-                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding AddJobCommand}" Padding="4" />
+                                <Label Text="Jobs" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="+ Add Job" Style="{StaticResource SecondaryButton}" Command="{Binding AddJobCommand}" />
                             </Grid>
                             <CollectionView ItemsSource="{Binding Customer.Jobs}">
                                 <CollectionView.ItemTemplate>

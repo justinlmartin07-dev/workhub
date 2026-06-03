@@ -43,9 +43,8 @@
 
             <!-- Phone Numbers -->
             <Grid ColumnDefinitions="*,Auto">
-                <Label Text="Phone Numbers" FontSize="14" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
-                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding AddPhoneCommand}" Padding="4" />
+                <Label Text="Phone Numbers" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                <Button Grid.Column="1" Text="+ Add" Style="{StaticResource SecondaryButton}" Command="{Binding AddPhoneCommand}" />
             </Grid>
             <CollectionView ItemsSource="{Binding PhoneEntries}">
                 <CollectionView.ItemTemplate>
@@ -54,7 +53,7 @@
                             <Picker WidthRequest="130" ItemsSource="{Binding BindingContext.PhoneLabelOptions, Source={x:Reference thisPage}}"
                                     SelectedItem="{Binding Label}" />
                             <Entry Grid.Column="1" Placeholder="Phone number" Text="{Binding Value}" Keyboard="Telephone" />
-                            <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                            <Button Grid.Column="2" Text="✕" Style="{StaticResource DangerButton}"
                                     WidthRequest="40" Padding="0"
                                     Command="{Binding BindingContext.RemovePhoneCommand, Source={x:Reference thisPage}}"
                                     CommandParameter="{Binding .}" />
@@ -65,9 +64,8 @@
 
             <!-- Email Addresses -->
             <Grid ColumnDefinitions="*,Auto">
-                <Label Text="Email Addresses" FontSize="14" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
-                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding AddEmailCommand}" Padding="4" />
+                <Label Text="Email Addresses" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                <Button Grid.Column="1" Text="+ Add" Style="{StaticResource SecondaryButton}" Command="{Binding AddEmailCommand}" />
             </Grid>
             <CollectionView ItemsSource="{Binding EmailEntries}">
                 <CollectionView.ItemTemplate>
@@ -76,7 +74,7 @@
                             <Picker WidthRequest="130" ItemsSource="{Binding BindingContext.EmailLabelOptions, Source={x:Reference thisPage}}"
                                     SelectedItem="{Binding Label}" />
                             <Entry Grid.Column="1" Placeholder="Email address" Text="{Binding Value}" Keyboard="Email" />
-                            <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                            <Button Grid.Column="2" Text="✕" Style="{StaticResource DangerButton}"
                                     WidthRequest="40" Padding="0"
                                     Command="{Binding BindingContext.RemoveEmailCommand, Source={x:Reference thisPage}}"
                                     CommandParameter="{Binding .}" />
@@ -87,11 +85,10 @@
 
             <Editor Placeholder="Notes" Text="{Binding Notes}" HeightRequest="120" />
 
-            <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" IsVisible="{Binding HasError}" />
+            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" IsVisible="{Binding HasError}" />
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                <Button Text="Cancel" BackgroundColor="{StaticResource Gray200}"
-                        TextColor="{StaticResource Gray900}" Command="{Binding CancelCommand}" />
+                <Button Text="Cancel" Style="{StaticResource CancelButton}" Command="{Binding CancelCommand}" />
                 <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}" />
             </Grid>

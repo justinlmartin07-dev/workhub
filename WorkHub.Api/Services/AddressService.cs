@@ -1,33 +1,63 @@
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace WorkHub.Api.Services;
 
 public class AddressService
 {
     private readonly HttpClient _httpClient;
+    private readonly IMemoryCache _cache;
     private readonly string? _apiKey;
 
-    public AddressService(HttpClient httpClient, IConfiguration configuration)
+    private static readonly TimeSpan AutocompleteCacheTtl = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan DetailsCacheTtl = TimeSpan.FromHours(24);
+
+    public AddressService(HttpClient httpClient, IMemoryCache cache, IConfiguration configuration)
     {
         _httpClient = httpClient;
+        _cache = cache;
         _apiKey = configuration["GOOGLE_PLACES_API_KEY"]
             ?? configuration["Google:PlacesApiKey"];
     }
 
     public bool IsConfigured => !string.IsNullOrEmpty(_apiKey);
 
-    public async Task<List<AddressSuggestion>> AutocompleteAsync(string input)
+    public async Task<List<AddressSuggestion>> AutocompleteAsync(
+        string input,
+        (double Lat, double Lng, double RadiusMeters)? bias = null,
+        string? sessionToken = null)
     {
         if (!IsConfigured || string.IsNullOrWhiteSpace(input))
             return [];
 
-        var requestBody = new
+        var biasKey = bias.HasValue
+            ? $"{bias.Value.Lat:F2}:{bias.Value.Lng:F2}:{bias.Value.RadiusMeters:F0}"
+            : "nobias";
+        var cacheKey = $"places:ac:{input.ToLowerInvariant()}:{biasKey}";
+        if (_cache.TryGetValue<List<AddressSuggestion>>(cacheKey, out var cached) && cached is not null)
+            return cached;
+
+        var requestBody = new Dictionary<string, object>
         {
-            input,
-            includedPrimaryTypes = new[] { "street_address", "subpremise", "premise" },
-            includedRegionCodes = new[] { "us" },
-            languageCode = "en"
+            ["input"] = input,
+            ["includedRegionCodes"] = new[] { "us" },
+            ["languageCode"] = "en"
         };
+
+        if (bias.HasValue)
+        {
+            requestBody["locationBias"] = new
+            {
+                circle = new
+                {
+                    center = new { latitude = bias.Value.Lat, longitude = bias.Value.Lng },
+                    radius = bias.Value.RadiusMeters
+                }
+            };
+        }
+
+        if (!string.IsNullOrEmpty(sessionToken))
+            requestBody["sessionToken"] = sessionToken;
 
         var request = new HttpRequestMessage(HttpMethod.Post, "https://places.googleapis.com/v1/places:autocomplete")
         {
@@ -69,16 +99,24 @@ public class AddressService
             }
         }
 
+        _cache.Set(cacheKey, suggestions, AutocompleteCacheTtl);
         return suggestions;
     }
 
-    public async Task<AddressDetails?> GetPlaceDetailsAsync(string placeId)
+    public async Task<AddressDetails?> GetPlaceDetailsAsync(string placeId, string? sessionToken = null)
     {
         if (!IsConfigured || string.IsNullOrWhiteSpace(placeId))
             return null;
 
-        var request = new HttpRequestMessage(HttpMethod.Get,
-            $"https://places.googleapis.com/v1/places/{placeId}");
+        var cacheKey = $"places:details:{placeId}";
+        if (_cache.TryGetValue<AddressDetails>(cacheKey, out var cached) && cached is not null)
+            return cached;
+
+        var url = $"https://places.googleapis.com/v1/places/{placeId}";
+        if (!string.IsNullOrEmpty(sessionToken))
+            url += $"?sessionToken={Uri.EscapeDataString(sessionToken)}";
+
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-Goog-Api-Key", _apiKey);
         request.Headers.Add("X-Goog-FieldMask", "addressComponents,formattedAddress");
 
@@ -115,6 +153,7 @@ public class AddressService
         }
 
         details.Street = $"{details.StreetNumber} {details.Route}".Trim();
+        _cache.Set(cacheKey, details, DetailsCacheTtl);
         return details;
     }
 }

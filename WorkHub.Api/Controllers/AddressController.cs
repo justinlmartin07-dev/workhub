@@ -17,7 +17,12 @@ public class AddressController : ControllerBase
     }
 
     [HttpGet("autocomplete")]
-    public async Task<IActionResult> Autocomplete([FromQuery] string q)
+    public async Task<IActionResult> Autocomplete(
+        [FromQuery] string q,
+        [FromQuery] double? lat = null,
+        [FromQuery] double? lng = null,
+        [FromQuery] int? radius = null,
+        [FromQuery] string? session = null)
     {
         if (!_addressService.IsConfigured)
             return Ok(new List<AddressSuggestion>());
@@ -25,17 +30,21 @@ public class AddressController : ControllerBase
         if (string.IsNullOrWhiteSpace(q) || q.Length < 3)
             return Ok(new List<AddressSuggestion>());
 
-        var suggestions = await _addressService.AutocompleteAsync(q);
+        (double Lat, double Lng, double RadiusMeters)? bias = null;
+        if (lat.HasValue && lng.HasValue)
+            bias = (lat.Value, lng.Value, radius ?? 50_000);
+
+        var suggestions = await _addressService.AutocompleteAsync(q, bias, session);
         return Ok(suggestions);
     }
 
     [HttpGet("details/{placeId}")]
-    public async Task<IActionResult> Details(string placeId)
+    public async Task<IActionResult> Details(string placeId, [FromQuery] string? session = null)
     {
         if (!_addressService.IsConfigured)
             return NotFound();
 
-        var details = await _addressService.GetPlaceDetailsAsync(placeId);
+        var details = await _addressService.GetPlaceDetailsAsync(placeId, session);
         if (details == null)
             return NotFound();
 

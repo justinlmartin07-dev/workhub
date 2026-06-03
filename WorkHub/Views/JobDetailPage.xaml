@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
              xmlns:controls="clr-namespace:WorkHub.Controls"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.JobDetailPage"
              x:DataType="vm:JobDetailViewModel"
              x:Name="thisPage"
@@ -24,15 +25,34 @@
                                                  IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
                             <Label Grid.Column="1" Text="{Binding Job.Title, FallbackValue='Job'}" FontSize="20" FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
-                            <Button Grid.Column="2" Text="Edit" BackgroundColor="Transparent"
-                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding EditCommand}" Padding="4" />
-                            <Button Grid.Column="3" Text="Delete" BackgroundColor="Transparent"
-                                    TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" Command="{Binding DeleteCommand}" Padding="4" />
+                            <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="4" VerticalOptions="Center">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                    <shapes:Path Data="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"
+                                                 Fill="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                    <Label Text="Edit" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                </HorizontalStackLayout>
+                            </Border>
+                            <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="4" VerticalOptions="Center">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding DeleteCommand}" />
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                    <shapes:Path Data="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"
+                                                 Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                    <Label Text="Delete" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" />
+                                </HorizontalStackLayout>
+                            </Border>
                         </Grid>
 
                         <!-- Status/Priority -->
-                        <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                        <Frame Style="{StaticResource Card}">
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
                                 <Label Text="Customer" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                                 <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
@@ -50,11 +70,10 @@
                         </Frame>
 
                         <!-- Address -->
-                        <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        <Frame Style="{StaticResource Card}"
                                IsVisible="{Binding Job.Address, Converter={StaticResource StringNotEmptyConverter}}">
                             <VerticalStackLayout Spacing="4">
-                                <Label Text="Job Address" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Job Address" Style="{StaticResource SectionHeading}" />
                                 <Label Text="{Binding Job.Address}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding OpenAddressInMapsCommand}" />
@@ -70,25 +89,21 @@
                         </Frame>
 
                         <!-- Scope Notes -->
-                        <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        <Frame Style="{StaticResource Card}"
                                IsVisible="{Binding Job.ScopeNotes, Converter={StaticResource StringNotEmptyConverter}}">
                             <VerticalStackLayout Spacing="4">
-                                <Label Text="Scope Notes" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Scope Notes" Style="{StaticResource SectionHeading}" />
                                 <Label Text="{Binding Job.ScopeNotes}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
                             </VerticalStackLayout>
                         </Frame>
 
                         <!-- Photos -->
-                        <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                        <Frame Style="{StaticResource Card}">
                             <VerticalStackLayout Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto,Auto">
-                                    <Label Text="Photos" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                    <Button Grid.Column="1" Text="Pick" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                            Command="{Binding PickPhotoCommand}" Padding="4" />
-                                    <Button Grid.Column="2" Text="Camera" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                            Command="{Binding TakePhotoCommand}" Padding="4" />
+                                    <Label Text="Photos" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                                    <Button Grid.Column="1" Text="Pick" Style="{StaticResource SecondaryButton}" Command="{Binding PickPhotoCommand}" />
+                                    <Button Grid.Column="2" Text="Camera" Style="{StaticResource SecondaryButton}" Command="{Binding TakePhotoCommand}" />
                                 </Grid>
                                 <CollectionView ItemsSource="{Binding Job.Photos}" HeightRequest="120"
                                                 ItemsLayout="HorizontalList">
@@ -109,14 +124,12 @@
                         </Frame>
 
                         <!-- Items Used -->
-                        <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                        <Frame Style="{StaticResource Card}">
                             <VerticalStackLayout Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="Items Used" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                    <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
-                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding OpenPartsPanelCommand}"
-                                            CommandParameter="used" Padding="4" />
+                                    <Label Text="Items Used" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                                    <Button Grid.Column="1" Text="+ Add" Style="{StaticResource SecondaryButton}"
+                                            Command="{Binding OpenPartsPanelCommand}" CommandParameter="used" />
                                 </Grid>
                                 <CollectionView ItemsSource="{Binding UsedItems}">
                                     <CollectionView.EmptyView>
@@ -158,14 +171,12 @@
                         </Frame>
 
                         <!-- Items To Order -->
-                        <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                        <Frame Style="{StaticResource Card}">
                             <VerticalStackLayout Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="Items To Order" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                    <Button Grid.Column="1" Text="+ Add" BackgroundColor="Transparent"
-                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Command="{Binding OpenPartsPanelCommand}"
-                                            CommandParameter="to_order" Padding="4" />
+                                    <Label Text="Items To Order" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                                    <Button Grid.Column="1" Text="+ Add" Style="{StaticResource SecondaryButton}"
+                                            Command="{Binding OpenPartsPanelCommand}" CommandParameter="to_order" />
                                 </Grid>
                                 <CollectionView ItemsSource="{Binding ToOrderItems}">
                                     <CollectionView.EmptyView>
@@ -207,15 +218,24 @@
                         </Frame>
 
                         <!-- Notes -->
-                        <Frame Padding="16" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                        <Frame Style="{StaticResource Card}">
                             <VerticalStackLayout Spacing="8">
-                                <Label Text="Notes" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="Notes" Style="{StaticResource SectionHeading}" />
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <Entry Placeholder="Add a note..." Text="{Binding NewNoteText}" ReturnType="Send"
-                                           ReturnCommand="{Binding AddNoteCommand}" />
-                                    <Button Grid.Column="1" Text="Add" Command="{Binding AddNoteCommand}"
-                                            Padding="12,0" />
+                                    <Editor Placeholder="Add a note..." Text="{Binding NewNoteText}"
+                                            AutoSize="TextChanges" MinimumHeightRequest="44" />
+                                    <Border Grid.Column="1" WidthRequest="44" HeightRequest="44"
+                                            StrokeShape="RoundRectangle 22" StrokeThickness="0"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            VerticalOptions="End">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding AddNoteCommand}" />
+                                        </Border.GestureRecognizers>
+                                        <shapes:Path Data="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"
+                                                     Fill="{AppThemeBinding Light=White, Dark={StaticResource PrimaryDarkText}}"
+                                                     Aspect="Uniform" WidthRequest="20" HeightRequest="20"
+                                                     HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
                                 </Grid>
                                 <CollectionView ItemsSource="{Binding Job.Notes}">
                                     <CollectionView.ItemTemplate>

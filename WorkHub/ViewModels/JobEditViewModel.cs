@@ -13,6 +13,9 @@ namespace WorkHub.ViewModels;
 public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
 {
     private readonly ApiService _apiService;
+    private readonly LocationBiasService _locationBias;
+
+    private string? _addressSessionToken;
 
     private string _origTitle = string.Empty;
     private string _origStatus = "new";
@@ -121,9 +124,10 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
 
     private bool _dataLoaded;
 
-    public JobEditViewModel(ApiService apiService)
+    public JobEditViewModel(ApiService apiService, LocationBiasService locationBias)
     {
         _apiService = apiService;
+        _locationBias = locationBias;
         // Deferred load for when no property change triggers LoadData (new job from jobs list)
         MainThread.BeginInvokeOnMainThread(async () =>
         {
@@ -329,21 +333,27 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
             return;
         }
 
+        // Start a new Places session on the first keystroke of a fresh search.
+        _addressSessionToken ??= Guid.NewGuid().ToString("N");
+
         _addressCts = new CancellationTokenSource();
         var token = _addressCts.Token;
         MainThread.BeginInvokeOnMainThread(async () =>
         {
             try
             {
-                await Task.Delay(300, token);
-                var results = await _apiService.GetAddressSuggestionsAsync(value);
+                await Task.Delay(200, token);
+                var bias = await _locationBias.GetCenterAsync();
+                if (token.IsCancellationRequested) return;
+                var results = await _apiService.GetAddressSuggestionsAsync(
+                    value, bias, _locationBias.RadiusMeters, _addressSessionToken, token);
                 if (!token.IsCancellationRequested)
                 {
                     AddressSuggestions = new ObservableCollection<AddressSuggestionResponse>(results);
                     ShowAddressSuggestions = results.Count > 0;
                 }
             }
-            catch (TaskCanceledException) { }
+            catch (OperationCanceledException) { }
         });
     }
 
@@ -353,7 +363,9 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
         ShowAddressSuggestions = false;
         _addressCts?.Cancel();
 
-        var details = await _apiService.GetAddressDetailsAsync(suggestion.PlaceId);
+        var details = await _apiService.GetAddressDetailsAsync(suggestion.PlaceId, _addressSessionToken);
+        // Selection closes the Places session; the next keystroke starts a new one.
+        _addressSessionToken = null;
         if (details != null)
         {
             _skipAddressSearch = true;

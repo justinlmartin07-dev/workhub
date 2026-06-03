@@ -194,24 +194,42 @@ public class ApiService
     }
 
     // Address Autocomplete
-    public async Task<List<AddressSuggestionResponse>> GetAddressSuggestionsAsync(string query)
+    public async Task<List<AddressSuggestionResponse>> GetAddressSuggestionsAsync(
+        string query,
+        (double Lat, double Lng)? biasCenter = null,
+        double biasRadiusMeters = 50_000,
+        string? sessionToken = null,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(query) || query.Length < 3) return [];
         try
         {
-            return await _httpClient.GetFromJsonAsync<List<AddressSuggestionResponse>>(
-                $"v1/address/autocomplete?q={Uri.EscapeDataString(query)}") ?? [];
+            var url = $"v1/address/autocomplete?q={Uri.EscapeDataString(query)}";
+            if (biasCenter.HasValue)
+                url += $"&lat={biasCenter.Value.Lat.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}"
+                     + $"&lng={biasCenter.Value.Lng.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}"
+                     + $"&radius={(int)biasRadiusMeters}";
+            if (!string.IsNullOrEmpty(sessionToken))
+                url += $"&session={Uri.EscapeDataString(sessionToken)}";
+            return await _httpClient.GetFromJsonAsync<List<AddressSuggestionResponse>>(url, cancellationToken) ?? [];
         }
+        catch (OperationCanceledException) { throw; }
         catch { return []; }
     }
 
-    public async Task<AddressDetailsResponse?> GetAddressDetailsAsync(string placeId)
+    public async Task<AddressDetailsResponse?> GetAddressDetailsAsync(
+        string placeId,
+        string? sessionToken = null,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<AddressDetailsResponse>(
-                $"v1/address/details/{Uri.EscapeDataString(placeId)}");
+            var url = $"v1/address/details/{Uri.EscapeDataString(placeId)}";
+            if (!string.IsNullOrEmpty(sessionToken))
+                url += $"?session={Uri.EscapeDataString(sessionToken)}";
+            return await _httpClient.GetFromJsonAsync<AddressDetailsResponse>(url, cancellationToken);
         }
+        catch (OperationCanceledException) { throw; }
         catch { return null; }
     }
 

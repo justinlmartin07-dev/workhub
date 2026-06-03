@@ -25,7 +25,10 @@ public partial class PhotoViewerViewModel : BaseViewModel
     private int _currentIndex;
 
     [ObservableProperty]
-    private string _title = "Photos";
+    private string _title = "Pictures";
+
+    [ObservableProperty]
+    private bool _isMenuOpen;
 
     public string? EntityType { get; private set; }
     public string? EntityId { get; private set; }
@@ -49,13 +52,13 @@ public partial class PhotoViewerViewModel : BaseViewModel
             {
                 var customer = await _apiService.GetCustomerAsync(custId);
                 Photos = new ObservableCollection<PhotoResponse>(customer?.Photos ?? new());
-                Title = $"{customer?.Name} Photos";
+                Title = $"{customer?.Name} Pictures";
             }
             else if (entityType == "job" && Guid.TryParse(entityId, out var jobId))
             {
                 var job = await _apiService.GetJobAsync(jobId);
                 Photos = new ObservableCollection<PhotoResponse>(job?.Photos ?? new());
-                Title = $"{job?.Title} Photos";
+                Title = $"{job?.Title} Pictures";
             }
 
             if (startIndex >= 0 && startIndex < Photos.Count)
@@ -73,8 +76,15 @@ public partial class PhotoViewerViewModel : BaseViewModel
     private void Close() => CloseRequested?.Invoke();
 
     [RelayCommand]
+    private void ToggleMenu() => IsMenuOpen = !IsMenuOpen;
+
+    [RelayCommand]
+    private void CloseMenu() => IsMenuOpen = false;
+
+    [RelayCommand]
     private async Task DeleteCurrentPhotoAsync()
     {
+        IsMenuOpen = false;
         var photo = CurrentPhoto;
         if (photo == null) return;
         bool confirm = await Shell.Current.DisplayAlert("Delete Photo", "Delete this photo?", "Delete", "Cancel");
@@ -98,6 +108,7 @@ public partial class PhotoViewerViewModel : BaseViewModel
     [RelayCommand]
     private async Task SaveCurrentPhotoAsync()
     {
+        IsMenuOpen = false;
         var photo = CurrentPhoto;
         if (photo == null) return;
 
@@ -107,8 +118,14 @@ public partial class PhotoViewerViewModel : BaseViewModel
 #if WINDOWS
             using var stream = new MemoryStream(bytes);
             var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
-            if (!result.IsSuccessful && result.Exception is not OperationCanceledException)
-                await Shell.Current.DisplayAlert("Save Failed", result.Exception?.Message ?? "Unknown error", "OK");
+            if (!result.IsSuccessful)
+            {
+                var msg = result.Exception?.Message ?? "";
+                var cancelled = result.Exception is OperationCanceledException
+                    || msg.Contains("cancel", StringComparison.OrdinalIgnoreCase);
+                if (!cancelled)
+                    await Shell.Current.DisplayAlert("Save Failed", msg.Length > 0 ? msg : "Unknown error", "OK");
+            }
 #elif ANDROID
             await SaveToAndroidGalleryAsync(bytes, fileName);
             await Shell.Current.DisplayAlert("Saved", "Photo saved to your gallery.", "OK");
@@ -123,6 +140,7 @@ public partial class PhotoViewerViewModel : BaseViewModel
     [RelayCommand]
     private async Task ShareCurrentPhotoAsync()
     {
+        IsMenuOpen = false;
         var photo = CurrentPhoto;
         if (photo == null) return;
 

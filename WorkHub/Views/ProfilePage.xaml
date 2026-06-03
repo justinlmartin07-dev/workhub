@@ -45,11 +45,9 @@
                             <Label Text="{Binding Profile.Email}" FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                             <HorizontalStackLayout Spacing="12">
-                                <Button Text="Change Photo" BackgroundColor="Transparent"
-                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                <Button Text="Change Photo" Style="{StaticResource SecondaryButton}"
                                         Command="{Binding ChangePhotoCommand}" Padding="4,2" FontSize="12" />
-                                <Button Text="Remove" BackgroundColor="Transparent"
-                                        TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                <Button Text="Remove" Style="{StaticResource DangerButton}"
                                         Command="{Binding DeletePhotoCommand}" Padding="4,2" FontSize="12"
                                         IsVisible="{Binding Profile.ProfilePhotoUrl, Converter={StaticResource StringNotEmptyConverter}}" />
                             </HorizontalStackLayout>
@@ -66,8 +64,7 @@
                                        VerticalTextAlignment="Center" />
                                 <Button Grid.Column="1" Text="Edit"
                                         IsVisible="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}"
-                                        BackgroundColor="Transparent"
-                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        Style="{StaticResource SecondaryButton}"
                                         Command="{Binding ToggleEditCommand}"
                                         Padding="8,4" FontSize="13" />
                                 <Button Grid.Column="1" Text="Cancel"
@@ -132,7 +129,7 @@
                     </Border>
 
                     <Label Text="{Binding ErrorMessage}"
-                           TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                           Style="{StaticResource ErrorText}"
                            IsVisible="{Binding HasError}"
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>

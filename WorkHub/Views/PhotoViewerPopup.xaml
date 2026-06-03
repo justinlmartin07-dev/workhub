@@ -6,54 +6,113 @@
                xmlns:models="clr-namespace:WorkHub.Models"
                xmlns:controls="clr-namespace:WorkHub.Controls"
                x:Class="WorkHub.Views.PhotoViewerPopup"
+               x:Name="thisPopup"
                x:DataType="vm:PhotoViewerViewModel"
                CanBeDismissedByTappingOutsideOfPopup="True"
-               Color="Transparent">
+               Color="Transparent"
+               HorizontalOptions="Fill"
+               VerticalOptions="Fill">
 
-    <Border StrokeThickness="0"
-            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
-        <Border.StrokeShape>
-            <RoundRectangle CornerRadius="16" />
-        </Border.StrokeShape>
+    <!-- Top spacer keeps the popup below the Windows title bar (toolkit Popup is a
+         WinUI overlay that ignores the global ExtendsContentIntoTitleBar=false).
+         Height for TopSpacerRow is set in code-behind per platform. -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="TopSpacerRow" Height="0" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Border Grid.Row="1" StrokeThickness="0"
+                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+        <Grid>
+            <!-- Main content: top rule, header, bottom rule, photo -->
+            <Grid RowDefinitions="1,Auto,1,*">
 
-        <Grid RowDefinitions="Auto,*">
+                <BoxView Grid.Row="0" HeightRequest="1"
+                         Color="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}" />
 
-            <!-- Header: title + ellipsis + close -->
-            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Padding="16,12" ColumnSpacing="4">
-                <Label Text="{Binding Title}" FontSize="16" FontAttributes="Bold"
-                       VerticalTextAlignment="Center" LineBreakMode="TailTruncation" />
-                <Button Grid.Column="1" Text="⋯" FontSize="22" Padding="0"
-                        WidthRequest="40" HeightRequest="40"
-                        BackgroundColor="Transparent"
-                        TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
-                        Clicked="OnEllipsisClicked" />
-                <Button Grid.Column="2" Text="✕" FontSize="18" Padding="0"
-                        WidthRequest="40" HeightRequest="40"
-                        BackgroundColor="Transparent"
-                        TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
-                        Command="{Binding CloseCommand}" />
+                <!-- Header: title + ellipsis + close (all same font size) -->
+                <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Padding="16,10" ColumnSpacing="4">
+                    <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold"
+                           VerticalTextAlignment="Center" LineBreakMode="TailTruncation" />
+                    <Button Grid.Column="1" Text="⋯" FontSize="18" Padding="0"
+                            WidthRequest="40" HeightRequest="40"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                            Command="{Binding ToggleMenuCommand}" />
+                    <Button Grid.Column="2" Text="✕" FontSize="18" Padding="0"
+                            WidthRequest="40" HeightRequest="40"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                            Command="{Binding CloseCommand}" />
+                </Grid>
+
+                <BoxView Grid.Row="2" HeightRequest="1"
+                         Color="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}" />
+
+                <!-- Photo area: 1/4" margin in wide mode, fill in narrow -->
+                <Grid Grid.Row="3" Padding="{Binding PhotoAreaPadding, Source={x:Reference thisPopup}}">
+                    <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
+                                            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}">
+                        <controls:DataStateView.Body>
+                            <Grid BackgroundColor="White">
+                                <CarouselView ItemsSource="{Binding Photos}" Position="{Binding CurrentIndex}" Loop="False">
+                                    <CarouselView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:PhotoResponse">
+                                            <Image Source="{Binding Url}" Aspect="AspectFit"
+                                                   VerticalOptions="Fill" HorizontalOptions="Fill" />
+                                        </DataTemplate>
+                                    </CarouselView.ItemTemplate>
+                                </CarouselView>
+                                <IndicatorView Position="{Binding CurrentIndex}" Count="{Binding Photos.Count}"
+                                               HorizontalOptions="Center" VerticalOptions="End" Margin="0,0,0,16"
+                                               IndicatorColor="#80FFFFFF" SelectedIndicatorColor="White" />
+                            </Grid>
+                        </controls:DataStateView.Body>
+                    </controls:DataStateView>
+                </Grid>
             </Grid>
 
-            <!-- Photo carousel -->
-            <controls:DataStateView Grid.Row="1"
-                                    IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
-                                    HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}">
-                <controls:DataStateView.Body>
-                    <Grid BackgroundColor="Black">
-                        <CarouselView ItemsSource="{Binding Photos}" Position="{Binding CurrentIndex}" Loop="False">
-                            <CarouselView.ItemTemplate>
-                                <DataTemplate x:DataType="models:PhotoResponse">
-                                    <Image Source="{Binding Url}" Aspect="AspectFit"
-                                           VerticalOptions="Center" HorizontalOptions="Center" />
-                                </DataTemplate>
-                            </CarouselView.ItemTemplate>
-                        </CarouselView>
-                        <IndicatorView Position="{Binding CurrentIndex}" Count="{Binding Photos.Count}"
-                                       HorizontalOptions="Center" VerticalOptions="End" Margin="0,0,0,16"
-                                       IndicatorColor="#80FFFFFF" SelectedIndicatorColor="White" />
-                    </Grid>
-                </controls:DataStateView.Body>
-            </controls:DataStateView>
+            <!-- Dismiss catcher: visible only while the menu is open -->
+            <Grid IsVisible="{Binding IsMenuOpen}" BackgroundColor="Transparent">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CloseMenuCommand}" />
+                </Grid.GestureRecognizers>
+            </Grid>
+
+            <!-- Floating menu, anchored under the ellipsis button -->
+            <Border IsVisible="{Binding IsMenuOpen}"
+                    HorizontalOptions="End" VerticalOptions="Start"
+                    Margin="0,56,60,0"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Padding="4"
+                    MinimumWidthRequest="160">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="0">
+                    <Label Text="Save" Padding="14,10" FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SaveCurrentPhotoCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                    <Label Text="Share" Padding="14,10" FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ShareCurrentPhotoCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                    <Label Text="Delete" Padding="14,10" FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding DeleteCurrentPhotoCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
         </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </toolkit:Popup>

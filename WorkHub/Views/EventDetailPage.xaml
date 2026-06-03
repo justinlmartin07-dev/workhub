@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
              xmlns:controls="clr-namespace:WorkHub.Controls"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.EventDetailPage"
              x:DataType="vm:EventDetailViewModel"
              Shell.NavBarIsVisible="False"
@@ -14,9 +15,19 @@
             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4">
                 <controls:BackButton Command="{Binding GoBackCommand}" />
                 <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                <Button Grid.Column="2" Text="Delete" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                        Command="{Binding DeleteCommand}"
-                        IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}" />
+                <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="4" VerticalOptions="Center"
+                        IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding DeleteCommand}" />
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                        <shapes:Path Data="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"
+                                     Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                     Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                        <Label Text="Delete" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" />
+                    </HorizontalStackLayout>
+                </Border>
             </Grid>
 
             <Entry Placeholder="Event Title *" Text="{Binding Title}" />
@@ -24,12 +35,12 @@
             <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="80" />
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Date" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                <Label Text="Date" Style="{StaticResource FieldLabel}" />
                 <DatePicker Date="{Binding StartDate}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
-                <Label Text="Start Time" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                <Label Text="Start Time" Style="{StaticResource FieldLabel}" />
                 <TimePicker Time="{Binding StartTime}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
@@ -39,17 +50,17 @@
             </HorizontalStackLayout>
 
             <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
-                <Label Text="End Date" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                <Label Text="End Date" Style="{StaticResource FieldLabel}" />
                 <DatePicker Date="{Binding EndDate}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAllDay, Converter={StaticResource InverseBoolConverter}}">
-                <Label Text="End Time" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                <Label Text="End Time" Style="{StaticResource FieldLabel}" />
                 <TimePicker Time="{Binding EndTime}" HorizontalOptions="Start" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Customer (optional)" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                <Label Text="Customer (optional)" Style="{StaticResource FieldLabel}" />
 
                 <!-- Selected customer display / tap to open picker -->
                 <Frame Padding="12" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
@@ -132,7 +143,7 @@
                 </CollectionView>
             </VerticalStackLayout>
 
-            <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}" IsVisible="{Binding HasError}" />
+            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" IsVisible="{Binding HasError}" />
 
             <Button Text="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding IsDirty}" />
 

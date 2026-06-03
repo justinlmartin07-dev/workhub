@@ -1,6 +1,9 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+#if WINDOWS
+using Microsoft.Maui.LifecycleEvents;
+#endif
 using WorkHub.Handlers;
 using WorkHub.Services;
 using WorkHub.ViewModels;
@@ -26,6 +29,17 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			})
+#if WINDOWS
+			// Don't draw under the Windows title bar — keeps page content (and popups)
+			// from overlapping the system caption area.
+			.ConfigureLifecycleEvents(events =>
+			{
+				events.AddWindows(windows => windows.OnWindowCreated(window =>
+				{
+					window.ExtendsContentIntoTitleBar = false;
+				}));
+			})
+#endif
 			.ConfigureMauiHandlers(handlers =>
 			{
 #if WINDOWS
@@ -313,6 +327,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<AuthService>();
 		builder.Services.AddSingleton<ApiService>();
 		builder.Services.AddSingleton<PhotoService>();
+		builder.Services.AddSingleton<LocationBiasService>();
 
 		// ViewModels
 		builder.Services.AddTransient<LoginViewModel>();
