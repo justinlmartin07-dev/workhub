@@ -257,9 +257,11 @@
                                                 <SwipeView.RightItems>
                                                     <SwipeItems Mode="Reveal">
                                                         <SwipeItem Text="Edit" BackgroundColor="{StaticResource Primary}"
+                                                                   IconImageSource="note_edit_light.png"
                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=EditNoteCommand}"
                                                                    CommandParameter="{Binding .}" />
                                                         <SwipeItem Text="Delete" BackgroundColor="{StaticResource Danger}"
+                                                                   IconImageSource="note_delete_light.png"
                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteNoteCommand}"
                                                                    CommandParameter="{Binding .}" />
                                                     </SwipeItems>
@@ -268,9 +270,11 @@
                                                     <FlyoutBase.ContextFlyout>
                                                         <MenuFlyout>
                                                             <MenuFlyoutItem Text="Edit"
+                                                                            IconImageSource="note_edit.png"
                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=EditNoteCommand}"
                                                                             CommandParameter="{Binding .}" />
                                                             <MenuFlyoutItem Text="Delete"
+                                                                            IconImageSource="note_delete.png"
                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteNoteCommand}"
                                                                             CommandParameter="{Binding .}" />
                                                         </MenuFlyout>
