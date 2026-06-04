@@ -221,10 +221,23 @@
                         <Frame Style="{StaticResource Card}">
                             <VerticalStackLayout Spacing="8">
                                 <Label Text="Notes" Style="{StaticResource SectionHeading}" />
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <Editor Placeholder="Add a note..." Text="{Binding NewNoteText}"
+                                <Label Text="Editing note — tap ✕ to cancel" FontSize="11" IsVisible="{Binding IsEditingNote}"
+                                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                    <Editor x:Name="NoteEditor" Placeholder="Add a note..." Text="{Binding NewNoteText}"
                                             AutoSize="TextChanges" MinimumHeightRequest="44" />
                                     <Border Grid.Column="1" WidthRequest="44" HeightRequest="44"
+                                            StrokeShape="RoundRectangle 22" StrokeThickness="0"
+                                            IsVisible="{Binding IsEditingNote}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray600}}"
+                                            VerticalOptions="End">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding CancelEditNoteCommand}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="✕" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                                    </Border>
+                                    <Border Grid.Column="2" WidthRequest="44" HeightRequest="44"
                                             StrokeShape="RoundRectangle 22" StrokeThickness="0"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                             VerticalOptions="End">
@@ -242,17 +255,43 @@
                                         <DataTemplate x:DataType="models:JobNoteResponse">
                                             <SwipeView>
                                                 <SwipeView.RightItems>
-                                                    <SwipeItem Text="Delete" BackgroundColor="{StaticResource Danger}"
-                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteNoteCommand}"
-                                                               CommandParameter="{Binding .}" />
+                                                    <SwipeItems Mode="Reveal">
+                                                        <SwipeItem Text="Edit" BackgroundColor="{StaticResource Primary}"
+                                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=EditNoteCommand}"
+                                                                   CommandParameter="{Binding .}" />
+                                                        <SwipeItem Text="Delete" BackgroundColor="{StaticResource Danger}"
+                                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteNoteCommand}"
+                                                                   CommandParameter="{Binding .}" />
+                                                    </SwipeItems>
                                                 </SwipeView.RightItems>
                                                 <VerticalStackLayout Padding="4,8">
+                                                    <FlyoutBase.ContextFlyout>
+                                                        <MenuFlyout>
+                                                            <MenuFlyoutItem Text="Edit"
+                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=EditNoteCommand}"
+                                                                            CommandParameter="{Binding .}" />
+                                                            <MenuFlyoutItem Text="Delete"
+                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteNoteCommand}"
+                                                                            CommandParameter="{Binding .}" />
+                                                        </MenuFlyout>
+                                                    </FlyoutBase.ContextFlyout>
                                                     <Label Text="{Binding Content}" FontSize="14" />
                                                     <HorizontalStackLayout Spacing="4">
                                                         <Label Text="{Binding CreatedByName}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                                                         <Label Text="{Binding CreatedAt, Converter={StaticResource DateFormatConverter}}"
                                                                FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                                                     </HorizontalStackLayout>
+                                                    <Label FontSize="11" FontAttributes="Italic" IsVisible="{Binding IsEdited}"
+                                                           TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}">
+                                                        <Label.FormattedText>
+                                                            <FormattedString>
+                                                                <Span Text="edited by " />
+                                                                <Span Text="{Binding UpdatedByName}" />
+                                                                <Span Text=" at " />
+                                                                <Span Text="{Binding UpdatedAt, Converter={StaticResource DateFormatConverter}, ConverterParameter='MMM dd, yyyy h:mm tt'}" />
+                                                            </FormattedString>
+                                                        </Label.FormattedText>
+                                                    </Label>
                                                 </VerticalStackLayout>
                                             </SwipeView>
                                         </DataTemplate>

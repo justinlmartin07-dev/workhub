@@ -12,6 +12,13 @@ public partial class JobDetailPage : ContentPage
         IsNarrowLayout = !(MainLayout.Current?.IsWideLayout ?? false);
         InitializeComponent();
         BindingContext = viewModel;
+        viewModel.NoteEditRequested += OnNoteEditRequested;
+    }
+
+    private void OnNoteEditRequested(object? sender, EventArgs e)
+    {
+        NoteEditor.Focus();
+        NoteEditor.CursorPosition = NoteEditor.Text?.Length ?? 0;
     }
 
     private void OnQuantityEntryUnfocused(object? sender, FocusEventArgs e)

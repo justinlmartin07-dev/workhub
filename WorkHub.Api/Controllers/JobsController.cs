@@ -86,8 +86,10 @@ public class JobsController : ControllerBase
             .Where(j => j.Id == id && j.DeletedAt == null)
             .Include(j => j.Customer)
             .Include(j => j.Photos.OrderByDescending(p => p.UploadedAt))
-            .Include(j => j.Notes.OrderBy(n => n.CreatedAt))
+            .Include(j => j.Notes.Where(n => n.DeletedAt == null).OrderBy(n => n.CreatedAt))
                 .ThenInclude(n => n.CreatedByUser)
+            .Include(j => j.Notes.Where(n => n.DeletedAt == null).OrderBy(n => n.CreatedAt))
+                .ThenInclude(n => n.UpdatedByUser)
             .Include(j => j.InventoryItems)
                 .ThenInclude(ji => ji.InventoryItem)
             .Include(j => j.AdhocItems)
@@ -158,6 +160,7 @@ public class JobsController : ControllerBase
                 CreatedByName = n.CreatedByUser.Name,
                 CreatedAt = n.CreatedAt,
                 UpdatedAt = n.UpdatedAt,
+                UpdatedByName = n.UpdatedByUser != null ? n.UpdatedByUser.Name : null,
             }).ToList(),
             UsedItems = usedItems,
             ToOrderItems = toOrderItems,

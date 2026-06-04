@@ -10,4 +10,7 @@ public class JobNote
     public User CreatedByUser { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public Guid? UpdatedBy { get; set; }
+    public User? UpdatedByUser { get; set; }
+    public DateTime? DeletedAt { get; set; }
 }

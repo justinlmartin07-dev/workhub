@@ -25,7 +25,7 @@ public class JobNotesController : ControllerBase
             return NotFound(new ErrorResponse { Error = "Job not found" });
 
         var notes = await _db.JobNotes
-            .Where(n => n.JobId == jobId)
+            .Where(n => n.JobId == jobId && n.DeletedAt == null)
             .OrderBy(n => n.CreatedAt)
             .Include(n => n.CreatedByUser)
             .Select(n => new JobNoteResponse
@@ -36,6 +36,7 @@ public class JobNotesController : ControllerBase
                 CreatedByName = n.CreatedByUser.Name,
                 CreatedAt = n.CreatedAt,
                 UpdatedAt = n.UpdatedAt,
+                UpdatedByName = n.UpdatedByUser != null ? n.UpdatedByUser.Name : null,
             })
             .ToListAsync();
 
@@ -79,13 +80,20 @@ public class JobNotesController : ControllerBase
     public async Task<IActionResult> Update(Guid jobId, Guid noteId, [FromBody] UpdateJobNoteRequest request)
     {
         var note = await _db.JobNotes.Include(n => n.CreatedByUser)
-            .FirstOrDefaultAsync(n => n.Id == noteId && n.JobId == jobId);
+            .FirstOrDefaultAsync(n => n.Id == noteId && n.JobId == jobId && n.DeletedAt == null);
         if (note == null)
             return NotFound(new ErrorResponse { Error = "Note not found" });
 
+        var userId = this.GetUserId();
         note.Content = request.Content;
         note.UpdatedAt = DateTime.UtcNow;
+        note.UpdatedBy = userId;
         await _db.SaveChangesAsync();
+
+        var updatedByName = await _db.Users
+            .Where(u => u.Id == userId)
+            .Select(u => u.Name)
+            .FirstOrDefaultAsync();
 
         return Ok(new JobNoteResponse
         {
@@ -95,17 +103,18 @@ public class JobNotesController : ControllerBase
             CreatedByName = note.CreatedByUser.Name,
             CreatedAt = note.CreatedAt,
             UpdatedAt = note.UpdatedAt,
+            UpdatedByName = updatedByName,
         });
     }
 
     [HttpDelete("{noteId:guid}")]
     public async Task<IActionResult> Delete(Guid jobId, Guid noteId)
     {
-        var note = await _db.JobNotes.FirstOrDefaultAsync(n => n.Id == noteId && n.JobId == jobId);
+        var note = await _db.JobNotes.FirstOrDefaultAsync(n => n.Id == noteId && n.JobId == jobId && n.DeletedAt == null);
         if (note == null)
             return NotFound(new ErrorResponse { Error = "Note not found" });
 
-        _db.JobNotes.Remove(note);
+        note.DeletedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return NoContent();
     }

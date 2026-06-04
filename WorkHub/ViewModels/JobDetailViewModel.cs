@@ -31,6 +31,15 @@ public partial class JobDetailViewModel : BaseViewModel
     private string _newNoteText = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditingNote))]
+    private JobNoteResponse? _editingNote;
+
+    public bool IsEditingNote => EditingNote != null;
+
+    /// <summary>Raised when a note is loaded into the compose box for editing, so the view can focus it.</summary>
+    public event EventHandler? NoteEditRequested;
+
+    [ObservableProperty]
     private int _locationPhotoCount;
 
     [ObservableProperty]
@@ -165,7 +174,15 @@ public partial class JobDetailViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(NewNoteText) || Job == null) return;
         try
         {
-            await _apiService.CreateJobNoteAsync(Job.Id, new CreateJobNoteRequest { Content = NewNoteText.Trim() });
+            if (EditingNote != null)
+            {
+                await _apiService.UpdateJobNoteAsync(Job.Id, EditingNote.Id, new UpdateJobNoteRequest { Content = NewNoteText.Trim() });
+                EditingNote = null;
+            }
+            else
+            {
+                await _apiService.CreateJobNoteAsync(Job.Id, new CreateJobNoteRequest { Content = NewNoteText.Trim() });
+            }
             NewNoteText = string.Empty;
             await LoadJobAsync();
         }
@@ -173,6 +190,21 @@ public partial class JobDetailViewModel : BaseViewModel
         {
             await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
         }
+    }
+
+    [RelayCommand]
+    private void EditNote(JobNoteResponse note)
+    {
+        EditingNote = note;
+        NewNoteText = note.Content;
+        NoteEditRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void CancelEditNote()
+    {
+        EditingNote = null;
+        NewNoteText = string.Empty;
     }
 
     [RelayCommand]

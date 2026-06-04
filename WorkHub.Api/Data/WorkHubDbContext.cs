@@ -139,9 +139,13 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.CreatedBy).HasColumnName("created_by");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+            e.Property(x => x.UpdatedBy).HasColumnName("updated_by");
+            e.Property(x => x.DeletedAt).HasColumnName("deleted_at");
             e.HasOne(x => x.Job).WithMany(j => j.Notes).HasForeignKey(x => x.JobId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedBy).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.UpdatedByUser).WithMany().HasForeignKey(x => x.UpdatedBy).OnDelete(DeleteBehavior.Restrict);
             e.HasIndex(x => x.JobId).HasDatabaseName("idx_job_notes_job_id");
+            e.HasIndex(x => x.DeletedAt).HasFilter("deleted_at IS NULL").HasDatabaseName("idx_job_notes_deleted_at");
         });
 
         // Job Photos
