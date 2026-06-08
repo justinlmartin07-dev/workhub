@@ -208,6 +208,28 @@ public static class MauiProgram
 					native.Resources["AutoSuggestBoxBorderBrush"] = transparentBrush;
 				});
 
+				// ── MenuFlyoutItem: render icons in their real color ──
+				// WinUI shows a MenuFlyoutItem's icon as monochrome, tinted to the menu
+				// foreground (white on a light menu) — which makes our gray icons nearly
+				// invisible. Turn monochrome off so the actual pixels show.
+				Microsoft.Maui.Handlers.MenuFlyoutItemHandler.Mapper.AppendToMapping("ColorIcon", (handler, view) =>
+				{
+					var native = handler.PlatformView;
+
+					static void Apply(Microsoft.UI.Xaml.Controls.MenuFlyoutItem item)
+					{
+						if (item.Icon is Microsoft.UI.Xaml.Controls.BitmapIcon bitmap)
+							bitmap.ShowAsMonochrome = false;
+					}
+
+					Apply(native);
+					// The icon is assigned asynchronously once the image source resolves,
+					// so re-apply whenever the Icon property changes.
+					native.RegisterPropertyChangedCallback(
+						Microsoft.UI.Xaml.Controls.MenuFlyoutItem.IconProperty,
+						(s, _) => { if (s is Microsoft.UI.Xaml.Controls.MenuFlyoutItem mfi) Apply(mfi); });
+				});
+
 				// ── Frame: increase corner radius globally ──
 				Microsoft.Maui.Handlers.ContentViewHandler.Mapper.AppendToMapping("ThemedFrame", (handler, view) =>
 				{
