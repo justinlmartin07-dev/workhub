@@ -208,30 +208,6 @@ public static class MauiProgram
 					native.Resources["AutoSuggestBoxBorderBrush"] = transparentBrush;
 				});
 
-				// ── Editor: strip native TextBox chrome so it follows our theme ──
-				// The WinUI TextBox draws its own background and border from theme
-				// resources that stay light in dark mode, showing a white box. Make
-				// every state transparent so the card behind and our themed text show.
-				Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping("ThemedInput", (handler, view) =>
-				{
-					if (view is not Editor editor || editor.StyleId != "ThemedInput")
-						return;
-
-					var native = handler.PlatformView;
-					var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
-
-					foreach (var key in new[]
-					{
-						"TextControlBackground", "TextControlBackgroundPointerOver",
-						"TextControlBackgroundFocused", "TextControlBackgroundDisabled",
-						"TextControlBorderBrush", "TextControlBorderBrushPointerOver",
-						"TextControlBorderBrushFocused", "TextControlBorderBrushDisabled",
-					})
-					{
-						native.Resources[key] = transparent;
-					}
-				});
-
 				// ── MenuFlyoutItem: render icons in their real color ──
 				// WinUI shows a MenuFlyoutItem's icon as monochrome, tinted to the menu
 				// foreground (white on a light menu) — which makes our gray icons nearly
