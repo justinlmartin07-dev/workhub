@@ -224,7 +224,7 @@
                                 <Label Text="Editing note — tap ✕ to cancel" FontSize="11" IsVisible="{Binding IsEditingNote}"
                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                    <Editor x:Name="NoteEditor" Placeholder="Add a note..." Text="{Binding NewNoteText}"
+                                    <Editor x:Name="NoteEditor" StyleId="ThemedInput" Placeholder="Add a note..." Text="{Binding NewNoteText}"
                                             AutoSize="TextChanges" MinimumHeightRequest="44" />
                                     <Border Grid.Column="1" WidthRequest="44" HeightRequest="44"
                                             StrokeShape="RoundRectangle 22" StrokeThickness="0"
