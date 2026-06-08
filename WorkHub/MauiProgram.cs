@@ -121,7 +121,7 @@ public static class MauiProgram
 					var native = handler.PlatformView;
 					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
-					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(10);
+					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(6);
 					native.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
 					native.Padding = new Microsoft.UI.Xaml.Thickness(14, 8, 14, 8);
 
@@ -190,13 +190,19 @@ public static class MauiProgram
 					}
 				});
 
+				// ── Button: corner radius ──
+				Microsoft.Maui.Handlers.ButtonHandler.Mapper.AppendToMapping("CornerRadius6", (handler, view) =>
+				{
+					handler.PlatformView.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(6);
+				});
+
 				// ── SearchBar: rounded, filled ──
 				Microsoft.Maui.Handlers.SearchBarHandler.Mapper.AppendToMapping("ThemedSearchBar", (handler, view) =>
 				{
 					var native = handler.PlatformView;
 					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
-					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(12);
+					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(6);
 
 					var bgColor = isDark
 						? Windows.UI.Color.FromArgb(255, 30, 41, 59)
