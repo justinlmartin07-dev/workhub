@@ -11,4 +11,16 @@
         <ShellContent ContentTemplate="{DataTemplate views:WelcomePage}" Shell.NavBarIsVisible="False" />
     </ShellItem>
 
+    <ShellItem Route="login" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate views:LoginPage}" Shell.NavBarIsVisible="False" />
+    </ShellItem>
+
+    <ShellItem Route="main" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate views:MainLayout}" Shell.NavBarIsVisible="False" />
+    </ShellItem>
+
+    <ShellItem Route="update" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate views:UpdateRequiredPage}" Shell.NavBarIsVisible="False" />
+    </ShellItem>
+
 </Shell>

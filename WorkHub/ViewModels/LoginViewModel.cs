@@ -58,7 +58,7 @@ public partial class LoginViewModel : BaseViewModel
 
         try
         {
-            await Shell.Current.GoToAsync("../main");
+            await Shell.Current.GoToAsync("//main");
         }
         catch (Exception ex)
         {

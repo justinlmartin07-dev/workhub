@@ -39,7 +39,7 @@ public partial class App : Application
 				    Version.TryParse(version.MinimumAppVersion, out var min) &&
 				    Normalize(cur) < Normalize(min))
 				{
-					await Shell.Current.GoToAsync("update");
+					await Shell.Current.GoToAsync("//update");
 					return;
 				}
 			}
@@ -47,11 +47,11 @@ public partial class App : Application
 			var hasSession = await _authService.TryRestoreSessionAsync();
 			if (hasSession)
 			{
-				await Shell.Current.GoToAsync("main");
+				await Shell.Current.GoToAsync("//main");
 			}
 			else
 			{
-				await Shell.Current.GoToAsync("login");
+				await Shell.Current.GoToAsync("//login");
 			}
 		}
 		catch (Exception ex)
@@ -59,7 +59,7 @@ public partial class App : Application
 			System.Diagnostics.Debug.WriteLine($"Startup error: {ex}");
 			try
 			{
-				await Shell.Current.GoToAsync("login");
+				await Shell.Current.GoToAsync("//login");
 			}
 			catch (Exception ex2)
 			{

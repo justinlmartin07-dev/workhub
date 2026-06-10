@@ -29,7 +29,7 @@ public class AuthDelegatingHandler : DelegatingHandler
             {
                 if (Application.Current?.MainPage != null)
                 {
-                    await Shell.Current.GoToAsync("../login");
+                    await Shell.Current.GoToAsync("//login");
                 }
             });
         }

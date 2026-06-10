@@ -102,6 +102,6 @@ public partial class ProfileViewModel : BaseViewModel
         bool confirm = await Shell.Current.DisplayAlert("Logout", "Are you sure you want to logout?", "Logout", "Cancel");
         if (!confirm) return;
         await _authService.LogoutAsync();
-        await Shell.Current.GoToAsync("../login");
+        await Shell.Current.GoToAsync("//login");
     }
 }
