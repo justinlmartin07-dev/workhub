@@ -15,6 +15,15 @@ public partial class JobDetailPage : ContentPage
         viewModel.NoteEditRequested += OnNoteEditRequested;
     }
 
+    protected override void OnSizeAllocated(double width, double height)
+    {
+        base.OnSizeAllocated(width, height);
+        // Keep the slide-out parts panel from overflowing narrow phones: cap at 360,
+        // but leave a 32px gutter so the scrim is always tappable to dismiss.
+        if (width > 0)
+            PartsPanel.WidthRequest = Math.Min(360, width - 32);
+    }
+
     private void OnNoteEditRequested(object? sender, EventArgs e)
     {
         NoteEditor.Focus();

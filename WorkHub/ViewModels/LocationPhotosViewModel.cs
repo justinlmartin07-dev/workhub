@@ -37,6 +37,9 @@ public partial class LocationPhotosViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private static async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
+
+    [RelayCommand]
     private async Task LoadPhotosAsync()
     {
         await LoadAsync(async () =>

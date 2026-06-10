@@ -144,19 +144,20 @@
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
                                                 <Button Grid.Column="1" Text="−" FontSize="14" Padding="0" VerticalOptions="Center"
-                                                        WidthRequest="28" HeightRequest="28" CornerRadius="4" MinimumWidthRequest="28" MinimumHeightRequest="28"
+                                                        WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
                                                         BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnDecrementClicked" />
                                                 <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
                                                        HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center"
-                                                       WidthRequest="40" HeightRequest="28" Margin="0"
+                                                       WidthRequest="48" HeightRequest="40" Margin="0"
                                                        Unfocused="OnQuantityEntryUnfocused" />
                                                 <Button Grid.Column="3" Text="+" FontSize="14" Padding="0" VerticalOptions="Center"
-                                                        WidthRequest="28" HeightRequest="28" CornerRadius="4" MinimumWidthRequest="28" MinimumHeightRequest="28"
+                                                        WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
                                                         BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnIncrementClicked" />
-                                                <Label Grid.Column="4" Text="✕" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                                                       VerticalTextAlignment="Center" VerticalOptions="Center" Padding="8,0">
+                                                <Label Grid.Column="4" Text="✕" FontSize="16" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                                       VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"
+                                                       MinimumWidthRequest="40" MinimumHeightRequest="40" Padding="10,8">
                                                     <Label.GestureRecognizers>
                                                         <TapGestureRecognizer
                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
@@ -191,19 +192,20 @@
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
                                                 <Button Grid.Column="1" Text="−" FontSize="14" Padding="0" VerticalOptions="Center"
-                                                        WidthRequest="28" HeightRequest="28" CornerRadius="4" MinimumWidthRequest="28" MinimumHeightRequest="28"
+                                                        WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
                                                         BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnDecrementClicked" />
                                                 <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
                                                        HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center"
-                                                       WidthRequest="40" HeightRequest="28" Margin="0"
+                                                       WidthRequest="48" HeightRequest="40" Margin="0"
                                                        Unfocused="OnQuantityEntryUnfocused" />
                                                 <Button Grid.Column="3" Text="+" FontSize="14" Padding="0" VerticalOptions="Center"
-                                                        WidthRequest="28" HeightRequest="28" CornerRadius="4" MinimumWidthRequest="28" MinimumHeightRequest="28"
+                                                        WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
                                                         BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnIncrementClicked" />
-                                                <Label Grid.Column="4" Text="✕" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                                                       VerticalTextAlignment="Center" VerticalOptions="Center" Padding="8,0">
+                                                <Label Grid.Column="4" Text="✕" FontSize="16" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                                       VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"
+                                                       MinimumWidthRequest="40" MinimumHeightRequest="40" Padding="10,8">
                                                     <Label.GestureRecognizers>
                                                         <TapGestureRecognizer
                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
@@ -315,8 +317,9 @@
             </BoxView.GestureRecognizers>
         </BoxView>
 
-        <!-- Slide-out parts panel -->
-        <Frame BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+        <!-- Slide-out parts panel (width clamped to the screen in OnSizeAllocated) -->
+        <Frame x:Name="PartsPanel"
+               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                CornerRadius="16" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                HorizontalOptions="End" VerticalOptions="Fill" Padding="0"
                WidthRequest="320" IsVisible="{Binding IsPartsPanelOpen}" HasShadow="True">

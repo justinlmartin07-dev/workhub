@@ -6,9 +6,19 @@
              xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Views.LocationPhotosPage"
              x:DataType="vm:LocationPhotosViewModel"
+             Shell.NavBarIsVisible="False"
              Title="Location Photos">
 
-    <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header with back button (page is always pushed via Shell, even on wide) -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="4" Padding="8,8,16,0">
+            <controls:BackButton Command="{Binding GoBackCommand}" />
+            <Label Grid.Column="1" Text="Location Photos" FontSize="20" FontAttributes="Bold"
+                   VerticalTextAlignment="Center" />
+        </Grid>
+
+        <controls:DataStateView Grid.Row="1"
+                            IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
                             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
                             EmptyMessage="No photos at this location" RetryCommand="{Binding LoadPhotosCommand}">
         <controls:DataStateView.Body>
@@ -38,5 +48,6 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </controls:DataStateView.Body>
-    </controls:DataStateView>
+        </controls:DataStateView>
+    </Grid>
 </ContentPage>
