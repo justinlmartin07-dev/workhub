@@ -63,7 +63,10 @@ public partial class CalendarPage : ContentView
     protected override void OnHandlerChanged()
     {
         base.OnHandlerChanged();
-        if (Handler != null && _viewModel.Events.Count == 0)
+        // Fires on every reattach (tab switch back) — the VM shows the loading
+        // state on first load and silently refreshes (skipping the grid rebuild
+        // when nothing changed) after that.
+        if (Handler != null)
         {
             _viewModel.LoadEventsCommand.Execute(null);
         }
@@ -74,11 +77,21 @@ public partial class CalendarPage : ContentView
     }
 
 #if WINDOWS
+    private Microsoft.UI.Xaml.UIElement? _scrollNative;
+
     private void AttachScrollHandler()
     {
+        // The page is cached and reattached on every tab return — drop the old
+        // subscription first so wheel events don't fire once per attach.
+        if (_scrollNative != null)
+        {
+            _scrollNative.PointerWheelChanged -= OnPointerWheelChanged;
+            _scrollNative = null;
+        }
         if (Handler?.PlatformView is Microsoft.UI.Xaml.UIElement nativeView)
         {
             nativeView.PointerWheelChanged += OnPointerWheelChanged;
+            _scrollNative = nativeView;
         }
     }
 

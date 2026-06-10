@@ -16,9 +16,15 @@ public partial class MainLayout : ContentPage
     private readonly IServiceProvider _serviceProvider;
     private int _lastTabIndex = -1;
     private bool _isWide;
-    private bool _suppressNextDetailRequest;
     private double _listColumnWidth;
     private double _splitterDragStartWidth;
+
+    // Tab content is created once and reused so each page keeps its state
+    // (list data, search text, selection, scroll) across tab switches.
+    private readonly Dictionary<int, View> _tabPages = new();
+    // Each tab's detail pane is parked here on switch and restored on return,
+    // so in-progress work (including unsaved edits) survives tab changes.
+    private readonly Dictionary<int, View?> _tabDetails = new();
 
     public static MainLayout? Current { get; private set; }
 
@@ -257,29 +263,35 @@ public partial class MainLayout : ContentPage
         }
     }
 
-    private async void LoadTabContent(int tabIndex)
+    private void LoadTabContent(int tabIndex)
     {
         if (tabIndex == _lastTabIndex) return;
 
-        if (_isWide && await CheckUnsavedChangesAsync())
-        {
-            _viewModel.SelectedTabIndex = _lastTabIndex;
-            return;
-        }
+        // Park the outgoing tab's detail pane so whatever was open (including an
+        // unsaved edit) is restored when the user comes back to that tab.
+        if (_lastTabIndex >= 0)
+            _tabDetails[_lastTabIndex] = DetailPanel.Content;
 
         _lastTabIndex = tabIndex;
 
-        ResetDetailPanel();
+        if (_tabDetails.TryGetValue(tabIndex, out var detail) && detail != null)
+            DetailPanel.Content = detail;
+        else
+            ResetDetailPanel();
 
-        View listContent = tabIndex switch
+        if (!_tabPages.TryGetValue(tabIndex, out var listContent))
         {
-            0 => _serviceProvider.GetRequiredService<CustomersListPage>(),
-            1 => _serviceProvider.GetRequiredService<JobsListPage>(),
-            2 => _serviceProvider.GetRequiredService<InventoryPage>(),
-            3 => _serviceProvider.GetRequiredService<CalendarPage>(),
-            4 => _serviceProvider.GetRequiredService<OrdersPage>(),
-            _ => new Label { Text = "Unknown tab" }
-        };
+            listContent = tabIndex switch
+            {
+                0 => _serviceProvider.GetRequiredService<CustomersListPage>(),
+                1 => _serviceProvider.GetRequiredService<JobsListPage>(),
+                2 => _serviceProvider.GetRequiredService<InventoryPage>(),
+                3 => _serviceProvider.GetRequiredService<CalendarPage>(),
+                4 => _serviceProvider.GetRequiredService<OrdersPage>(),
+                _ => new Label { Text = "Unknown tab" }
+            };
+            _tabPages[tabIndex] = listContent;
+        }
 
         ListPanel.Content = listContent;
         if (_isWide) UpdateColumnProportions();
@@ -319,7 +331,6 @@ public partial class MainLayout : ContentPage
                     JobEditViewModel j => j.JobId,
                     _ => null
                 };
-                _suppressNextDetailRequest = true;
                 WeakReferenceMessenger.Default.Send(new SelectListItemMessage(
                     new SelectListItemRequest { ItemId = editId ?? "", TabIndex = _viewModel.SelectedTabIndex }));
             }
@@ -330,13 +341,13 @@ public partial class MainLayout : ContentPage
 
     private async void HandleDetailRequest(DetailRequest request)
     {
-        if (_suppressNextDetailRequest)
-        {
-            _suppressNextDetailRequest = false;
-            return;
-        }
+        var switchingTab = request.SwitchTabIndex.HasValue && _isWide
+            && request.SwitchTabIndex.Value != _viewModel.SelectedTabIndex;
 
-        if (_isWide && await CheckUnsavedChangesAsync())
+        // A same-tab request replaces the visible detail — guard unsaved edits.
+        // A tab-switch request parks the current detail instead (nothing is lost),
+        // so the guard runs after the switch against the target tab's parked detail.
+        if (_isWide && !switchingTab && await CheckUnsavedChangesAsync())
             return;
 
         // Only switch tabs in wide mode — in narrow mode the detail page is pushed
@@ -344,9 +355,14 @@ public partial class MainLayout : ContentPage
         // when the user navigates back.
         if (request.SwitchTabIndex.HasValue && _isWide)
         {
-            _viewModel.SelectedTabIndex = request.SwitchTabIndex.Value;
-            _lastTabIndex = -1; // Force reload
-            LoadTabContent(request.SwitchTabIndex.Value);
+            if (switchingTab)
+            {
+                _viewModel.SelectedTabIndex = request.SwitchTabIndex.Value;
+                LoadTabContent(request.SwitchTabIndex.Value);
+
+                if (await CheckUnsavedChangesAsync())
+                    return;
+            }
 
             // Tell the list to select/scroll to the item
             if (request.QueryParams.TryGetValue("id", out var id))

@@ -23,6 +23,7 @@ public partial class JobsListViewModel : BaseViewModel
 
     private string? _pendingSelectId;
     private CancellationTokenSource? _searchCts;
+    private bool _suppressSelectionNav;
 
     public event Action<JobListItemResponse>? ScrollToRequested;
 
@@ -60,11 +61,41 @@ public partial class JobsListViewModel : BaseViewModel
                 page++;
             } while (page <= totalPages);
 
-            Jobs = new ObservableCollection<JobListItemResponse>(all);
+            if (Jobs.Count == 0)
+            {
+                Jobs = new ObservableCollection<JobListItemResponse>(all);
+            }
+            else
+            {
+                var selectedId = SelectedJob?.Id;
+                Jobs.MergeInto(all, j => j.Id, RowUnchanged);
+                ReselectById(selectedId);
+            }
+
             if (Jobs.Count == 0) SetEmpty();
             else SetContent();
             if (TrySelectPending()) _pendingSelectId = null;
-        });
+        }, showLoading: Jobs.Count == 0);
+    }
+
+    private static bool RowUnchanged(JobListItemResponse a, JobListItemResponse b) =>
+        a.Title == b.Title
+        && a.CustomerName == b.CustomerName
+        && a.CustomerId == b.CustomerId
+        && a.Status == b.Status
+        && a.Priority == b.Priority
+        && a.CreatedAt == b.CreatedAt;
+
+    // After a merge replaced the selected item with a fresh instance, re-point the
+    // selection at the new instance without re-triggering detail navigation.
+    private void ReselectById(Guid? selectedId)
+    {
+        if (selectedId == null || SelectedJob?.Id == selectedId) return;
+        var match = Jobs.FirstOrDefault(j => j.Id == selectedId);
+        if (match == null) return;
+        _suppressSelectionNav = true;
+        try { SelectedJob = match; }
+        finally { _suppressSelectionNav = false; }
     }
 
     private bool TrySelectPending()
@@ -80,7 +111,11 @@ public partial class JobsListViewModel : BaseViewModel
         var match = Jobs.FirstOrDefault(j => j.Id == id);
         if (match != null)
         {
-            SelectedJob = match;
+            // Select without navigating — the sender of SelectListItemMessage
+            // shows the detail itself; this is just list highlight + scroll.
+            _suppressSelectionNav = true;
+            try { SelectedJob = match; }
+            finally { _suppressSelectionNav = false; }
             ScrollToRequested?.Invoke(match);
             return true;
         }
@@ -123,7 +158,7 @@ public partial class JobsListViewModel : BaseViewModel
     [RelayCommand]
     private void SelectJob(JobListItemResponse job)
     {
-        if (job == null) return;
+        if (job == null || _suppressSelectionNav) return;
         var id = job.Id.ToString();
         WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
         {

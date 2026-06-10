@@ -31,6 +31,10 @@ public partial class BaseViewModel : ObservableObject
     {
         if (IsBusy) return;
 
+        // A refresh of already-visible content shouldn't blank the page on failure —
+        // keep showing the (stale) data instead of swapping in an error state.
+        var keepContentOnError = !showLoading && HasContent;
+
         try
         {
             IsBusy = true;
@@ -40,22 +44,29 @@ public partial class BaseViewModel : ObservableObject
 
             await action();
 
-            HasContent = true;
-            IsEmpty = false;
+            // The action may have called SetEmpty/SetContent; only apply the
+            // default "has content" outcome when it didn't decide a state itself.
+            if (!IsEmpty && !HasContent) SetContent();
         }
         catch (HttpRequestException ex)
         {
-            ErrorMessage = ex.StatusCode.HasValue
-                ? $"Server error ({(int)ex.StatusCode}): {ex.Message}"
-                : "Unable to connect to server";
-            HasError = true;
-            HasContent = false;
+            if (!keepContentOnError)
+            {
+                ErrorMessage = ex.StatusCode.HasValue
+                    ? $"Server error ({(int)ex.StatusCode}): {ex.Message}"
+                    : "Unable to connect to server";
+                HasError = true;
+                HasContent = false;
+            }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"{ex.GetType().Name}: {ex.Message}";
-            HasError = true;
-            HasContent = false;
+            if (!keepContentOnError)
+            {
+                ErrorMessage = $"{ex.GetType().Name}: {ex.Message}";
+                HasError = true;
+                HasContent = false;
+            }
             var path = Path.Combine(FileSystem.AppDataDirectory, "crash.log");
             File.WriteAllText(path, $"{DateTime.Now}\n{ex}\n");
         }

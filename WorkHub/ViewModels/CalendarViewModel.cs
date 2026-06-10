@@ -27,9 +27,17 @@ public partial class CalendarViewModel : BaseViewModel
     [ObservableProperty]
     private string _monthYearLabel = string.Empty;
 
+    private DateTime? _loadedMonth;
+
     public CalendarViewModel(ApiService apiService)
     {
         _apiService = apiService;
+
+        WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
+        {
+            if (m.Value == "event")
+                MainThread.BeginInvokeOnMainThread(() => LoadEventsCommand.Execute(null));
+        });
     }
 
     partial void OnSelectedDateChanged(DateTime value)
@@ -41,16 +49,51 @@ public partial class CalendarViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadEventsAsync()
     {
+        var month = new DateTime(SelectedDate.Year, SelectedDate.Month, 1);
+        var sameMonth = _loadedMonth == month;
+
         await LoadAsync(async () =>
         {
             var from = new DateTime(SelectedDate.Year, SelectedDate.Month, 1, 0, 0, 0, DateTimeKind.Utc);
             var to = from.AddMonths(1).AddSeconds(-1);
             var events = await _apiService.GetEventsAsync(from, to);
+            _loadedMonth = month;
+
+            // Refreshing the same month with identical events — skip the expensive
+            // grid rebuild entirely.
+            if (sameMonth && EventsUnchanged(events))
+            {
+                SetContent();
+                return;
+            }
+
             Events = new ObservableCollection<CalendarEventResponse>(events);
             BuildGrid();
             FilterDayEvents();
             SetContent();
-        });
+        }, showLoading: !sameMonth);
+    }
+
+    private bool EventsUnchanged(List<CalendarEventResponse> fresh)
+    {
+        if (fresh.Count != Events.Count) return false;
+        var current = Events.OrderBy(e => e.Id).ToList();
+        var incoming = fresh.OrderBy(e => e.Id).ToList();
+        for (int i = 0; i < current.Count; i++)
+        {
+            var a = current[i];
+            var b = incoming[i];
+            if (a.Id != b.Id
+                || a.Title != b.Title
+                || a.Description != b.Description
+                || a.StartTime != b.StartTime
+                || a.EndTime != b.EndTime
+                || a.CustomerId != b.CustomerId
+                || a.JobId != b.JobId
+                || a.Assignments.Count != b.Assignments.Count)
+                return false;
+        }
+        return true;
     }
 
     private void BuildGrid()

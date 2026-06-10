@@ -47,11 +47,21 @@ public partial class InventoryViewModel : BaseViewModel
                 page++;
             } while (page <= totalPages);
 
-            Items = new ObservableCollection<InventoryItemResponse>(all);
+            if (Items.Count == 0)
+                Items = new ObservableCollection<InventoryItemResponse>(all);
+            else
+                Items.MergeInto(all, i => i.Id, RowUnchanged);
+
             if (Items.Count == 0) SetEmpty();
             else SetContent();
-        });
+        }, showLoading: Items.Count == 0);
     }
+
+    private static bool RowUnchanged(InventoryItemResponse a, InventoryItemResponse b) =>
+        a.Name == b.Name
+        && a.Description == b.Description
+        && a.PartNumber == b.PartNumber
+        && a.UpdatedAt == b.UpdatedAt;
 
     partial void OnSearchTextChanged(string value)
     {

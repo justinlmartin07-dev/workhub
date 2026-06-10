@@ -303,6 +303,7 @@ public partial class EventDetailViewModel : BaseViewModel
             if (!HasError)
             {
                 IsDirty = false;
+                WeakReferenceMessenger.Default.Send(new DataChangedMessage("event"));
                 if (IsNew)
                     NavigateBackToDaySummary();
             }
@@ -325,6 +326,7 @@ public partial class EventDetailViewModel : BaseViewModel
         try
         {
             await _apiService.DeleteEventAsync(Guid.Parse(EventId!));
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("event"));
             NavigateBackToDaySummary();
         }
         catch (Exception ex)

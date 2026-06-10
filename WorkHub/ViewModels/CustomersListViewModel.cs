@@ -23,6 +23,7 @@ public partial class CustomersListViewModel : BaseViewModel
 
     private string? _pendingSelectId;
     private CancellationTokenSource? _searchCts;
+    private bool _suppressSelectionNav;
 
     public event Action<CustomerResponse>? ScrollToRequested;
 
@@ -60,11 +61,40 @@ public partial class CustomersListViewModel : BaseViewModel
                 page++;
             } while (page <= totalPages);
 
-            Customers = new ObservableCollection<CustomerResponse>(all);
+            if (Customers.Count == 0)
+            {
+                Customers = new ObservableCollection<CustomerResponse>(all);
+            }
+            else
+            {
+                var selectedId = SelectedCustomer?.Id;
+                Customers.MergeInto(all, c => c.Id, RowUnchanged);
+                ReselectById(selectedId);
+            }
+
             if (Customers.Count == 0) SetEmpty();
             else SetContent();
             if (TrySelectPending()) _pendingSelectId = null;
-        });
+        }, showLoading: Customers.Count == 0);
+    }
+
+    private static bool RowUnchanged(CustomerResponse a, CustomerResponse b) =>
+        a.Name == b.Name
+        && a.Address == b.Address
+        && a.UpdatedAt == b.UpdatedAt
+        && a.PrimaryPhone == b.PrimaryPhone
+        && a.PrimaryEmail == b.PrimaryEmail;
+
+    // After a merge replaced the selected item with a fresh instance, re-point the
+    // selection at the new instance without re-triggering detail navigation.
+    private void ReselectById(Guid? selectedId)
+    {
+        if (selectedId == null || SelectedCustomer?.Id == selectedId) return;
+        var match = Customers.FirstOrDefault(c => c.Id == selectedId);
+        if (match == null) return;
+        _suppressSelectionNav = true;
+        try { SelectedCustomer = match; }
+        finally { _suppressSelectionNav = false; }
     }
 
     private bool TrySelectPending()
@@ -80,7 +110,11 @@ public partial class CustomersListViewModel : BaseViewModel
         var match = Customers.FirstOrDefault(c => c.Id == id);
         if (match != null)
         {
-            SelectedCustomer = match;
+            // Select without navigating — the sender of SelectListItemMessage
+            // shows the detail itself; this is just list highlight + scroll.
+            _suppressSelectionNav = true;
+            try { SelectedCustomer = match; }
+            finally { _suppressSelectionNav = false; }
             ScrollToRequested?.Invoke(match);
             return true;
         }
@@ -123,7 +157,7 @@ public partial class CustomersListViewModel : BaseViewModel
     [RelayCommand]
     private void SelectCustomer(CustomerResponse customer)
     {
-        if (customer == null) return;
+        if (customer == null || _suppressSelectionNav) return;
         SelectedCustomer = customer;
         var id = customer.Id.ToString();
         WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
