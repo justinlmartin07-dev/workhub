@@ -1,0 +1,20 @@
+# Build output
+bin/
+obj/
+**/bin/
+**/obj/
+
+# Local dev secrets — must never end up in the image
+appsettings.Development.json
+
+# Docker / git
+Dockerfile
+.dockerignore
+.git/
+.gitignore
+
+# IDE / OS cruft
+.vs/
+.vscode/
+*.user
+.DS_Store
