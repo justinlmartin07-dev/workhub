@@ -37,7 +37,7 @@ public partial class App : Application
 				var currentVersion = AppInfo.VersionString;
 				if (Version.TryParse(currentVersion, out var cur) &&
 				    Version.TryParse(version.MinimumAppVersion, out var min) &&
-				    cur < min)
+				    Normalize(cur) < Normalize(min))
 				{
 					await Shell.Current.GoToAsync("update");
 					return;
@@ -67,4 +67,9 @@ public partial class App : Application
 			}
 		}
 	}
+
+	// Version("1.0") compares less than Version("1.0.0") because missing
+	// components default to -1, so pad to four components before comparing.
+	private static Version Normalize(Version v) =>
+		new(v.Major, Math.Max(v.Minor, 0), Math.Max(v.Build, 0), Math.Max(v.Revision, 0));
 }
