@@ -157,6 +157,19 @@ public class ApiService
         response.EnsureSuccessStatusCode();
     }
 
+    // Orders (to-order parts across all active jobs)
+    public async Task<List<OrderLineResponse>> GetOrdersAsync()
+        => await _httpClient.GetFromJsonAsync<List<OrderLineResponse>>("v1/orders") ?? new();
+
+    // Marks a to-order part ordered/unordered via the per-job item endpoints.
+    public async Task SetJobItemOrderedAsync(Guid jobId, Guid itemId, string source, bool ordered)
+    {
+        if (source == "adhoc")
+            await UpdateJobAdhocItemAsync(jobId, itemId, new UpdateJobAdhocItemRequest { Ordered = ordered });
+        else
+            await UpdateJobItemAsync(jobId, itemId, new UpdateJobInventoryRequest { Ordered = ordered });
+    }
+
     // Inventory
     public async Task<PagedResponse<InventoryItemResponse>> GetInventoryAsync(string? search = null, int page = 1, int pageSize = 25)
     {

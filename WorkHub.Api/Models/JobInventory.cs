@@ -9,6 +9,7 @@ public class JobInventory
     public InventoryItem InventoryItem { get; set; } = null!;
     public int Quantity { get; set; } = 1;
     public string ListType { get; set; } = string.Empty; // "used" or "to_order"
+    public DateTime? OrderedAt { get; set; } // set when a "to_order" item is marked ordered
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

@@ -189,7 +189,49 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Tab 4: Profile (no selected state, navigates via Shell) -->
+                    <!-- Tab 4: Orders -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=4}"
+                                         Value="True">
+                                <Setter Property="BackgroundColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="4" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
+                            <shapes:Path Data="M280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM246-720l96 200h280l110-200H246Zm-38-80h590q23 0 35 20.5t1 41.5L692-482q-11 20-29.5 31T622-440H324l-44 80h480v80H280q-45 0-68-39.5t-2-78.5l54-98-144-304H40v-80h130l38 80Zm134 280h280-280Z"
+                                         Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                         Aspect="Uniform" WidthRequest="20" HeightRequest="20"
+                                         HorizontalOptions="Center">
+                                <shapes:Path.Triggers>
+                                    <DataTrigger TargetType="shapes:Path"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=4}"
+                                                 Value="True">
+                                        <Setter Property="Fill"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </shapes:Path.Triggers>
+                            </shapes:Path>
+                            <Label Text="Orders" FontSize="10" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=4}"
+                                                 Value="True">
+                                        <Setter Property="TextColor"
+                                                Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tab 5: Profile (no selected state, navigates via Shell) -->
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
                             Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
                         <Border.GestureRecognizers>
@@ -235,11 +277,11 @@
 
         <!-- Bottom Tab Bar (narrow only) -->
         <Grid x:Name="BottomTabs" Grid.Row="1"
-              ColumnDefinitions="*,*,*,*,*" HeightRequest="64"
+              ColumnDefinitions="*,*,*,*,*,*" HeightRequest="64"
               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
               Padding="0">
             <!-- Thin top border line -->
-            <BoxView Grid.ColumnSpan="5" HeightRequest="0.5" VerticalOptions="Start"
+            <BoxView Grid.ColumnSpan="6" HeightRequest="0.5" VerticalOptions="Start"
                      BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}" />
 
             <!-- Tab 0: Customers -->
@@ -410,8 +452,50 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Tab 4: Profile (no selected state, navigates via Shell) -->
+            <!-- Tab 4: Orders -->
             <Border Grid.Column="4" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border"
+                                 Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=4}"
+                                 Value="True">
+                        <Setter Property="BackgroundColor"
+                                Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="4" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                    <shapes:Path Data="M280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM246-720l96 200h280l110-200H246Zm-38-80h590q23 0 35 20.5t1 41.5L692-482q-11 20-29.5 31T622-440H324l-44 80h480v80H280q-45 0-68-39.5t-2-78.5l54-98-144-304H40v-80h130l38 80Zm134 280h280-280Z"
+                                 Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                 Aspect="Uniform" WidthRequest="18" HeightRequest="18"
+                                 HorizontalOptions="Center">
+                        <shapes:Path.Triggers>
+                            <DataTrigger TargetType="shapes:Path"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=4}"
+                                         Value="True">
+                                <Setter Property="Fill"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </shapes:Path.Triggers>
+                    </shapes:Path>
+                    <Label Text="Orders" FontSize="10" HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=4}"
+                                         Value="True">
+                                <Setter Property="TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource PrimaryMuted}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Tab 5: Profile (no selected state, navigates via Shell) -->
+            <Border Grid.Column="5" StrokeThickness="0" StrokeShape="RoundRectangle 14"
                     Margin="6,8" Padding="0" BackgroundColor="Transparent">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding GoToProfileCommand}" />

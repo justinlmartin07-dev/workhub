@@ -277,6 +277,7 @@ public partial class MainLayout : ContentPage
             1 => _serviceProvider.GetRequiredService<JobsListPage>(),
             2 => _serviceProvider.GetRequiredService<InventoryPage>(),
             3 => _serviceProvider.GetRequiredService<CalendarPage>(),
+            4 => _serviceProvider.GetRequiredService<OrdersPage>(),
             _ => new Label { Text = "Unknown tab" }
         };
 
@@ -362,6 +363,7 @@ public partial class MainLayout : ContentPage
                 "jobDetail" => CreateDetailView<JobDetailPage, JobDetailViewModel>(request),
                 "jobEdit" => CreateDetailView<JobEditPage, JobEditViewModel>(request),
                 "inventoryDetail" => CreateDetailView<InventoryItemDetailPage, InventoryItemDetailViewModel>(request),
+                "orderDetail" => CreateDetailView<OrderDetailPage, OrderDetailViewModel>(request),
                 "eventDetail" => CreateDetailView<EventDetailPage, EventDetailViewModel>(request),
                 "daySummary" => CreateDetailView<CalendarDaySummaryPage, CalendarDaySummaryViewModel>(request),
                 _ => null

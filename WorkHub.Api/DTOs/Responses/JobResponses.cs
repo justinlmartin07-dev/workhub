@@ -50,4 +50,21 @@ public class JobItemResponse
     public string ListType { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty; // "library" or "adhoc"
     public Guid? InventoryItemId { get; set; }
+    public DateTime? OrderedAt { get; set; }
+}
+
+// A single "to order" part across all jobs, for the ordering dashboard.
+public class OrderLineResponse
+{
+    public Guid Id { get; set; }
+    public string Source { get; set; } = string.Empty; // "library" or "adhoc"
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public string? PartNumber { get; set; }
+    public int Quantity { get; set; }
+    public DateTime? OrderedAt { get; set; }
+    public Guid JobId { get; set; }
+    public string JobTitle { get; set; } = string.Empty;
+    public Guid CustomerId { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
 }

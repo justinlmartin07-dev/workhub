@@ -42,6 +42,7 @@ public class JobItemsController : ControllerBase
                 ListType = ji.ListType,
                 Source = "library",
                 InventoryItemId = ji.InventoryItemId,
+                OrderedAt = ji.OrderedAt,
             })
             .ToListAsync();
 
@@ -82,6 +83,7 @@ public class JobItemsController : ControllerBase
             ListType = ji.ListType,
             Source = "library",
             InventoryItemId = ji.InventoryItemId,
+            OrderedAt = ji.OrderedAt,
         });
     }
 
@@ -97,6 +99,7 @@ public class JobItemsController : ControllerBase
 
         if (request.Quantity.HasValue) ji.Quantity = request.Quantity.Value;
         if (request.ListType != null) ji.ListType = request.ListType;
+        if (request.Ordered.HasValue) ji.OrderedAt = request.Ordered.Value ? DateTime.UtcNow : null;
         ji.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -111,6 +114,7 @@ public class JobItemsController : ControllerBase
             ListType = ji.ListType,
             Source = "library",
             InventoryItemId = ji.InventoryItemId,
+            OrderedAt = ji.OrderedAt,
         });
     }
 

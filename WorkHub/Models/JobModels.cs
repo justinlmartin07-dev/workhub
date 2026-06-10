@@ -94,6 +94,7 @@ public class UpdateJobInventoryRequest
 {
     public int? Quantity { get; set; }
     public string? ListType { get; set; }
+    public bool? Ordered { get; set; }
 }
 
 public class CreateJobAdhocItemRequest
@@ -110,4 +111,5 @@ public class UpdateJobAdhocItemRequest
     public string? Description { get; set; }
     public int? Quantity { get; set; }
     public string? ListType { get; set; }
+    public bool? Ordered { get; set; }
 }

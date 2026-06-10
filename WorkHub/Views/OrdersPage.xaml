@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
+             x:Class="WorkHub.Views.OrdersPage"
+             x:DataType="vm:OrdersViewModel">
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Padding="16,12,16,8" Spacing="2">
+            <Label Text="To Order" FontSize="20" FontAttributes="Bold" />
+            <HorizontalStackLayout Spacing="6">
+                <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                       FontAttributes="Bold" Text="{Binding OutstandingCount, StringFormat='{0} to order'}" />
+                <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" Text="•" />
+                <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                       Text="{Binding OrderedCount, StringFormat='{0} ordered'}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+
+        <controls:DataStateView Grid.Row="1"
+            IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
+            HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
+            EmptyMessage="Nothing to order" RetryCommand="{Binding LoadOrdersCommand}">
+            <controls:DataStateView.Body>
+                <CollectionView ItemsSource="{Binding Orders}"
+                                SelectionMode="Single"
+                                SelectionChangedCommand="{Binding SelectOrderCommand}"
+                                SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}"
+                                TranslationX="6" Margin="0,0,6,0">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="4" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:OrderLineResponse">
+                            <Border Margin="10,0" Padding="0"
+                                    StrokeShape="RoundRectangle 12"
+                                    StrokeThickness="0"
+                                    Stroke="Transparent"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                                <Setter Property="StrokeThickness" Value="2" />
+                                                <Setter Property="Shadow">
+                                                    <Shadow Brush="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                            Offset="0,2" Radius="12" Opacity="0.25" />
+                                                </Setter>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <Grid ColumnDefinitions="4,*" ColumnSpacing="0">
+                                    <!-- Accent bar -->
+                                    <BoxView Grid.Column="0" WidthRequest="4"
+                                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                             Margin="0,6" />
+
+                                    <!-- Content -->
+                                    <Grid Grid.Column="1" Padding="14,12" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                                            <Label Text="{Binding Name}" FontSize="15" FontAttributes="Bold">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsOrdered}" Value="True">
+                                                        <Setter Property="TextDecorations" Value="Strikethrough" />
+                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                            <Label FontSize="12"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                                   LineBreakMode="TailTruncation" MaxLines="1">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding JobTitle}" />
+                                                        <Span Text="  •  " />
+                                                        <Span Text="{Binding CustomerName}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </VerticalStackLayout>
+
+                                        <!-- Quantity badge -->
+                                        <Border Grid.Column="1" VerticalOptions="Center" Padding="10,4"
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}">
+                                            <Label FontSize="13" FontAttributes="Bold" VerticalOptions="Center"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"
+                                                   Text="{Binding Quantity, StringFormat='×{0}'}" />
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </controls:DataStateView.Body>
+        </controls:DataStateView>
+    </Grid>
+</ContentView>

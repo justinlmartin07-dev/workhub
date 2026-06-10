@@ -369,6 +369,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<InventoryViewModel>();
 		builder.Services.AddTransient<InventoryItemDetailViewModel>();
 		builder.Services.AddTransient<CalendarViewModel>();
+		builder.Services.AddTransient<OrdersViewModel>();
+		builder.Services.AddTransient<OrderDetailViewModel>();
 		builder.Services.AddTransient<EventDetailViewModel>();
 		builder.Services.AddTransient<CalendarDaySummaryViewModel>();
 		builder.Services.AddTransient<PhotoViewerViewModel>();
@@ -390,6 +392,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<InventoryPage>();
 		builder.Services.AddTransient<InventoryItemDetailPage>();
 		builder.Services.AddTransient<CalendarPage>();
+		builder.Services.AddTransient<OrdersPage>();
+		builder.Services.AddTransient<OrderDetailPage>();
 		builder.Services.AddTransient<EventDetailPage>();
 		builder.Services.AddTransient<CalendarDaySummaryPage>();
 		builder.Services.AddTransient<PhotoViewerPopup>();

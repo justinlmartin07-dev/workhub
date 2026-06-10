@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WorkHub.ViewModels"
+             xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
+             x:Class="WorkHub.Views.OrderDetailPage"
+             x:DataType="vm:OrderDetailViewModel"
+             Title="Part">
+
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="Auto,*">
+            <controls:BackButton Command="{Binding CancelCommand}" />
+            <Label Grid.Column="1" Text="Part" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
+        </Grid>
+    </Shell.TitleView>
+
+    <Grid>
+        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                           VerticalOptions="Center" HorizontalOptions="Center" />
+
+        <ScrollView IsVisible="{Binding Order, Converter={StaticResource IsNotNullConverter}}">
+            <VerticalStackLayout Padding="24" Spacing="20">
+
+                <!-- Part name -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="PART" FontSize="11" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    <Label Text="{Binding Order.Name}" FontSize="24" FontAttributes="Bold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding Order.IsOrdered}" Value="True">
+                                <Setter Property="TextDecorations" Value="Strikethrough" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+
+                <!-- Description -->
+                <VerticalStackLayout Spacing="3"
+                                     IsVisible="{Binding Order.Description, Converter={StaticResource StringNotEmptyConverter}}">
+                    <Label Text="Description" Style="{StaticResource FieldLabel}" />
+                    <Label Text="{Binding Order.Description}" FontSize="15" />
+                </VerticalStackLayout>
+
+                <!-- Part number -->
+                <VerticalStackLayout Spacing="3"
+                                     IsVisible="{Binding Order.PartNumber, Converter={StaticResource StringNotEmptyConverter}}">
+                    <Label Text="Part Number" Style="{StaticResource FieldLabel}" />
+                    <Label Text="{Binding Order.PartNumber}" FontSize="15" FontAttributes="Bold" />
+                </VerticalStackLayout>
+
+                <!-- Quantity -->
+                <VerticalStackLayout Spacing="3">
+                    <Label Text="Quantity" Style="{StaticResource FieldLabel}" />
+                    <Label Text="{Binding Order.Quantity}" FontSize="15" FontAttributes="Bold" />
+                </VerticalStackLayout>
+
+                <!-- Ordered toggle -->
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,12" Margin="0,8,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <CheckBox Grid.Column="0" VerticalOptions="Center"
+                                  IsChecked="{Binding Order.IsOrdered, Mode=OneWay}"
+                                  CheckedChanged="OnOrderedChanged"
+                                  Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Mark as ordered" FontSize="15" FontAttributes="Bold" />
+                            <Label Text="Ordered" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                   IsVisible="{Binding Order.IsOrdered}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

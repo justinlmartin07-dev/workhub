@@ -187,6 +187,7 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.InventoryItemId).HasColumnName("inventory_item_id");
             e.Property(x => x.Quantity).HasColumnName("quantity").HasDefaultValue(1);
             e.Property(x => x.ListType).HasColumnName("list_type").HasMaxLength(20).IsRequired();
+            e.Property(x => x.OrderedAt).HasColumnName("ordered_at");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             e.HasOne(x => x.Job).WithMany(j => j.InventoryItems).HasForeignKey(x => x.JobId).OnDelete(DeleteBehavior.Cascade);
@@ -206,6 +207,7 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.Description).HasColumnName("description");
             e.Property(x => x.Quantity).HasColumnName("quantity").HasDefaultValue(1);
             e.Property(x => x.ListType).HasColumnName("list_type").HasMaxLength(20).IsRequired();
+            e.Property(x => x.OrderedAt).HasColumnName("ordered_at");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             e.HasOne(x => x.Job).WithMany(j => j.AdhocItems).HasForeignKey(x => x.JobId).OnDelete(DeleteBehavior.Cascade);

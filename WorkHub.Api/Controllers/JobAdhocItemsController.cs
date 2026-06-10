@@ -38,6 +38,7 @@ public class JobAdhocItemsController : ControllerBase
                 Quantity = ai.Quantity,
                 ListType = ai.ListType,
                 Source = "adhoc",
+                OrderedAt = ai.OrderedAt,
             })
             .ToListAsync();
 
@@ -73,6 +74,7 @@ public class JobAdhocItemsController : ControllerBase
             Quantity = item.Quantity,
             ListType = item.ListType,
             Source = "adhoc",
+            OrderedAt = item.OrderedAt,
         });
     }
 
@@ -87,6 +89,7 @@ public class JobAdhocItemsController : ControllerBase
         if (request.Description != null) item.Description = request.Description;
         if (request.Quantity.HasValue) item.Quantity = request.Quantity.Value;
         if (request.ListType != null) item.ListType = request.ListType;
+        if (request.Ordered.HasValue) item.OrderedAt = request.Ordered.Value ? DateTime.UtcNow : null;
         item.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -99,6 +102,7 @@ public class JobAdhocItemsController : ControllerBase
             Quantity = item.Quantity,
             ListType = item.ListType,
             Source = "adhoc",
+            OrderedAt = item.OrderedAt,
         });
     }
 
