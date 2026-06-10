@@ -13,13 +13,24 @@ namespace WorkHub;
 
 public static class MauiProgram
 {
-	private const string ApiBaseUrl = "http://localhost:5180/";
-
 	public static IServiceProvider Services { get; private set; } = null!;
+
+	// Reads the API base URL from the bundled Resources/Raw/appsettings.json.
+	// Edit that file (and rebuild) to point the app at a different API.
+	private static string LoadApiBaseUrl()
+	{
+		using var stream = Microsoft.Maui.Storage.FileSystem.OpenAppPackageFileAsync("appsettings.json")
+			.GetAwaiter().GetResult();
+		using var reader = new StreamReader(stream);
+		using var doc = System.Text.Json.JsonDocument.Parse(reader.ReadToEnd());
+		return doc.RootElement.GetProperty("ApiBaseUrl").GetString()
+			?? throw new InvalidOperationException("ApiBaseUrl missing from appsettings.json");
+	}
 
 	public static MauiApp CreateMauiApp()
 	{
 		var builder = MauiApp.CreateBuilder();
+		var apiBaseUrl = LoadApiBaseUrl();
 		builder
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
@@ -340,13 +351,13 @@ public static class MauiProgram
 		// HttpClients
 		builder.Services.AddHttpClient("AuthClient", client =>
 		{
-			client.BaseAddress = new Uri(ApiBaseUrl);
+			client.BaseAddress = new Uri(apiBaseUrl);
 			client.DefaultRequestHeaders.Add("Accept", "application/json");
 		});
 
 		builder.Services.AddHttpClient("ApiClient", client =>
 		{
-			client.BaseAddress = new Uri(ApiBaseUrl);
+			client.BaseAddress = new Uri(apiBaseUrl);
 			client.DefaultRequestHeaders.Add("Accept", "application/json");
 			client.Timeout = TimeSpan.FromSeconds(30);
 		}).AddHttpMessageHandler<AuthDelegatingHandler>();
