@@ -15,37 +15,68 @@ public class PhotoService
 
     public async Task<Models.PhotoResponse?> PickAndUploadCustomerPhotoAsync(Guid customerId)
     {
-        var photo = await MediaPicker.PickPhotoAsync();
+        var photo = await PickPhotoSafeAsync();
         if (photo == null) return null;
         return await CompressAndUploadAsync(photo, (stream, name) => _apiService.UploadCustomerPhotoAsync(customerId, stream, name));
     }
 
     public async Task<Models.PhotoResponse?> CaptureAndUploadCustomerPhotoAsync(Guid customerId)
     {
-        var photo = await MediaPicker.CapturePhotoAsync();
+        var photo = await CapturePhotoSafeAsync();
         if (photo == null) return null;
         return await CompressAndUploadAsync(photo, (stream, name) => _apiService.UploadCustomerPhotoAsync(customerId, stream, name));
     }
 
     public async Task<Models.PhotoResponse?> PickAndUploadJobPhotoAsync(Guid jobId)
     {
-        var photo = await MediaPicker.PickPhotoAsync();
+        var photo = await PickPhotoSafeAsync();
         if (photo == null) return null;
         return await CompressAndUploadAsync(photo, (stream, name) => _apiService.UploadJobPhotoAsync(jobId, stream, name));
     }
 
     public async Task<Models.PhotoResponse?> CaptureAndUploadJobPhotoAsync(Guid jobId)
     {
-        var photo = await MediaPicker.CapturePhotoAsync();
+        var photo = await CapturePhotoSafeAsync();
         if (photo == null) return null;
         return await CompressAndUploadAsync(photo, (stream, name) => _apiService.UploadJobPhotoAsync(jobId, stream, name));
     }
 
     public async Task<Models.PhotoResponse?> PickAndUploadProfilePhotoAsync()
     {
-        var photo = await MediaPicker.PickPhotoAsync();
+        var photo = await PickPhotoSafeAsync();
         if (photo == null) return null;
         return await CompressAndUploadAsync(photo, (stream, name) => _apiService.UploadProfilePhotoAsync(stream, name));
+    }
+
+    private static async Task<FileResult?> CapturePhotoSafeAsync()
+    {
+        if (!MediaPicker.Default.IsCaptureSupported)
+        {
+            await Shell.Current.DisplayAlert("Camera", "No camera is available on this device.", "OK");
+            return null;
+        }
+        try
+        {
+            return await MediaPicker.CapturePhotoAsync();
+        }
+        catch (PermissionException)
+        {
+            await Shell.Current.DisplayAlert("Camera", "Camera permission was denied. Enable it in Settings > Apps > WorkHub > Permissions.", "OK");
+            return null;
+        }
+    }
+
+    private static async Task<FileResult?> PickPhotoSafeAsync()
+    {
+        try
+        {
+            return await MediaPicker.PickPhotoAsync();
+        }
+        catch (PermissionException)
+        {
+            await Shell.Current.DisplayAlert("Photos", "Photo access was denied. Enable it in Settings > Apps > WorkHub > Permissions.", "OK");
+            return null;
+        }
     }
 
     private async Task<Models.PhotoResponse?> CompressAndUploadAsync(FileResult photo, Func<Stream, string, Task<Models.PhotoResponse?>> uploadFunc)
