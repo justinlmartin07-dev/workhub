@@ -82,8 +82,18 @@ public class PhotoService
     private async Task<Models.PhotoResponse?> CompressAndUploadAsync(FileResult photo, Func<Stream, string, Task<Models.PhotoResponse?>> uploadFunc)
     {
         using var sourceStream = await photo.OpenReadAsync();
-        using var original = SKBitmap.Decode(sourceStream);
-        if (original == null) return null;
+        using var buffered = new MemoryStream();
+        await sourceStream.CopyToAsync(buffered);
+        buffered.Position = 0;
+
+        using var codec = SKCodec.Create(buffered);
+        if (codec == null) return null;
+        var decoded = SKBitmap.Decode(codec);
+        if (decoded == null) return null;
+
+        // Camera JPEGs carry rotation as an EXIF tag that SKBitmap.Decode ignores
+        // and re-encoding strips, so bake the rotation into the pixels.
+        using var original = ApplyExifOrientation(decoded, codec.EncodedOrigin);
 
         var (newWidth, newHeight) = CalculateSize(original.Width, original.Height);
         using var resized = original.Resize(new SKImageInfo(newWidth, newHeight), SKFilterQuality.Medium);
@@ -95,6 +105,55 @@ public class PhotoService
 
         var fileName = Path.ChangeExtension(photo.FileName, ".jpg");
         return await uploadFunc(compressedStream, fileName);
+    }
+
+    private static SKBitmap ApplyExifOrientation(SKBitmap bitmap, SKEncodedOrigin origin)
+    {
+        if (origin == SKEncodedOrigin.TopLeft) return bitmap;
+
+        bool swapsAxes = origin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop
+            or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;
+        var upright = swapsAxes
+            ? new SKBitmap(bitmap.Height, bitmap.Width)
+            : new SKBitmap(bitmap.Width, bitmap.Height);
+
+        using (var canvas = new SKCanvas(upright))
+        {
+            switch (origin)
+            {
+                case SKEncodedOrigin.TopRight:
+                    canvas.Scale(-1, 1, bitmap.Width / 2f, 0);
+                    break;
+                case SKEncodedOrigin.BottomRight:
+                    canvas.RotateDegrees(180, bitmap.Width / 2f, bitmap.Height / 2f);
+                    break;
+                case SKEncodedOrigin.BottomLeft:
+                    canvas.Scale(1, -1, 0, bitmap.Height / 2f);
+                    break;
+                case SKEncodedOrigin.LeftTop:
+                    canvas.Scale(-1, 1, upright.Width / 2f, 0);
+                    canvas.Translate(upright.Width, 0);
+                    canvas.RotateDegrees(90);
+                    break;
+                case SKEncodedOrigin.RightTop:
+                    canvas.Translate(upright.Width, 0);
+                    canvas.RotateDegrees(90);
+                    break;
+                case SKEncodedOrigin.RightBottom:
+                    canvas.Scale(1, -1, 0, upright.Height / 2f);
+                    canvas.Translate(upright.Width, 0);
+                    canvas.RotateDegrees(90);
+                    break;
+                case SKEncodedOrigin.LeftBottom:
+                    canvas.Translate(0, upright.Height);
+                    canvas.RotateDegrees(-90);
+                    break;
+            }
+            canvas.DrawBitmap(bitmap, 0, 0);
+        }
+
+        bitmap.Dispose();
+        return upright;
     }
 
     private static (int width, int height) CalculateSize(int originalWidth, int originalHeight)
