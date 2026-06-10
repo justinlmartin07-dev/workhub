@@ -13,16 +13,21 @@ public class AuthService
 {
     private readonly WorkHubDbContext _db;
     private readonly IConfiguration _config;
+    private readonly string _jwtSecret;
 
     public AuthService(WorkHubDbContext db, IConfiguration config)
     {
         _db = db;
         _config = config;
+        // Must match the validation key resolved in Program.cs (prefer the
+        // JWT_SECRET_KEY env var, fall back to Jwt:SecretKey in appsettings).
+        _jwtSecret = config["JWT_SECRET_KEY"] ?? config["Jwt:SecretKey"]
+            ?? throw new InvalidOperationException("JWT secret key not configured");
     }
 
     public string GenerateAccessToken(User user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SecretKey"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
