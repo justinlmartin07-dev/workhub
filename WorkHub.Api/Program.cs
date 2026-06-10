@@ -18,7 +18,38 @@ builder.WebHost.ConfigureKestrel(options =>
 var databaseUrl = builder.Configuration["DATABASE_URL"]
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<WorkHubDbContext>(options =>
-    options.UseNpgsql(databaseUrl));
+    options.UseNpgsql(ToNpgsqlConnectionString(databaseUrl)));
+
+// Railway provides DATABASE_URL in URL form (postgresql://user:pass@host:port/db),
+// which Npgsql can't parse. Convert it to a keyword connection string. A value
+// already in keyword form (local dev) is passed through unchanged.
+static string? ToNpgsqlConnectionString(string? value)
+{
+    if (string.IsNullOrWhiteSpace(value)) return value;
+    if (!value.StartsWith("postgres://") && !value.StartsWith("postgresql://")) return value;
+
+    var uri = new Uri(value);
+    var userInfo = uri.UserInfo.Split(':', 2);
+    var csb = new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port > 0 ? uri.Port : 5432,
+        Username = Uri.UnescapeDataString(userInfo[0]),
+        Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty,
+        Database = uri.AbsolutePath.TrimStart('/'),
+    };
+
+    // Carry over sslmode if the URL specifies one (Railway's public proxy needs SSL).
+    foreach (var pair in uri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+    {
+        var kv = pair.Split('=', 2);
+        if (kv.Length == 2 && kv[0].Equals("sslmode", StringComparison.OrdinalIgnoreCase)
+            && Enum.TryParse<Npgsql.SslMode>(kv[1], true, out var mode))
+            csb.SslMode = mode;
+    }
+
+    return csb.ConnectionString;
+}
 
 // JWT Authentication
 var jwtKey = builder.Configuration["JWT_SECRET_KEY"]
