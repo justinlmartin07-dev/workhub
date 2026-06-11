@@ -16,6 +16,7 @@
            Subtle text: Gray400 (light) / Gray500 (dark)
            Surface:  SurfaceCardLight / SurfaceCardDark
            Borders:  SurfaceBorderLight / SurfaceBorderDark
+           Inputs:   SurfaceInputLight / SurfaceInputDark
          Use AppThemeBinding at the call site to pick the right one.
          ══════════════════════════════════════════════════════════ -->
 
@@ -36,6 +37,10 @@
     <Color x:Key="SurfaceLight">#F8FAFC</Color>
     <Color x:Key="SurfaceCardLight">#FFFFFF</Color>
     <Color x:Key="SurfaceBorderLight">#E2E8F0</Color>
+    <!-- Text input fill — sits between the card and border shades so the
+         field reads as a control against either page or card background. -->
+    <Color x:Key="SurfaceInputDark">#273449</Color>
+    <Color x:Key="SurfaceInputLight">#F1F5F9</Color>
 
     <!-- Semantic Colors -->
     <Color x:Key="Danger">#EF4444</Color>

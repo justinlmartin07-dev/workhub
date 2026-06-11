@@ -269,63 +269,78 @@ public static class MauiProgram
 
 #if ANDROID
 				// ── Entry: remove underline, rounded fill ──
-				Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("ThemedEntry", (handler, view) =>
+				// Appended to the Background key (not a custom key) so it re-applies
+				// after MAUI's own background mapper, which otherwise wipes the shape
+				// when the implicit style's BackgroundColor lands.
+				Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping(nameof(Microsoft.Maui.IView.Background), (handler, view) =>
 				{
 					var native = handler.PlatformView;
 					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
-
-					// Remove underline
-					native.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+					// Clear any tint — a transparent tint would render the custom
+					// background drawable below fully invisible.
+					native.BackgroundTintList = null;
 
 					// Rounded filled background
 					var bgColor = isDark
-						? Android.Graphics.Color.Argb(255, 30, 41, 59)
+						? Android.Graphics.Color.Argb(255, 39, 52, 73) // SurfaceInputDark #273449
 						: Android.Graphics.Color.Argb(255, 241, 245, 249);
 
 					var shape = new Android.Graphics.Drawables.GradientDrawable();
 					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
 					shape.SetCornerRadius(28f); // ~10dp
 					shape.SetColor(bgColor);
+					var strokeColor = isDark
+						? Android.Graphics.Color.Argb(255, 51, 65, 85)    // SurfaceBorderDark #334155
+						: Android.Graphics.Color.Argb(255, 226, 232, 240); // SurfaceBorderLight #E2E8F0
+					shape.SetStroke(3, strokeColor); // ~1dp
 					native.Background = shape;
 					native.SetPadding(40, 24, 40, 24);
 				});
 
 				// ── Editor: remove underline, rounded fill ──
-				Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping("ThemedEditor", (handler, view) =>
+				Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping(nameof(Microsoft.Maui.IView.Background), (handler, view) =>
 				{
 					var native = handler.PlatformView;
 					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
-					native.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+					native.BackgroundTintList = null;
 
 					var bgColor = isDark
-						? Android.Graphics.Color.Argb(255, 30, 41, 59)
+						? Android.Graphics.Color.Argb(255, 39, 52, 73) // SurfaceInputDark #273449
 						: Android.Graphics.Color.Argb(255, 241, 245, 249);
 
 					var shape = new Android.Graphics.Drawables.GradientDrawable();
 					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
 					shape.SetCornerRadius(28f);
 					shape.SetColor(bgColor);
+					var strokeColor = isDark
+						? Android.Graphics.Color.Argb(255, 51, 65, 85)    // SurfaceBorderDark #334155
+						: Android.Graphics.Color.Argb(255, 226, 232, 240); // SurfaceBorderLight #E2E8F0
+					shape.SetStroke(3, strokeColor); // ~1dp
 					native.Background = shape;
 					native.SetPadding(40, 24, 40, 24);
 				});
 
 				// ── Picker: remove underline, rounded fill ──
-				Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping("ThemedPicker", (handler, view) =>
+				Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping(nameof(Microsoft.Maui.IView.Background), (handler, view) =>
 				{
 					var native = handler.PlatformView;
 					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
-					native.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+					native.BackgroundTintList = null;
 
 					var bgColor = isDark
-						? Android.Graphics.Color.Argb(255, 30, 41, 59)
+						? Android.Graphics.Color.Argb(255, 39, 52, 73) // SurfaceInputDark #273449
 						: Android.Graphics.Color.Argb(255, 241, 245, 249);
 
 					var shape = new Android.Graphics.Drawables.GradientDrawable();
 					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
 					shape.SetCornerRadius(28f);
 					shape.SetColor(bgColor);
+					var strokeColor = isDark
+						? Android.Graphics.Color.Argb(255, 51, 65, 85)    // SurfaceBorderDark #334155
+						: Android.Graphics.Color.Argb(255, 226, 232, 240); // SurfaceBorderLight #E2E8F0
+					shape.SetStroke(3, strokeColor); // ~1dp
 					native.Background = shape;
 					native.SetPadding(40, 24, 40, 24);
 				});
