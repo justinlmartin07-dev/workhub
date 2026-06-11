@@ -12,6 +12,35 @@ public class ApiService
         _httpClient = httpClientFactory.CreateClient("ApiClient");
     }
 
+    // Fetches a complete list with the fewest round trips: page 1 at the server's
+    // max page size, then any remaining pages in parallel instead of sequentially.
+    private static async Task<List<T>> GetAllPagesAsync<T>(Func<int, Task<PagedResponse<T>>> getPage)
+    {
+        var first = await getPage(1);
+        var all = new List<T>(first.TotalCount > 0 ? first.TotalCount : first.Items.Count);
+        all.AddRange(first.Items);
+
+        if (first.TotalPages > 1)
+        {
+            var rest = await Task.WhenAll(
+                Enumerable.Range(2, first.TotalPages - 1).Select(getPage));
+            foreach (var pageResult in rest)
+                all.AddRange(pageResult.Items);
+        }
+        return all;
+    }
+
+    private const int MaxPageSize = 100; // server clamps pageSize to 100
+
+    public Task<List<CustomerResponse>> GetAllCustomersAsync()
+        => GetAllPagesAsync(page => GetCustomersAsync(page: page, pageSize: MaxPageSize));
+
+    public Task<List<JobListItemResponse>> GetAllJobsAsync()
+        => GetAllPagesAsync(page => GetJobsAsync(page: page, pageSize: MaxPageSize));
+
+    public Task<List<InventoryItemResponse>> GetAllInventoryAsync()
+        => GetAllPagesAsync(page => GetInventoryAsync(page: page, pageSize: MaxPageSize));
+
     // Customers
     public async Task<PagedResponse<CustomerResponse>> GetCustomersAsync(string? search = null, int page = 1, int pageSize = 25)
     {

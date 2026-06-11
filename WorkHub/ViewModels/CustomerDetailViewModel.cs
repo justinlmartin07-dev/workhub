@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -8,17 +9,32 @@ using WorkHub.Views;
 
 namespace WorkHub.ViewModels;
 
+// Cached detail snapshot: the customer plus the location-photo count, so both
+// render instantly on revisit.
+public class CustomerDetailCacheEntry
+{
+    public CustomerResponse Customer { get; set; } = null!;
+    public int LocationPhotoCount { get; set; }
+}
+
 [QueryProperty(nameof(CustomerId), "id")]
 public partial class CustomerDetailViewModel : BaseViewModel
 {
     private readonly ApiService _apiService;
     private readonly PhotoService _photoService;
+    private readonly ListCacheService _listCache;
+    private readonly PhotoCacheService _photoCache;
+
+    private string CacheKey => $"customer-{CustomerId}";
 
     [ObservableProperty]
     private string? _customerId;
 
     [ObservableProperty]
     private CustomerResponse? _customer;
+
+    [ObservableProperty]
+    private ObservableCollection<PhotoDisplayModel> _photos = new();
 
     [ObservableProperty]
     private int _locationPhotoCount;
@@ -29,10 +45,13 @@ public partial class CustomerDetailViewModel : BaseViewModel
     public List<CustomerContactResponse> EmailContacts =>
         Customer?.Contacts?.Where(c => c.Type == "email").ToList() ?? [];
 
-    public CustomerDetailViewModel(ApiService apiService, PhotoService photoService)
+    public CustomerDetailViewModel(ApiService apiService, PhotoService photoService,
+        ListCacheService listCache, PhotoCacheService photoCache)
     {
         _apiService = apiService;
         _photoService = photoService;
+        _listCache = listCache;
+        _photoCache = photoCache;
     }
 
     partial void OnCustomerChanged(CustomerResponse? value)
@@ -51,14 +70,124 @@ public partial class CustomerDetailViewModel : BaseViewModel
     public async Task LoadCustomerAsync()
     {
         if (!Guid.TryParse(CustomerId, out var id)) return;
+
+        // First load: render the last-known copy instantly, no spinner.
+        if (Customer == null)
+        {
+            var cached = await _listCache.LoadObjectAsync<CustomerDetailCacheEntry>(CacheKey);
+            if (cached?.Customer != null && Customer == null)
+            {
+                ApplyCustomer(cached.Customer, urlsAreFresh: false);
+                LocationPhotoCount = cached.LocationPhotoCount;
+                SetContent();
+            }
+        }
+
+        // Refresh from the network; silent when something is already showing.
         await LoadAsync(async () =>
         {
-            Customer = await _apiService.GetCustomerAsync(id);
-            if (Customer?.Address != null)
+            // Kick off the location-photo count alongside the customer fetch
+            // using the best-known address, instead of serially afterwards.
+            var knownAddress = Customer?.Address;
+            var countTask = knownAddress != null
+                ? _apiService.GetLocationPhotoCountAsync(knownAddress, excludeCustomerId: id)
+                : null;
+
+            CustomerResponse? fresh;
+            try
             {
-                LocationPhotoCount = await _apiService.GetLocationPhotoCountAsync(Customer.Address, excludeCustomerId: id);
+                fresh = await _apiService.GetCustomerAsync(id);
             }
-        });
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                ObserveAbandoned(countTask);
+                _listCache.Remove(CacheKey);
+                await HandleCustomerGoneAsync();
+                return;
+            }
+            if (fresh == null)
+            {
+                ObserveAbandoned(countTask);
+                return;
+            }
+
+            // Render the customer before waiting on the (decorative) count.
+            // Presigned photo URLs differ on every response; only rebind when
+            // something the user can see actually changed.
+            if (Customer == null || !JsonComparison.EqualIgnoringUrls(Customer, fresh))
+                ApplyCustomer(fresh, urlsAreFresh: true);
+            else
+                UpdatePhotos(fresh.Photos, urlsAreFresh: true);
+
+            var count = LocationPhotoCount;
+            try
+            {
+                if (countTask != null && fresh.Address == knownAddress)
+                    count = await countTask;
+                else if (fresh.Address != null)
+                {
+                    ObserveAbandoned(countTask);
+                    count = await _apiService.GetLocationPhotoCountAsync(fresh.Address, excludeCustomerId: id);
+                }
+                else
+                    count = 0;
+            }
+            catch
+            {
+                // Count is decorative — keep the last-known value on failure.
+            }
+            LocationPhotoCount = count;
+
+            _ = _listCache.SaveObjectAsync(CacheKey,
+                new CustomerDetailCacheEntry { Customer = fresh, LocationPhotoCount = count });
+        }, showLoading: Customer == null);
+    }
+
+    // Prevent an unobserved-exception fault when a started count task is dropped.
+    private static void ObserveAbandoned(Task? task)
+    {
+        if (task != null)
+            _ = task.ContinueWith(t => _ = t.Exception, TaskContinuationOptions.OnlyOnFaulted);
+    }
+
+    private void ApplyCustomer(CustomerResponse customer, bool urlsAreFresh)
+    {
+        Customer = customer;
+        UpdatePhotos(customer.Photos, urlsAreFresh);
+    }
+
+    // Sync the photo wrappers to the latest response. Existing wrappers keep
+    // their identity (and their already-loaded ImageSource) — only their
+    // Photo reference is swapped for the new presigned URL.
+    private void UpdatePhotos(List<PhotoResponse>? photos, bool urlsAreFresh)
+    {
+        var fresh = (photos ?? []).Select(p =>
+        {
+            var existing = Photos.FirstOrDefault(w => w.Id == p.Id);
+            if (existing != null)
+            {
+                existing.UpdatePhoto(p);
+                return existing;
+            }
+            return new PhotoDisplayModel(p);
+        }).ToList();
+
+        Photos.MergeInto(fresh, w => w.Id, ReferenceEquals);
+        foreach (var wrapper in Photos)
+            _ = wrapper.ResolveAsync(_photoCache, urlsAreFresh);
+    }
+
+    private async Task HandleCustomerGoneAsync()
+    {
+        if (Views.MainLayout.Current?.IsWideLayout == true)
+        {
+            Views.MainLayout.Current.ClearDetail();
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("customer"));
+        }
+        else
+        {
+            await Shell.Current.GoToAsync("..");
+        }
     }
 
     [RelayCommand]
@@ -85,6 +214,7 @@ public partial class CustomerDetailViewModel : BaseViewModel
         try
         {
             await _apiService.DeleteCustomerAsync(Customer.Id);
+            _listCache.Remove(CacheKey);
             if (Views.MainLayout.Current?.IsWideLayout == true)
             {
                 Views.MainLayout.Current.ClearDetail();
@@ -127,11 +257,12 @@ public partial class CustomerDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task ViewPhotosAsync(PhotoResponse photo)
+    private async Task ViewPhotosAsync(PhotoDisplayModel photo)
     {
-        if (Customer?.Photos == null || string.IsNullOrEmpty(CustomerId)) return;
-        var index = Customer.Photos.IndexOf(photo);
-        await PhotoViewerLauncher.ShowAsync("customer", CustomerId, index);
+        if (Customer == null || Photos.Count == 0) return;
+        var index = Photos.IndexOf(photo);
+        if (index < 0) index = 0;
+        await PhotoViewerLauncher.ShowAsync($"{Customer.Name} Pictures", Photos, index);
     }
 
     [RelayCommand]

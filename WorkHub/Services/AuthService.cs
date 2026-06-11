@@ -21,9 +21,14 @@ public class AuthService
     public UserBriefResponse? CurrentUser => _currentUser;
     public bool IsAuthenticated => !string.IsNullOrEmpty(_accessToken) && _expiresAt > DateTime.UtcNow;
 
-    public AuthService(IHttpClientFactory httpClientFactory)
+    private readonly ListCacheService _listCache;
+    private readonly PhotoCacheService _photoCache;
+
+    public AuthService(IHttpClientFactory httpClientFactory, ListCacheService listCache, PhotoCacheService photoCache)
     {
         _httpClient = httpClientFactory.CreateClient("AuthClient");
+        _listCache = listCache;
+        _photoCache = photoCache;
     }
 
     public async Task<bool> TryRestoreSessionAsync()
@@ -91,37 +96,53 @@ public class AuthService
         }
     }
 
+    private readonly SemaphoreSlim _refreshLock = new(1, 1);
+
     public async Task<string?> GetValidTokenAsync()
     {
         if (_expiresAt > DateTime.UtcNow.AddMinutes(2))
             return _accessToken;
 
-        if (string.IsNullOrEmpty(_refreshToken))
-            return null;
-
+        // Refresh tokens rotate on use — concurrent requests (e.g. parallel list
+        // loads at launch) must not race the refresh call, or the loser presents
+        // an already-rotated token and gets logged out.
+        await _refreshLock.WaitAsync();
         try
         {
-            var request = new { RefreshToken = _refreshToken };
-            var response = await _httpClient.PostAsJsonAsync("v1/auth/refresh", request);
+            if (_expiresAt > DateTime.UtcNow.AddMinutes(2))
+                return _accessToken;
 
-            if (!response.IsSuccessStatusCode)
-            {
-                await LogoutAsync();
+            if (string.IsNullOrEmpty(_refreshToken))
                 return null;
+
+            try
+            {
+                var request = new { RefreshToken = _refreshToken };
+                var response = await _httpClient.PostAsJsonAsync("v1/auth/refresh", request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    await LogoutAsync();
+                    return null;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<RefreshResponse>();
+                if (result == null) return null;
+
+                _accessToken = result.AccessToken;
+                _refreshToken = result.RefreshToken;
+                _expiresAt = result.ExpiresAt;
+                await SaveTokensAsync();
+                return _accessToken;
             }
-
-            var result = await response.Content.ReadFromJsonAsync<RefreshResponse>();
-            if (result == null) return null;
-
-            _accessToken = result.AccessToken;
-            _refreshToken = result.RefreshToken;
-            _expiresAt = result.ExpiresAt;
-            await SaveTokensAsync();
-            return _accessToken;
+            catch
+            {
+                return _accessToken;
+            }
         }
-        catch
+        finally
         {
-            return _accessToken;
+            _refreshLock.Release();
         }
     }
 
@@ -141,6 +162,8 @@ public class AuthService
         _refreshToken = null;
         _currentUser = null;
         SecureStorage.RemoveAll();
+        _listCache.Clear();
+        _photoCache.Clear();
     }
 
     public async Task<VersionResponse?> CheckVersionAsync()

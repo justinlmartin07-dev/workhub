@@ -10,7 +10,13 @@ namespace WorkHub.ViewModels;
 
 public partial class JobsListViewModel : BaseViewModel
 {
+    private const string CacheKey = "jobs";
+
     private readonly ApiService _apiService;
+    private readonly ListCacheService _listCache;
+
+    // Full dataset; Jobs below is the (possibly search-filtered) view of it.
+    private List<JobListItemResponse> _allJobs = new();
 
     [ObservableProperty]
     private ObservableCollection<JobListItemResponse> _jobs = new();
@@ -22,14 +28,14 @@ public partial class JobsListViewModel : BaseViewModel
     private JobListItemResponse? _selectedJob;
 
     private string? _pendingSelectId;
-    private CancellationTokenSource? _searchCts;
     private bool _suppressSelectionNav;
 
     public event Action<JobListItemResponse>? ScrollToRequested;
 
-    public JobsListViewModel(ApiService apiService)
+    public JobsListViewModel(ApiService apiService, ListCacheService listCache)
     {
         _apiService = apiService;
+        _listCache = listCache;
 
         WeakReferenceMessenger.Default.Register<SelectListItemMessage>(this, (r, m) =>
         {
@@ -48,35 +54,57 @@ public partial class JobsListViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadJobsAsync()
     {
+        // First load: show the last-known data from disk instantly, then let the
+        // network refresh below merge in whatever changed.
+        if (_allJobs.Count == 0 && !IsBusy)
+        {
+            var cached = await _listCache.LoadAsync<JobListItemResponse>(CacheKey);
+            if (cached is { Count: > 0 } && _allJobs.Count == 0)
+            {
+                _allJobs = cached;
+                PublishList(rebuild: true);
+                if (TrySelectPending()) _pendingSelectId = null;
+            }
+        }
+
         await LoadAsync(async () =>
         {
-            var all = new List<JobListItemResponse>();
-            var page = 1;
-            int totalPages;
-            do
-            {
-                var result = await _apiService.GetJobsAsync(SearchText, null, null, page: page);
-                totalPages = result.TotalPages;
-                all.AddRange(result.Items);
-                page++;
-            } while (page <= totalPages);
-
-            if (Jobs.Count == 0)
-            {
-                Jobs = new ObservableCollection<JobListItemResponse>(all);
-            }
-            else
-            {
-                var selectedId = SelectedJob?.Id;
-                Jobs.MergeInto(all, j => j.Id, RowUnchanged);
-                ReselectById(selectedId);
-            }
-
-            if (Jobs.Count == 0) SetEmpty();
-            else SetContent();
+            _allJobs = await _apiService.GetAllJobsAsync();
+            PublishList(rebuild: false);
             if (TrySelectPending()) _pendingSelectId = null;
+            _ = _listCache.SaveAsync(CacheKey, _allJobs);
         }, showLoading: Jobs.Count == 0);
     }
+
+    // Projects the master list through the current search filter into the bound
+    // collection. rebuild swaps the collection wholesale (right for filter changes,
+    // where most rows differ); otherwise rows are merged in place so only actual
+    // changes re-render.
+    private void PublishList(bool rebuild)
+    {
+        var query = SearchText.Trim();
+        var visible = query.Length == 0
+            ? _allJobs
+            : _allJobs.Where(j => MatchesSearch(j, query)).ToList();
+
+        if (rebuild || Jobs.Count == 0 || visible.Count == 0)
+        {
+            Jobs = new ObservableCollection<JobListItemResponse>(visible);
+        }
+        else
+        {
+            var selectedId = SelectedJob?.Id;
+            Jobs.MergeInto(visible, j => j.Id, RowUnchanged);
+            ReselectById(selectedId);
+        }
+
+        if (Jobs.Count == 0) SetEmpty();
+        else SetContent();
+    }
+
+    private static bool MatchesSearch(JobListItemResponse j, string query) =>
+        j.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || j.CustomerName.Contains(query, StringComparison.OrdinalIgnoreCase);
 
     private static bool RowUnchanged(JobListItemResponse a, JobListItemResponse b) =>
         a.Title == b.Title
@@ -122,28 +150,11 @@ public partial class JobsListViewModel : BaseViewModel
         return false;
     }
 
-    partial void OnSearchTextChanged(string value)
-    {
-        _searchCts?.Cancel();
-        _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
-        MainThread.BeginInvokeOnMainThread(async () =>
-        {
-            try
-            {
-                await Task.Delay(300, token);
-                await LoadJobsAsync();
-            }
-            catch (TaskCanceledException) { }
-        });
-    }
+    // Search filters the in-memory list — instant, no debounce, no network.
+    partial void OnSearchTextChanged(string value) => PublishList(rebuild: true);
 
     [RelayCommand]
-    private async Task SearchAsync()
-    {
-        _searchCts?.Cancel();
-        await LoadJobsAsync();
-    }
+    private void Search() => PublishList(rebuild: true);
 
     [RelayCommand]
     private void AddJob()

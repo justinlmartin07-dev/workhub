@@ -123,12 +123,12 @@
                                 <Button Grid.Column="1" Text="Pick" Style="{StaticResource SecondaryButton}" Command="{Binding PickPhotoCommand}" />
                                 <Button Grid.Column="2" Text="Camera" Style="{StaticResource SecondaryButton}" Command="{Binding TakePhotoCommand}" />
                             </Grid>
-                            <CollectionView ItemsSource="{Binding Customer.Photos}" HeightRequest="120"
+                            <CollectionView ItemsSource="{Binding Photos}" HeightRequest="120"
                                             ItemsLayout="HorizontalList">
                                 <CollectionView.ItemTemplate>
-                                    <DataTemplate x:DataType="models:PhotoResponse">
+                                    <DataTemplate x:DataType="vm:PhotoDisplayModel">
                                         <Border StrokeShape="RoundRectangle 8" Margin="0,0,8,0" StrokeThickness="0">
-                                            <Image Source="{Binding Url}" WidthRequest="120" HeightRequest="120" Aspect="AspectFill">
+                                            <Image Source="{Binding Source}" WidthRequest="120" HeightRequest="120" Aspect="AspectFill">
                                                 <Image.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=ViewPhotosCommand}"
                                                                           CommandParameter="{Binding .}" />

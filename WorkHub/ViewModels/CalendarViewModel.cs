@@ -27,11 +27,13 @@ public partial class CalendarViewModel : BaseViewModel
     [ObservableProperty]
     private string _monthYearLabel = string.Empty;
 
+    private readonly ListCacheService _listCache;
     private DateTime? _loadedMonth;
 
-    public CalendarViewModel(ApiService apiService)
+    public CalendarViewModel(ApiService apiService, ListCacheService listCache)
     {
         _apiService = apiService;
+        _listCache = listCache;
 
         WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
         {
@@ -51,6 +53,23 @@ public partial class CalendarViewModel : BaseViewModel
     {
         var month = new DateTime(SelectedDate.Year, SelectedDate.Month, 1);
         var sameMonth = _loadedMonth == month;
+        var cacheKey = $"events-{month:yyyy-MM}";
+
+        // Entering a month we haven't loaded this run: render the cached copy
+        // instantly and let the network pass below correct it silently.
+        if (!sameMonth && !IsBusy)
+        {
+            var cached = await _listCache.LoadAsync<CalendarEventResponse>(cacheKey);
+            if (cached != null && _loadedMonth != month)
+            {
+                Events = new ObservableCollection<CalendarEventResponse>(cached);
+                BuildGrid();
+                FilterDayEvents();
+                SetContent();
+                _loadedMonth = month;
+                sameMonth = true;
+            }
+        }
 
         await LoadAsync(async () =>
         {
@@ -58,6 +77,7 @@ public partial class CalendarViewModel : BaseViewModel
             var to = from.AddMonths(1).AddSeconds(-1);
             var events = await _apiService.GetEventsAsync(from, to);
             _loadedMonth = month;
+            _ = _listCache.SaveAsync(cacheKey, events);
 
             // Refreshing the same month with identical events — skip the expensive
             // grid rebuild entirely.

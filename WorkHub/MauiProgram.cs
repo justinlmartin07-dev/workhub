@@ -363,24 +363,28 @@ public static class MauiProgram
 		}).AddHttpMessageHandler<AuthDelegatingHandler>();
 
 		// Services
+		builder.Services.AddSingleton<ListCacheService>();
+		builder.Services.AddSingleton<PhotoCacheService>();
 		builder.Services.AddSingleton<AuthService>();
 		builder.Services.AddSingleton<ApiService>();
 		builder.Services.AddSingleton<PhotoService>();
 		builder.Services.AddSingleton<LocationBiasService>();
 
 		// ViewModels
+		// List VMs are singletons: their data is preloaded at launch (MainLayout)
+		// and survives page re-creation, so opening a tab shows content instantly.
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<MainLayoutViewModel>();
-		builder.Services.AddTransient<CustomersListViewModel>();
+		builder.Services.AddSingleton<CustomersListViewModel>();
 		builder.Services.AddTransient<CustomerDetailViewModel>();
 		builder.Services.AddTransient<CustomerEditViewModel>();
-		builder.Services.AddTransient<JobsListViewModel>();
+		builder.Services.AddSingleton<JobsListViewModel>();
 		builder.Services.AddTransient<JobDetailViewModel>();
 		builder.Services.AddTransient<JobEditViewModel>();
-		builder.Services.AddTransient<InventoryViewModel>();
+		builder.Services.AddSingleton<InventoryViewModel>();
 		builder.Services.AddTransient<InventoryItemDetailViewModel>();
-		builder.Services.AddTransient<CalendarViewModel>();
-		builder.Services.AddTransient<OrdersViewModel>();
+		builder.Services.AddSingleton<CalendarViewModel>();
+		builder.Services.AddSingleton<OrdersViewModel>();
 		builder.Services.AddTransient<OrderDetailViewModel>();
 		builder.Services.AddTransient<EventDetailViewModel>();
 		builder.Services.AddTransient<CalendarDaySummaryViewModel>();

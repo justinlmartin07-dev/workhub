@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.Maui.Controls.Shapes;
 using WorkHub.Models;
 using WorkHub.ViewModels;
@@ -50,24 +51,38 @@ public partial class CalendarPage : ContentView
             ? ResolveColor("SurfaceBorderDark", Colors.DimGray)
             : ResolveColor("SurfaceBorderLight", Colors.LightGray);
 
-        _viewModel.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(CalendarViewModel.Weeks))
-                BuildMonthGrid();
-        };
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CalendarViewModel.Weeks))
+            BuildMonthGrid();
     }
 
     private static Color ResolveColor(string key, Color fallback)
         => Application.Current?.Resources[key] as Color ?? fallback;
 
+    // The Weeks collection instance the current grid was built from — the VM
+    // replaces Weeks wholesale on rebuild, so a reference check tells us whether
+    // the (slow) grid build can be skipped on reattach.
+    private object? _builtWeeks;
+
     protected override void OnHandlerChanged()
     {
         base.OnHandlerChanged();
+        // The VM is a singleton — only the attached page instance may listen,
+        // or handlers from stale pages would pile up across login cycles.
+        _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
         // Fires on every reattach (tab switch back) — the VM shows the loading
         // state on first load and silently refreshes (skipping the grid rebuild
         // when nothing changed) after that.
         if (Handler != null)
         {
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            // Events may have been preloaded before this page existed (or while
+            // it was detached) — render the grid now if it's out of date.
+            if (!ReferenceEquals(_builtWeeks, _viewModel.Weeks))
+                BuildMonthGrid();
             _viewModel.LoadEventsCommand.Execute(null);
         }
 
@@ -123,6 +138,7 @@ public partial class CalendarPage : ContentView
 
     private void BuildMonthGrid()
     {
+        _builtWeeks = _viewModel.Weeks;
         MonthGrid.Children.Clear();
         MonthGrid.RowDefinitions.Clear();
         MonthGrid.ColumnDefinitions.Clear();

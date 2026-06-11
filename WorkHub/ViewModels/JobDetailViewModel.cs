@@ -14,12 +14,19 @@ public partial class JobDetailViewModel : BaseViewModel
 {
     private readonly ApiService _apiService;
     private readonly PhotoService _photoService;
+    private readonly ListCacheService _listCache;
+    private readonly PhotoCacheService _photoCache;
+
+    private string CacheKey => $"job-{JobId}";
 
     [ObservableProperty]
     private string? _jobId;
 
     [ObservableProperty]
     private JobResponse? _job;
+
+    [ObservableProperty]
+    private ObservableCollection<PhotoDisplayModel> _photos = new();
 
     [ObservableProperty]
     private ObservableCollection<JobItemResponse> _usedItems = new();
@@ -63,10 +70,13 @@ public partial class JobDetailViewModel : BaseViewModel
     private List<InventoryItemResponse> _allInventory = new();
     private string _activeListType = string.Empty;
 
-    public JobDetailViewModel(ApiService apiService, PhotoService photoService)
+    public JobDetailViewModel(ApiService apiService, PhotoService photoService,
+        ListCacheService listCache, PhotoCacheService photoCache)
     {
         _apiService = apiService;
         _photoService = photoService;
+        _listCache = listCache;
+        _photoCache = photoCache;
     }
 
     partial void OnJobIdChanged(string? value)
@@ -79,12 +89,95 @@ public partial class JobDetailViewModel : BaseViewModel
     public async Task LoadJobAsync()
     {
         if (!Guid.TryParse(JobId, out var id)) return;
+
+        // First load: render the last-known copy instantly, no spinner.
+        if (Job == null)
+        {
+            var cached = await _listCache.LoadObjectAsync<JobResponse>(CacheKey);
+            if (cached != null && Job == null)
+            {
+                ApplyJob(cached, urlsAreFresh: false);
+                SetContent();
+            }
+        }
+
+        // Refresh from the network; silent when something is already showing.
         await LoadAsync(async () =>
         {
-            Job = await _apiService.GetJobAsync(id);
-            UsedItems = new ObservableCollection<JobItemResponse>(Job?.UsedItems ?? []);
-            ToOrderItems = new ObservableCollection<JobItemResponse>(Job?.ToOrderItems ?? []);
-        });
+            JobResponse? fresh;
+            try
+            {
+                fresh = await _apiService.GetJobAsync(id);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // Deleted elsewhere — drop the cache and leave instead of
+                // showing a ghost page.
+                _listCache.Remove(CacheKey);
+                await HandleJobGoneAsync();
+                return;
+            }
+            if (fresh == null) return;
+
+            // Presigned photo URLs differ on every response; only rebind when
+            // something the user can see actually changed.
+            if (Job == null || !JsonComparison.EqualIgnoringUrls(Job, fresh))
+                ApplyJob(fresh, urlsAreFresh: true);
+            else
+                UpdatePhotos(fresh.Photos, urlsAreFresh: true);
+
+            _ = _listCache.SaveObjectAsync(CacheKey, fresh);
+        }, showLoading: Job == null);
+    }
+
+    private void ApplyJob(JobResponse job, bool urlsAreFresh)
+    {
+        Job = job;
+        UsedItems.MergeInto(job.UsedItems ?? [], i => i.Id, ItemUnchanged);
+        ToOrderItems.MergeInto(job.ToOrderItems ?? [], i => i.Id, ItemUnchanged);
+        UpdatePhotos(job.Photos, urlsAreFresh);
+    }
+
+    private static bool ItemUnchanged(JobItemResponse a, JobItemResponse b) =>
+        a.Name == b.Name
+        && a.Description == b.Description
+        && a.PartNumber == b.PartNumber
+        && a.Quantity == b.Quantity
+        && a.ListType == b.ListType
+        && a.Source == b.Source;
+
+    // Sync the photo wrappers to the latest response. Existing wrappers keep
+    // their identity (and their already-loaded ImageSource) — only their
+    // Photo reference is swapped for the new presigned URL.
+    private void UpdatePhotos(List<PhotoResponse>? photos, bool urlsAreFresh)
+    {
+        var fresh = (photos ?? []).Select(p =>
+        {
+            var existing = Photos.FirstOrDefault(w => w.Id == p.Id);
+            if (existing != null)
+            {
+                existing.UpdatePhoto(p);
+                return existing;
+            }
+            return new PhotoDisplayModel(p);
+        }).ToList();
+
+        Photos.MergeInto(fresh, w => w.Id, ReferenceEquals);
+        foreach (var wrapper in Photos)
+            _ = wrapper.ResolveAsync(_photoCache, urlsAreFresh);
+    }
+
+    private async Task HandleJobGoneAsync()
+    {
+        if (Views.MainLayout.Current?.IsWideLayout == true)
+        {
+            Views.MainLayout.Current.ClearDetail();
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
+        }
+        else
+        {
+            await Shell.Current.GoToAsync("..");
+        }
     }
 
     [RelayCommand]
@@ -152,6 +245,7 @@ public partial class JobDetailViewModel : BaseViewModel
         try
         {
             await _apiService.DeleteJobAsync(Job.Id);
+            _listCache.Remove(CacheKey);
             if (Views.MainLayout.Current?.IsWideLayout == true)
             {
                 Views.MainLayout.Current.ClearDetail();
@@ -243,11 +337,12 @@ public partial class JobDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task ViewPhotosAsync(PhotoResponse photo)
+    private async Task ViewPhotosAsync(PhotoDisplayModel photo)
     {
-        if (Job?.Photos == null || string.IsNullOrEmpty(JobId)) return;
-        var index = Job.Photos.IndexOf(photo);
-        await PhotoViewerLauncher.ShowAsync("job", JobId, index);
+        if (Job == null || Photos.Count == 0) return;
+        var index = Photos.IndexOf(photo);
+        if (index < 0) index = 0;
+        await PhotoViewerLauncher.ShowAsync($"{Job.Title} Pictures", Photos, index);
     }
 
     [RelayCommand]

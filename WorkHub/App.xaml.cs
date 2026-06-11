@@ -6,10 +6,11 @@ public partial class App : Application
 {
 	private readonly AuthService _authService;
 
-	public App(AuthService authService)
+	public App(AuthService authService, PhotoCacheService photoCache)
 	{
 		InitializeComponent();
 		_authService = authService;
+		_ = photoCache.TrimAsync();
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
@@ -29,20 +30,10 @@ public partial class App : Application
 	{
 		try
 		{
-			await Task.Delay(200);
-
-			var version = await _authService.CheckVersionAsync();
-			if (version != null)
-			{
-				var currentVersion = AppInfo.VersionString;
-				if (Version.TryParse(currentVersion, out var cur) &&
-				    Version.TryParse(version.MinimumAppVersion, out var min) &&
-				    Normalize(cur) < Normalize(min))
-				{
-					await Shell.Current.GoToAsync("//update");
-					return;
-				}
-			}
+			// Don't block startup on the network: restore the local session and
+			// navigate immediately. The version check runs concurrently and
+			// redirects to the update page when (and only when) it says so.
+			var versionTask = _authService.CheckVersionAsync();
 
 			var hasSession = await _authService.TryRestoreSessionAsync();
 			if (hasSession)
@@ -52,6 +43,18 @@ public partial class App : Application
 			else
 			{
 				await Shell.Current.GoToAsync("//login");
+			}
+
+			var version = await versionTask;
+			if (version != null)
+			{
+				var currentVersion = AppInfo.VersionString;
+				if (Version.TryParse(currentVersion, out var cur) &&
+				    Version.TryParse(version.MinimumAppVersion, out var min) &&
+				    Normalize(cur) < Normalize(min))
+				{
+					await Shell.Current.GoToAsync("//update");
+				}
 			}
 		}
 		catch (Exception ex)

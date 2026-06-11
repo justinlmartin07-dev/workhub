@@ -10,7 +10,10 @@ namespace WorkHub.ViewModels;
 
 public partial class OrdersViewModel : BaseViewModel
 {
+    private const string CacheKey = "orders";
+
     private readonly ApiService _apiService;
+    private readonly ListCacheService _listCache;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(OutstandingCount))]
@@ -20,9 +23,10 @@ public partial class OrdersViewModel : BaseViewModel
     public int OutstandingCount => Orders.Count(o => !o.IsOrdered);
     public int OrderedCount => Orders.Count(o => o.IsOrdered);
 
-    public OrdersViewModel(ApiService apiService)
+    public OrdersViewModel(ApiService apiService, ListCacheService listCache)
     {
         _apiService = apiService;
+        _listCache = listCache;
 
         // Adding/removing to-order parts (or job changes) needs a fresh list.
         WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
@@ -51,6 +55,18 @@ public partial class OrdersViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadOrdersAsync()
     {
+        // First load: show the last-known data from disk instantly, then let the
+        // network refresh below merge in whatever changed.
+        if (Orders.Count == 0 && !IsBusy)
+        {
+            var cached = await _listCache.LoadAsync<OrderLineResponse>(CacheKey);
+            if (cached is { Count: > 0 } && Orders.Count == 0)
+            {
+                Orders = new ObservableCollection<OrderLineResponse>(cached);
+                SetContent();
+            }
+        }
+
         await LoadAsync(async () =>
         {
             var orders = await _apiService.GetOrdersAsync();
@@ -68,6 +84,7 @@ public partial class OrdersViewModel : BaseViewModel
 
             if (Orders.Count == 0) SetEmpty();
             else SetContent();
+            _ = _listCache.SaveAsync(CacheKey, orders);
         }, showLoading: Orders.Count == 0);
     }
 

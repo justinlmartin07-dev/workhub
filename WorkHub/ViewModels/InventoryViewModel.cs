@@ -10,7 +10,13 @@ namespace WorkHub.ViewModels;
 
 public partial class InventoryViewModel : BaseViewModel
 {
+    private const string CacheKey = "inventory";
+
     private readonly ApiService _apiService;
+    private readonly ListCacheService _listCache;
+
+    // Full dataset; Items below is the (possibly search-filtered) view of it.
+    private List<InventoryItemResponse> _allItems = new();
 
     [ObservableProperty]
     private ObservableCollection<InventoryItemResponse> _items = new();
@@ -18,11 +24,10 @@ public partial class InventoryViewModel : BaseViewModel
     [ObservableProperty]
     private string _searchText = string.Empty;
 
-    private CancellationTokenSource? _searchCts;
-
-    public InventoryViewModel(ApiService apiService)
+    public InventoryViewModel(ApiService apiService, ListCacheService listCache)
     {
         _apiService = apiService;
+        _listCache = listCache;
 
         WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
         {
@@ -34,28 +39,50 @@ public partial class InventoryViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadItemsAsync()
     {
+        // First load: show the last-known data from disk instantly, then let the
+        // network refresh below merge in whatever changed.
+        if (_allItems.Count == 0 && !IsBusy)
+        {
+            var cached = await _listCache.LoadAsync<InventoryItemResponse>(CacheKey);
+            if (cached is { Count: > 0 } && _allItems.Count == 0)
+            {
+                _allItems = cached;
+                PublishList(rebuild: true);
+            }
+        }
+
         await LoadAsync(async () =>
         {
-            var all = new List<InventoryItemResponse>();
-            var page = 1;
-            int totalPages;
-            do
-            {
-                var result = await _apiService.GetInventoryAsync(SearchText, page);
-                totalPages = result.TotalPages;
-                all.AddRange(result.Items);
-                page++;
-            } while (page <= totalPages);
-
-            if (Items.Count == 0)
-                Items = new ObservableCollection<InventoryItemResponse>(all);
-            else
-                Items.MergeInto(all, i => i.Id, RowUnchanged);
-
-            if (Items.Count == 0) SetEmpty();
-            else SetContent();
+            _allItems = await _apiService.GetAllInventoryAsync();
+            PublishList(rebuild: false);
+            _ = _listCache.SaveAsync(CacheKey, _allItems);
         }, showLoading: Items.Count == 0);
     }
+
+    // Projects the master list through the current search filter into the bound
+    // collection. rebuild swaps the collection wholesale (right for filter changes,
+    // where most rows differ); otherwise rows are merged in place so only actual
+    // changes re-render.
+    private void PublishList(bool rebuild)
+    {
+        var query = SearchText.Trim();
+        var visible = query.Length == 0
+            ? _allItems
+            : _allItems.Where(i => MatchesSearch(i, query)).ToList();
+
+        if (rebuild || Items.Count == 0 || visible.Count == 0)
+            Items = new ObservableCollection<InventoryItemResponse>(visible);
+        else
+            Items.MergeInto(visible, i => i.Id, RowUnchanged);
+
+        if (Items.Count == 0) SetEmpty();
+        else SetContent();
+    }
+
+    private static bool MatchesSearch(InventoryItemResponse i, string query) =>
+        i.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || (i.PartNumber?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (i.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false);
 
     private static bool RowUnchanged(InventoryItemResponse a, InventoryItemResponse b) =>
         a.Name == b.Name
@@ -63,28 +90,11 @@ public partial class InventoryViewModel : BaseViewModel
         && a.PartNumber == b.PartNumber
         && a.UpdatedAt == b.UpdatedAt;
 
-    partial void OnSearchTextChanged(string value)
-    {
-        _searchCts?.Cancel();
-        _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
-        MainThread.BeginInvokeOnMainThread(async () =>
-        {
-            try
-            {
-                await Task.Delay(300, token);
-                await LoadItemsAsync();
-            }
-            catch (TaskCanceledException) { }
-        });
-    }
+    // Search filters the in-memory list — instant, no debounce, no network.
+    partial void OnSearchTextChanged(string value) => PublishList(rebuild: true);
 
     [RelayCommand]
-    private async Task SearchAsync()
-    {
-        _searchCts?.Cancel();
-        await LoadItemsAsync();
-    }
+    private void Search() => PublishList(rebuild: true);
 
     [RelayCommand]
     private void SelectItem(InventoryItemResponse item)

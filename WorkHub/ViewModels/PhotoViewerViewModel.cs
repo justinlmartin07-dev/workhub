@@ -17,9 +17,10 @@ public partial class PhotoViewerViewModel : BaseViewModel
 {
     private readonly ApiService _apiService;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly PhotoCacheService _photoCache;
 
     [ObservableProperty]
-    private ObservableCollection<PhotoResponse> _photos = new();
+    private ObservableCollection<PhotoDisplayModel> _photos = new();
 
     [ObservableProperty]
     private int _currentIndex;
@@ -30,47 +31,32 @@ public partial class PhotoViewerViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isMenuOpen;
 
-    public string? EntityType { get; private set; }
-    public string? EntityId { get; private set; }
-
     public event Action? CloseRequested;
 
-    public PhotoViewerViewModel(ApiService apiService, IHttpClientFactory httpClientFactory)
+    public PhotoViewerViewModel(ApiService apiService, IHttpClientFactory httpClientFactory,
+        PhotoCacheService photoCache)
     {
         _apiService = apiService;
         _httpClientFactory = httpClientFactory;
+        _photoCache = photoCache;
     }
 
-    public async Task InitializeAsync(string entityType, string entityId, int startIndex)
+    // The caller hands over its own (already-resolved) photo collection — the
+    // viewer opens with zero network calls, and deletes here update the caller.
+    public void Initialize(string title, ObservableCollection<PhotoDisplayModel> photos, int startIndex)
     {
-        EntityType = entityType;
-        EntityId = entityId;
+        Title = title;
+        Photos = photos;
 
-        await LoadAsync(async () =>
-        {
-            if (entityType == "customer" && Guid.TryParse(entityId, out var custId))
-            {
-                var customer = await _apiService.GetCustomerAsync(custId);
-                Photos = new ObservableCollection<PhotoResponse>(customer?.Photos ?? new());
-                Title = $"{customer?.Name} Pictures";
-            }
-            else if (entityType == "job" && Guid.TryParse(entityId, out var jobId))
-            {
-                var job = await _apiService.GetJobAsync(jobId);
-                Photos = new ObservableCollection<PhotoResponse>(job?.Photos ?? new());
-                Title = $"{job?.Title} Pictures";
-            }
+        if (startIndex >= 0 && startIndex < Photos.Count)
+            CurrentIndex = startIndex;
 
-            if (startIndex >= 0 && startIndex < Photos.Count)
-                CurrentIndex = startIndex;
-
-            if (Photos.Count == 0) SetEmpty();
-            else SetContent();
-        });
+        if (Photos.Count == 0) SetEmpty();
+        else SetContent();
     }
 
     private PhotoResponse? CurrentPhoto =>
-        CurrentIndex >= 0 && CurrentIndex < Photos.Count ? Photos[CurrentIndex] : null;
+        CurrentIndex >= 0 && CurrentIndex < Photos.Count ? Photos[CurrentIndex].Photo : null;
 
     [RelayCommand]
     private void Close() => CloseRequested?.Invoke();
@@ -164,8 +150,11 @@ public partial class PhotoViewerViewModel : BaseViewModel
 
     private async Task<(byte[] Bytes, string FileName)> DownloadAsync(PhotoResponse photo)
     {
-        var http = _httpClientFactory.CreateClient();
-        var bytes = await http.GetByteArrayAsync(photo.Url);
+        // Prefer the local photo cache — works offline and skips the download.
+        var cachedPath = _photoCache.TryGetCachedPath(photo.Id);
+        var bytes = cachedPath != null
+            ? await File.ReadAllBytesAsync(cachedPath)
+            : await _httpClientFactory.CreateClient().GetByteArrayAsync(photo.Url);
         var fileName = SuggestedFileName(photo);
         return (bytes, fileName);
     }

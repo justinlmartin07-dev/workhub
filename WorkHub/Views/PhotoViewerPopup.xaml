@@ -57,8 +57,8 @@
                             <Grid BackgroundColor="White">
                                 <CarouselView ItemsSource="{Binding Photos}" Position="{Binding CurrentIndex}" Loop="False">
                                     <CarouselView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:PhotoResponse">
-                                            <Image Source="{Binding Url}" Aspect="AspectFit"
+                                        <DataTemplate x:DataType="vm:PhotoDisplayModel">
+                                            <Image Source="{Binding Source}" Aspect="AspectFit"
                                                    VerticalOptions="Fill" HorizontalOptions="Fill" />
                                         </DataTemplate>
                                     </CarouselView.ItemTemplate>
