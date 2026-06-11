@@ -145,7 +145,7 @@
                                                 </VerticalStackLayout>
                                                 <Button Grid.Column="1" Text="−" FontSize="14" Padding="0" VerticalOptions="Center"
                                                         WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
-                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnDecrementClicked" />
                                                 <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
                                                        HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center"
@@ -153,7 +153,7 @@
                                                        Unfocused="OnQuantityEntryUnfocused" />
                                                 <Button Grid.Column="3" Text="+" FontSize="14" Padding="0" VerticalOptions="Center"
                                                         WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
-                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnIncrementClicked" />
                                                 <Label Grid.Column="4" Text="✕" FontSize="16" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                                        VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"
@@ -193,7 +193,7 @@
                                                 </VerticalStackLayout>
                                                 <Button Grid.Column="1" Text="−" FontSize="14" Padding="0" VerticalOptions="Center"
                                                         WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
-                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnDecrementClicked" />
                                                 <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
                                                        HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center"
@@ -201,7 +201,7 @@
                                                        Unfocused="OnQuantityEntryUnfocused" />
                                                 <Button Grid.Column="3" Text="+" FontSize="14" Padding="0" VerticalOptions="Center"
                                                         WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
-                                                        BackgroundColor="{StaticResource Gray100}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
                                                         Clicked="OnIncrementClicked" />
                                                 <Label Grid.Column="4" Text="✕" FontSize="16" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                                        VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"
