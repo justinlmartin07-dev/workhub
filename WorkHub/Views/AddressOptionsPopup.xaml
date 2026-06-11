@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+               x:Class="WorkHub.Views.AddressOptionsPopup"
+               CanBeDismissedByTappingOutsideOfPopup="True"
+               Color="Transparent">
+
+    <Border StrokeShape="RoundRectangle 12"
+            Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+            StrokeThickness="1"
+            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+            Padding="6"
+            MinimumWidthRequest="240">
+        <VerticalStackLayout Spacing="2">
+            <Label x:Name="AddressLabel" FontSize="12" Padding="10,6,10,4"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                   LineBreakMode="TailTruncation" MaxLines="2" />
+
+            <BoxView HeightRequest="1" Margin="4,0"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}" />
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="10,10">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOpenInEarthTapped" />
+                </Grid.GestureRecognizers>
+                <!-- Material Symbols "public" globe, line style to match the other Path icons -->
+                <shapes:Path Data="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-155.5t86-127Q252-817 325-848.5T480-880q83 0 155.5 31.5t127 86q54.5 54.5 86 127T880-480q0 82-31.5 155t-86 127.5q-54.5 54.5-127 86T480-80Zm-40-82v-78q-33 0-56.5-23.5T360-320v-40L168-552q-3 18-5.5 36t-2.5 36q0 121 79.5 212T440-162Zm276-102q20-22 36-47.5t26.5-53q10.5-27.5 16-56.5t5.5-59q0-98-54.5-179T600-776v16q0 33-23.5 56.5T520-680h-80v80q0 17-11.5 28.5T400-560h-80v80h240q17 0 28.5 11.5T600-440v120h40q26 0 47 15.5t29 40.5Z"
+                             Fill="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                             Aspect="Uniform" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="Open in Google Earth" FontSize="14" FontFamily="OpenSansSemibold"
+                       VerticalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

@@ -10,7 +10,7 @@ using WorkHub.Views;
 namespace WorkHub.ViewModels;
 
 [QueryProperty(nameof(JobId), "id")]
-public partial class JobDetailViewModel : BaseViewModel
+public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
 {
     private readonly ApiService _apiService;
     private readonly PhotoService _photoService;
@@ -81,20 +81,44 @@ public partial class JobDetailViewModel : BaseViewModel
 
     partial void OnJobIdChanged(string? value)
     {
-        if (Guid.TryParse(value, out _))
-            LoadJobCommand.Execute(null);
+        if (!Guid.TryParse(value, out _)) return;
+        ResetForNewJob();
+        LoadJobCommand.Execute(null);
     }
+
+    // Same item shown again on the reused view — just refresh silently.
+    public void RefreshOnReuse() => LoadJobCommand.Execute(null);
+
+    // The detail view is cached and reused across items — wipe the previous
+    // job's state so the new one starts from its own cache (or a spinner),
+    // never from stale content or a leftover note draft.
+    private void ResetForNewJob()
+    {
+        Job = null;
+        Photos.Clear();
+        UsedItems.Clear();
+        ToOrderItems.Clear();
+        NewNoteText = string.Empty;
+        EditingNote = null;
+        IsPartsPanelOpen = false;
+        HasContent = false;
+        HasError = false;
+        IsEmpty = false;
+    }
+
+    private bool IsCurrent(Guid id) => Guid.TryParse(JobId, out var current) && current == id;
 
     [RelayCommand]
     public async Task LoadJobAsync()
     {
         if (!Guid.TryParse(JobId, out var id)) return;
+        var cacheKey = $"job-{id}";
 
         // First load: render the last-known copy instantly, no spinner.
         if (Job == null)
         {
-            var cached = await _listCache.LoadObjectAsync<JobResponse>(CacheKey);
-            if (cached != null && Job == null)
+            var cached = await _listCache.LoadObjectAsync<JobResponse>(cacheKey);
+            if (cached != null && Job == null && IsCurrent(id))
             {
                 ApplyJob(cached, urlsAreFresh: false);
                 SetContent();
@@ -113,11 +137,18 @@ public partial class JobDetailViewModel : BaseViewModel
             {
                 // Deleted elsewhere — drop the cache and leave instead of
                 // showing a ghost page.
-                _listCache.Remove(CacheKey);
-                await HandleJobGoneAsync();
+                _listCache.Remove(cacheKey);
+                if (IsCurrent(id))
+                    await HandleJobGoneAsync();
                 return;
             }
             if (fresh == null) return;
+
+            _ = _listCache.SaveObjectAsync(cacheKey, fresh);
+
+            // The user may have moved to a different item mid-flight — never
+            // apply a stale response over the new item's content.
+            if (!IsCurrent(id)) return;
 
             // Presigned photo URLs differ on every response; only rebind when
             // something the user can see actually changed.
@@ -125,9 +156,12 @@ public partial class JobDetailViewModel : BaseViewModel
                 ApplyJob(fresh, urlsAreFresh: true);
             else
                 UpdatePhotos(fresh.Photos, urlsAreFresh: true);
-
-            _ = _listCache.SaveObjectAsync(CacheKey, fresh);
         }, showLoading: Job == null);
+
+        // If the id changed while a load was in flight, the IsBusy gate
+        // swallowed the re-trigger — load again for the current id.
+        if (!IsCurrent(id))
+            await LoadJobAsync();
     }
 
     private void ApplyJob(JobResponse job, bool urlsAreFresh)
@@ -216,6 +250,16 @@ public partial class JobDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task ShowAddressOptionsAsync()
+    {
+        var address = Job?.Address;
+        if (string.IsNullOrWhiteSpace(address)) return;
+
+        if (await Views.AddressOptionsPopup.ShowAsync(address))
+            await OpenAddressInEarthAsync();
+    }
+
+    [RelayCommand]
     private async Task OpenAddressInEarthAsync()
     {
         var address = Job?.Address;
@@ -224,11 +268,10 @@ public partial class JobDetailViewModel : BaseViewModel
         var encoded = Uri.EscapeDataString(address);
         try
         {
-#if ANDROID
-            await Launcher.OpenAsync($"com.google.earth:/search?q={encoded}");
-#else
+            // The Earth app claims earth.google.com app links on Android, so this
+            // opens the app when installed and the browser otherwise. (Earth's
+            // custom URI scheme is unreliable and blocked by package visibility.)
             await Launcher.OpenAsync($"https://earth.google.com/web/search/{encoded}");
-#endif
         }
         catch
         {

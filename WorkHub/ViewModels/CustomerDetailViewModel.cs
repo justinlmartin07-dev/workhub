@@ -18,7 +18,7 @@ public class CustomerDetailCacheEntry
 }
 
 [QueryProperty(nameof(CustomerId), "id")]
-public partial class CustomerDetailViewModel : BaseViewModel
+public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
 {
     private readonly ApiService _apiService;
     private readonly PhotoService _photoService;
@@ -318,6 +318,16 @@ public partial class CustomerDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task ShowAddressOptionsAsync()
+    {
+        var address = Customer?.Address;
+        if (string.IsNullOrWhiteSpace(address)) return;
+
+        if (await Views.AddressOptionsPopup.ShowAsync(address))
+            await OpenAddressInEarthAsync();
+    }
+
+    [RelayCommand]
     private async Task OpenAddressInEarthAsync()
     {
         var address = Customer?.Address;
@@ -326,11 +336,10 @@ public partial class CustomerDetailViewModel : BaseViewModel
         var encoded = Uri.EscapeDataString(address);
         try
         {
-#if ANDROID
-            await Launcher.OpenAsync($"com.google.earth:/search?q={encoded}");
-#else
+            // The Earth app claims earth.google.com app links on Android, so this
+            // opens the app when installed and the browser otherwise. (Earth's
+            // custom URI scheme is unreliable and blocked by package visibility.)
             await Launcher.OpenAsync($"https://earth.google.com/web/search/{encoded}");
-#endif
         }
         catch
         {

@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:WorkHub.Models"
              xmlns:controls="clr-namespace:WorkHub.Controls"
              xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="WorkHub.Views.CustomerDetailPage"
              x:DataType="vm:CustomerDetailViewModel"
              x:Name="thisPage"
@@ -92,9 +93,12 @@
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
                                 <Label Text="Address:" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="76" />
                                 <Label Grid.Column="1" Text="{Binding Customer.Address, FallbackValue='-'}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding OpenAddressInMapsCommand}" />
-                                    </Label.GestureRecognizers>
+                                    <Label.Behaviors>
+                                        <!-- Tap → Maps, hold → Earth. ContextFlyout below covers Windows right-click;
+                                             it does nothing on Android, hence the long-press here. -->
+                                        <toolkit:TouchBehavior Command="{Binding OpenAddressInMapsCommand}"
+                                                               LongPressCommand="{Binding ShowAddressOptionsCommand}" />
+                                    </Label.Behaviors>
                                     <FlyoutBase.ContextFlyout>
                                         <MenuFlyout>
                                             <MenuFlyoutItem Text="Open in Maps" Command="{Binding OpenAddressInMapsCommand}" />
