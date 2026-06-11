@@ -491,10 +491,32 @@ public partial class MainLayout : ContentPage
         return null;
     }
 
+    private static bool _shellNavInFlight;
+    private static string? _lastShellRoute;
+    private static DateTime _lastShellNavAt;
+
     private static async Task NavigateViaShell(DetailRequest request)
     {
         var query = string.Join("&", request.QueryParams.Select(p => $"{p.Key}={p.Value}"));
         var route = string.IsNullOrEmpty(query) ? request.Route : $"{request.Route}?{query}";
-        await Shell.Current.GoToAsync(route);
+
+        // Duplicate pushes stack an identical page under the visible one, which
+        // then takes two back presses to escape. Drop a repeat of the same route
+        // while one navigation is animating or within a short window after it.
+        if (_shellNavInFlight) return;
+        if (route == _lastShellRoute && (DateTime.UtcNow - _lastShellNavAt) < TimeSpan.FromMilliseconds(1500))
+            return;
+
+        _shellNavInFlight = true;
+        try
+        {
+            _lastShellRoute = route;
+            _lastShellNavAt = DateTime.UtcNow;
+            await Shell.Current.GoToAsync(route);
+        }
+        finally
+        {
+            _shellNavInFlight = false;
+        }
     }
 }
