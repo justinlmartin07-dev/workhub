@@ -106,8 +106,10 @@
                                     </Label.Behaviors>
                                     <FlyoutBase.ContextFlyout>
                                         <MenuFlyout>
-                                            <MenuFlyoutItem Text="Open in Maps" Command="{Binding OpenAddressInMapsCommand}" />
-                                            <MenuFlyoutItem Text="Open in Google Earth" Command="{Binding OpenAddressInEarthCommand}" />
+                                            <MenuFlyoutItem Text="Open in Maps" IconImageSource="map_pin.png"
+                                                            Command="{Binding OpenAddressInMapsCommand}" />
+                                            <MenuFlyoutItem Text="Open in Google Earth" IconImageSource="globe.png"
+                                                            Command="{Binding OpenAddressInEarthCommand}" />
                                         </MenuFlyout>
                                     </FlyoutBase.ContextFlyout>
                                 </Label>
