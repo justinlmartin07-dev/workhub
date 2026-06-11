@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.CustomerEditPage"
              x:DataType="vm:CustomerEditViewModel"
              x:Name="thisPage"
@@ -49,14 +50,21 @@
             <CollectionView ItemsSource="{Binding PhoneEntries}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:ContactEntry">
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="0,2">
-                            <Picker WidthRequest="130" ItemsSource="{Binding BindingContext.PhoneLabelOptions, Source={x:Reference thisPage}}"
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4" Padding="0,2">
+                            <Picker WidthRequest="{OnPlatform 92, WinUI=140}" ItemsSource="{Binding BindingContext.PhoneLabelOptions, Source={x:Reference thisPage}}"
                                     SelectedItem="{Binding Label}" />
                             <Entry Grid.Column="1" Placeholder="Phone number" Text="{Binding Value}" Keyboard="Telephone" />
-                            <Button Grid.Column="2" Text="✕" Style="{StaticResource DangerButton}"
-                                    WidthRequest="40" Padding="0"
-                                    Command="{Binding BindingContext.RemovePhoneCommand, Source={x:Reference thisPage}}"
-                                    CommandParameter="{Binding .}" />
+                            <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
+                                    Padding="6" VerticalOptions="Center">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding BindingContext.RemovePhoneCommand, Source={x:Reference thisPage}}"
+                                                          CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <!-- Material Symbols "close" -->
+                                <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                                             Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                             Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                            </Border>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -70,14 +78,21 @@
             <CollectionView ItemsSource="{Binding EmailEntries}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:ContactEntry">
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="0,2">
-                            <Picker WidthRequest="130" ItemsSource="{Binding BindingContext.EmailLabelOptions, Source={x:Reference thisPage}}"
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4" Padding="0,2">
+                            <Picker WidthRequest="{OnPlatform 92, WinUI=140}" ItemsSource="{Binding BindingContext.EmailLabelOptions, Source={x:Reference thisPage}}"
                                     SelectedItem="{Binding Label}" />
                             <Entry Grid.Column="1" Placeholder="Email address" Text="{Binding Value}" Keyboard="Email" />
-                            <Button Grid.Column="2" Text="✕" Style="{StaticResource DangerButton}"
-                                    WidthRequest="40" Padding="0"
-                                    Command="{Binding BindingContext.RemoveEmailCommand, Source={x:Reference thisPage}}"
-                                    CommandParameter="{Binding .}" />
+                            <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
+                                    Padding="6" VerticalOptions="Center">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding BindingContext.RemoveEmailCommand, Source={x:Reference thisPage}}"
+                                                          CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <!-- Material Symbols "close" -->
+                                <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                                             Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                             Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                            </Border>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
