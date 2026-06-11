@@ -59,7 +59,7 @@
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="models:CustomerContactResponse">
                                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
-                                            <Label Text="{Binding Label, StringFormat='{0}:'}" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="60" />
+                                            <Label Text="{Binding Label, StringFormat='{0}:'}" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="76" />
                                             <Label Grid.Column="1" Text="{Binding Value}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                                 <Label.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=CallPhoneCommand}"
@@ -76,7 +76,7 @@
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="models:CustomerContactResponse">
                                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
-                                            <Label Text="{Binding Label, StringFormat='{0}:'}" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="60" />
+                                            <Label Text="{Binding Label, StringFormat='{0}:'}" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="76" />
                                             <Label Grid.Column="1" Text="{Binding Value}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                                 <Label.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=SendEmailCommand}"
@@ -90,7 +90,7 @@
 
                             <!-- Address -->
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
-                                <Label Text="Address:" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                <Label Text="Address:" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="76" />
                                 <Label Grid.Column="1" Text="{Binding Customer.Address, FallbackValue='-'}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding OpenAddressInMapsCommand}" />
