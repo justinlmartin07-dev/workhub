@@ -16,10 +16,8 @@
             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
             EmptyMessage="No inventory items" RetryCommand="{Binding LoadItemsCommand}">
             <controls:DataStateView.Body>
-                <CollectionView ItemsSource="{Binding Items}"
+                <CollectionView x:Name="InventoryCollectionView" ItemsSource="{Binding Items}"
                                 SelectionMode="Single"
-                                SelectionChangedCommand="{Binding SelectItemCommand}"
-                                SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}"
                                 TranslationX="6" Margin="0,0,6,0">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="4" />
@@ -31,6 +29,12 @@
                                     StrokeThickness="0"
                                     Stroke="Transparent"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                                <Border.GestureRecognizers>
+                                    <!-- Navigation rides on the tap, not SelectionChanged, so tapping
+                                         the already-selected item still opens it. -->
+                                    <TapGestureRecognizer Command="{Binding Source={x:Reference InventoryCollectionView}, Path=BindingContext.SelectItemCommand}"
+                                                          CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
                                 <VisualStateManager.VisualStateGroups>
                                     <VisualStateGroup x:Name="CommonStates">
                                         <VisualState x:Name="Normal" />

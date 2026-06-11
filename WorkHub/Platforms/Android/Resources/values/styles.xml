@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Applied over MAUI's runtime theme in MainActivity.OnCreate (MauiAppCompatActivity
+         replaces the manifest theme, so a manifest-level override never survives).
+         The selection indicator is drawn by the app (Selected visual state border);
+         suppress Android's own activated-item highlight, which Samsung renders orange. -->
+    <style name="WorkHubThemeOverlay">
+        <item name="android:colorActivatedHighlight">@android:color/transparent</item>
+    </style>
+</resources>
