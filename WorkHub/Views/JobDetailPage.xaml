@@ -76,11 +76,16 @@
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Job Address" Style="{StaticResource SectionHeading}" />
                                 <Label Text="{Binding Job.Address}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                    <Label.GestureRecognizers>
+                                        <!-- Primary button only: a right-click must reach ONLY the
+                                             ContextFlyout below, or the menu is instantly dismissed
+                                             by Maps opening (TouchBehavior fired on any button). -->
+                                        <TapGestureRecognizer Buttons="Primary" Command="{Binding OpenAddressInMapsCommand}" />
+                                    </Label.GestureRecognizers>
                                     <Label.Behaviors>
-                                        <!-- Tap → Maps, hold → Earth. ContextFlyout below covers Windows right-click;
-                                             it does nothing on Android, hence the long-press here. -->
-                                        <toolkit:TouchBehavior Command="{Binding OpenAddressInMapsCommand}"
-                                                               LongPressCommand="{Binding ShowAddressOptionsCommand}" />
+                                        <!-- Android hold → Earth options. ContextFlyout covers Windows
+                                             right-click; it does nothing on Android, hence the long-press. -->
+                                        <toolkit:TouchBehavior LongPressCommand="{Binding ShowAddressOptionsCommand}" />
                                     </Label.Behaviors>
                                     <FlyoutBase.ContextFlyout>
                                         <MenuFlyout>

@@ -93,11 +93,16 @@
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
                                 <Label Text="Address:" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="76" />
                                 <Label Grid.Column="1" Text="{Binding Customer.Address, FallbackValue='-'}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                    <Label.GestureRecognizers>
+                                        <!-- Primary button only: a right-click must reach ONLY the
+                                             ContextFlyout below, or the menu is instantly dismissed
+                                             by Maps opening (TouchBehavior fired on any button). -->
+                                        <TapGestureRecognizer Buttons="Primary" Command="{Binding OpenAddressInMapsCommand}" />
+                                    </Label.GestureRecognizers>
                                     <Label.Behaviors>
-                                        <!-- Tap → Maps, hold → Earth. ContextFlyout below covers Windows right-click;
-                                             it does nothing on Android, hence the long-press here. -->
-                                        <toolkit:TouchBehavior Command="{Binding OpenAddressInMapsCommand}"
-                                                               LongPressCommand="{Binding ShowAddressOptionsCommand}" />
+                                        <!-- Android hold → Earth options. ContextFlyout covers Windows
+                                             right-click; it does nothing on Android, hence the long-press. -->
+                                        <toolkit:TouchBehavior LongPressCommand="{Binding ShowAddressOptionsCommand}" />
                                     </Label.Behaviors>
                                     <FlyoutBase.ContextFlyout>
                                         <MenuFlyout>

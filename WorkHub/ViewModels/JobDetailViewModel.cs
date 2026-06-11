@@ -228,9 +228,15 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     [RelayCommand]
     private async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
 
+    // Releasing the long-press that opened the options popup still registers
+    // as a tap (the tap recognizer doesn't disqualify long holds), which would
+    // open Maps over the popup — swallow taps while the popup is up.
+    private bool _addressOptionsOpen;
+
     [RelayCommand]
     private async Task OpenAddressInMapsAsync()
     {
+        if (_addressOptionsOpen) return;
         var address = Job?.Address;
         if (string.IsNullOrWhiteSpace(address)) return;
 
@@ -255,7 +261,17 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         var address = Job?.Address;
         if (string.IsNullOrWhiteSpace(address)) return;
 
-        if (await Views.AddressOptionsPopup.ShowAsync(address))
+        bool openEarth;
+        _addressOptionsOpen = true;
+        try
+        {
+            openEarth = await Views.AddressOptionsPopup.ShowAsync(address);
+        }
+        finally
+        {
+            _addressOptionsOpen = false;
+        }
+        if (openEarth)
             await OpenAddressInEarthAsync();
     }
 

@@ -324,9 +324,15 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
         }));
     }
 
+    // Releasing the long-press that opened the options popup still registers
+    // as a tap (the tap recognizer doesn't disqualify long holds), which would
+    // open Maps over the popup — swallow taps while the popup is up.
+    private bool _addressOptionsOpen;
+
     [RelayCommand]
     private async Task OpenAddressInMapsAsync()
     {
+        if (_addressOptionsOpen) return;
         var address = Customer?.Address;
         if (string.IsNullOrWhiteSpace(address)) return;
 
@@ -351,7 +357,17 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
         var address = Customer?.Address;
         if (string.IsNullOrWhiteSpace(address)) return;
 
-        if (await Views.AddressOptionsPopup.ShowAsync(address))
+        bool openEarth;
+        _addressOptionsOpen = true;
+        try
+        {
+            openEarth = await Views.AddressOptionsPopup.ShowAsync(address);
+        }
+        finally
+        {
+            _addressOptionsOpen = false;
+        }
+        if (openEarth)
             await OpenAddressInEarthAsync();
     }
 
