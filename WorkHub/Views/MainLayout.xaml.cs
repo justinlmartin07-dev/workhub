@@ -25,6 +25,10 @@ public partial class MainLayout : ContentPage
     // Each tab's detail pane is parked here on switch and restored on return,
     // so in-progress work (including unsaved edits) survives tab changes.
     private readonly Dictionary<int, View?> _tabDetails = new();
+    // The heavy detail views (job/customer) are built once and reused — XAML
+    // inflation is the dominant cost of opening a detail once data is cached.
+    // Their VMs reset themselves when the entity id changes (IReusableDetail).
+    private readonly Dictionary<string, View> _detailViewCache = new();
 
     public static MainLayout? Current { get; private set; }
 
@@ -57,7 +61,35 @@ public partial class MainLayout : ContentPage
         {
             _viewModel.SelectedTabIndex = 0;
             LoadTabContent(0);
+            PrewarmDetailViews();
         }
+    }
+
+    private bool _prewarmStarted;
+
+    // Inflate the heavy detail views once, shortly after launch, so the first
+    // click on a job/customer doesn't pay the XAML-construction cost either.
+    private void PrewarmDetailViews()
+    {
+        if (_prewarmStarted) return;
+        _prewarmStarted = true;
+
+        Dispatcher.Dispatch(async () =>
+        {
+            // Let the first list render before taking UI-thread time.
+            await Task.Delay(750);
+            if (!_isWide) return; // narrow mode pushes detail pages via Shell
+
+            if (!_detailViewCache.ContainsKey("jobDetail"))
+                GetOrCreateCachedDetailView<JobDetailPage, JobDetailViewModel>(
+                    "jobDetail", new DetailRequest { Route = "jobDetail" });
+
+            await Task.Delay(250);
+
+            if (!_detailViewCache.ContainsKey("customerDetail"))
+                GetOrCreateCachedDetailView<CustomerDetailPage, CustomerDetailViewModel>(
+                    "customerDetail", new DetailRequest { Route = "customerDetail" });
+        });
     }
 
     protected override void OnDisappearing()
@@ -374,9 +406,9 @@ public partial class MainLayout : ContentPage
         {
             View? detailView = request.Route switch
             {
-                "customerDetail" => CreateDetailView<CustomerDetailPage, CustomerDetailViewModel>(request),
+                "customerDetail" => GetOrCreateCachedDetailView<CustomerDetailPage, CustomerDetailViewModel>("customerDetail", request),
                 "customerEdit" => CreateDetailView<CustomerEditPage, CustomerEditViewModel>(request),
-                "jobDetail" => CreateDetailView<JobDetailPage, JobDetailViewModel>(request),
+                "jobDetail" => GetOrCreateCachedDetailView<JobDetailPage, JobDetailViewModel>("jobDetail", request),
                 "jobEdit" => CreateDetailView<JobEditPage, JobEditViewModel>(request),
                 "inventoryDetail" => CreateDetailView<InventoryItemDetailPage, InventoryItemDetailViewModel>(request),
                 "orderDetail" => CreateDetailView<OrderDetailPage, OrderDetailViewModel>(request),
@@ -398,6 +430,40 @@ public partial class MainLayout : ContentPage
         {
             await NavigateViaShell(request);
         }
+    }
+
+    // Reuse the cached view for this route: update the VM's properties (the
+    // entity-id setter resets and reloads), or ask it to refresh when the same
+    // item is shown again. Falls back to creating (and caching) the view.
+    private View? GetOrCreateCachedDetailView<TPage, TViewModel>(string route, DetailRequest request)
+        where TPage : ContentPage
+        where TViewModel : class
+    {
+        if (_detailViewCache.TryGetValue(route, out var view))
+        {
+            if (view.BindingContext is TViewModel vm)
+            {
+                var changed = false;
+                foreach (var param in request.Properties)
+                {
+                    var prop = vm.GetType().GetProperty(param.Key);
+                    if (prop == null) continue;
+                    if (!Equals(prop.GetValue(vm), param.Value))
+                    {
+                        prop.SetValue(vm, param.Value);
+                        changed = true;
+                    }
+                }
+                if (!changed && vm is ViewModels.IReusableDetail reusable)
+                    reusable.RefreshOnReuse();
+            }
+            return view;
+        }
+
+        var created = CreateDetailView<TPage, TViewModel>(request);
+        if (created != null)
+            _detailViewCache[route] = created;
+        return created;
     }
 
     private View? CreateDetailView<TPage, TViewModel>(DetailRequest request)

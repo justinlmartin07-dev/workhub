@@ -7,6 +7,14 @@ public interface IHasUnsavedChanges
     bool HasUnsavedChanges { get; }
 }
 
+// Detail VMs whose view is cached and reused by MainLayout. Called when the
+// same item is shown again (the entity-id property didn't change, so the
+// property setter won't trigger a reload itself).
+public interface IReusableDetail
+{
+    void RefreshOnReuse();
+}
+
 public partial class BaseViewModel : ObservableObject
 {
     [ObservableProperty]

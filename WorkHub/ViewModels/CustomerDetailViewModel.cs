@@ -62,20 +62,39 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
 
     partial void OnCustomerIdChanged(string? value)
     {
-        if (Guid.TryParse(value, out _))
-            LoadCustomerCommand.Execute(null);
+        if (!Guid.TryParse(value, out _)) return;
+        ResetForNewCustomer();
+        LoadCustomerCommand.Execute(null);
     }
+
+    // Same item shown again on the reused view — just refresh silently.
+    public void RefreshOnReuse() => LoadCustomerCommand.Execute(null);
+
+    // The detail view is cached and reused across items — wipe the previous
+    // customer's state so the new one starts from its own cache (or a spinner).
+    private void ResetForNewCustomer()
+    {
+        Customer = null;
+        Photos.Clear();
+        LocationPhotoCount = 0;
+        HasContent = false;
+        HasError = false;
+        IsEmpty = false;
+    }
+
+    private bool IsCurrent(Guid id) => Guid.TryParse(CustomerId, out var current) && current == id;
 
     [RelayCommand]
     public async Task LoadCustomerAsync()
     {
         if (!Guid.TryParse(CustomerId, out var id)) return;
+        var cacheKey = $"customer-{id}";
 
         // First load: render the last-known copy instantly, no spinner.
         if (Customer == null)
         {
-            var cached = await _listCache.LoadObjectAsync<CustomerDetailCacheEntry>(CacheKey);
-            if (cached?.Customer != null && Customer == null)
+            var cached = await _listCache.LoadObjectAsync<CustomerDetailCacheEntry>(cacheKey);
+            if (cached?.Customer != null && Customer == null && IsCurrent(id))
             {
                 ApplyCustomer(cached.Customer, urlsAreFresh: false);
                 LocationPhotoCount = cached.LocationPhotoCount;
@@ -101,12 +120,15 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 ObserveAbandoned(countTask);
-                _listCache.Remove(CacheKey);
-                await HandleCustomerGoneAsync();
+                _listCache.Remove(cacheKey);
+                if (IsCurrent(id))
+                    await HandleCustomerGoneAsync();
                 return;
             }
-            if (fresh == null)
+            if (fresh == null || !IsCurrent(id))
             {
+                // The user may have moved to a different item mid-flight —
+                // never apply a stale response over the new item's content.
                 ObserveAbandoned(countTask);
                 return;
             }
@@ -136,11 +158,17 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
             {
                 // Count is decorative — keep the last-known value on failure.
             }
+            if (!IsCurrent(id)) return;
             LocationPhotoCount = count;
 
-            _ = _listCache.SaveObjectAsync(CacheKey,
+            _ = _listCache.SaveObjectAsync(cacheKey,
                 new CustomerDetailCacheEntry { Customer = fresh, LocationPhotoCount = count });
         }, showLoading: Customer == null);
+
+        // If the id changed while a load was in flight, the IsBusy gate
+        // swallowed the re-trigger — load again for the current id.
+        if (!IsCurrent(id))
+            await LoadCustomerAsync();
     }
 
     // Prevent an unobserved-exception fault when a started count task is dropped.
