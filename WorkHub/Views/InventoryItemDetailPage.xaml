@@ -40,6 +40,7 @@
                                      Fill="{StaticResource White}"
                                      Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
                         <Label Text="Delete" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                               IsVisible="{OnPlatform true, Android=false}"
                                TextColor="{StaticResource White}" />
                     </HorizontalStackLayout>
                 </Border>
