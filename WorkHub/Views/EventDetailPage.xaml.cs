@@ -26,12 +26,58 @@ public partial class EventDetailPage : ContentPage
             else if (e.PropertyName == nameof(EventDetailViewModel.IsCustomerPickerOpen)
                      && _viewModel.IsCustomerPickerOpen)
             {
-                Dispatcher.Dispatch(() => CustomerSearchBar.Focus());
+                // Wait for the picker to render before focusing: focusing the
+                // not-yet-visible SearchBar fails on Windows, and WinUI then
+                // focuses the first control on the page (the title) and scrolls
+                // back up to it.
+                Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(100), () => CustomerSearchBar.Focus());
             }
         };
 
         RebuildChips();
+
+#if WINDOWS
+        // When the customer picker opens, WinUI grabs focus for the first control
+        // (the title) before our delayed focus reaches the search box, flashing
+        // the title and scrolling up to it. Disable focus-driven auto-scroll and
+        // deflect that programmatic grab straight to the search box.
+        PageScroll.HandlerChanged += (s, e) =>
+        {
+            if (PageScroll.Handler?.PlatformView is not Microsoft.UI.Xaml.Controls.ScrollViewer sv)
+                return;
+            sv.BringIntoViewOnFocusChange = false;
+            sv.GettingFocus += (sender, args) =>
+            {
+                // While the picker is open, no non-pointer focus may land on any
+                // text box except the picker's search box: redirect when the search
+                // box exists, cancel when it is still being created (first open) —
+                // the delayed focus below lands on it once it's ready.
+                if (!_viewModel.IsCustomerPickerOpen
+                    || args.FocusState == Microsoft.UI.Xaml.FocusState.Pointer
+                    || args.NewFocusedElement is not Microsoft.UI.Xaml.Controls.TextBox tb)
+                    return;
+
+                var search = CustomerSearchBar.Handler?.PlatformView as Microsoft.UI.Xaml.Controls.AutoSuggestBox;
+                if (search != null && IsWithin(tb, search))
+                    return;
+                if (search == null || !args.TrySetNewFocusedElement(search))
+                    args.TryCancel();
+            };
+        };
+#endif
     }
+
+#if WINDOWS
+    private static bool IsWithin(Microsoft.UI.Xaml.DependencyObject? element, Microsoft.UI.Xaml.DependencyObject root)
+    {
+        while (element != null)
+        {
+            if (element == root) return true;
+            element = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(element);
+        }
+        return false;
+    }
+#endif
 
     private void RebuildChips()
     {

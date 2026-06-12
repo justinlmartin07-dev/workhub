@@ -16,7 +16,9 @@ public partial class JobEditPage : ContentPage
         {
             if (e.PropertyName == nameof(JobEditViewModel.IsCustomerPickerOpen) && _viewModel.IsCustomerPickerOpen)
             {
-                // Small delay to let the UI render before focusing
+                // Small delay to let the UI render before focusing — focusing the
+                // not-yet-visible SearchBar fails on Windows and sends focus (and
+                // the scroll position) to the first control on the page instead.
                 Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(100), () =>
                 {
                     CustomerSearchBar.Focus();
