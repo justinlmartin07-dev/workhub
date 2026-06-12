@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using Amazon.S3;
@@ -134,15 +135,21 @@ builder.Services.AddCors(options =>
 });
 
 // Trust Railway's proxy so RemoteIpAddress / scheme reflect the real client.
+// ForwardLimit = 1 means only the single right-most X-Forwarded-For entry (the one
+// Railway's edge appends) is honored, so a client cannot spoof its source IP by
+// supplying its own X-Forwarded-For — which would otherwise defeat the per-IP
+// rate limiter or let an attacker poison a victim's partition.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardLimit = 1;
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
-// Rate limiting — throttle the unauthenticated auth endpoints per client IP to
-// blunt credential stuffing / spraying and refresh-endpoint abuse.
+// Rate limiting — per-IP throttle on the unauthenticated auth endpoints (blunts
+// credential stuffing / spraying), and a per-user throttle on the metered
+// third-party (Google Places) endpoints to cap billing/quota abuse.
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -152,6 +159,15 @@ builder.Services.AddRateLimiter(options =>
             factory: _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+            }));
+    options.AddPolicy("thirdparty", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 30,
                 Window = TimeSpan.FromMinutes(1),
             }));
 });
@@ -175,13 +191,17 @@ app.UseExceptionHandler(errorApp =>
     errorApp.Run(async context =>
     {
         var error = context.Features.Get<IExceptionHandlerPathFeature>()?.Error;
-        if (error is UnauthorizedAccessException)
+        if (error is WorkHub.Api.Controllers.MissingUserClaimException)
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             await context.Response.WriteAsJsonAsync(new { error = "Unauthorized" });
         }
         else
         {
+            context.RequestServices.GetRequiredService<ILoggerFactory>()
+                .CreateLogger("UnhandledException")
+                .LogError(error, "Unhandled exception for {Method} {Path}",
+                    context.Request.Method, context.Request.Path);
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsJsonAsync(new { error = "An unexpected error occurred." });
         }

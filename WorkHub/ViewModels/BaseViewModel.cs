@@ -75,8 +75,10 @@ public partial class BaseViewModel : ObservableObject
                 HasError = true;
                 HasContent = false;
             }
+#if DEBUG
             var path = Path.Combine(FileSystem.AppDataDirectory, "crash.log");
             File.WriteAllText(path, $"{DateTime.Now}\n{ex}\n");
+#endif
         }
         finally
         {

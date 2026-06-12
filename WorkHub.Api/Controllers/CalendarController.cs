@@ -20,6 +20,10 @@ public class CalendarController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] DateTime from, [FromQuery] DateTime to, [FromQuery] Guid? userId)
     {
+        // Bound the range so a caller can't pull (and eager-join) the entire calendar.
+        if (to < from || (to - from).TotalDays > 366)
+            return BadRequest(new ErrorResponse { Error = "Invalid or too-large date range (max 366 days)." });
+
         var query = _db.CalendarEvents
             .Where(e => e.StartTime >= from && e.StartTime <= to)
             .Include(e => e.Customer)
@@ -91,7 +95,7 @@ public class CalendarController : ControllerBase
 
         if (request.AssignedUserIds?.Count > 0)
         {
-            foreach (var uid in request.AssignedUserIds)
+            foreach (var uid in request.AssignedUserIds.Distinct())
             {
                 _db.CalendarEventAssignments.Add(new CalendarEventAssignment
                 {

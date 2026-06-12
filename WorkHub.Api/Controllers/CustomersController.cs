@@ -178,7 +178,9 @@ public class CustomersController : ControllerBase
         if (customer == null)
             return NotFound(new ErrorResponse { Error = "Customer not found" });
 
-        var blockingJobs = customer.Jobs.Where(j => j.Status != "Complete").ToList();
+        var blockingJobs = customer.Jobs
+            .Where(j => !string.Equals(j.Status, "Complete", StringComparison.OrdinalIgnoreCase))
+            .ToList();
         if (blockingJobs.Any())
         {
             return Conflict(new ErrorResponse

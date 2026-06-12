@@ -75,7 +75,11 @@ public class AuthService
     public async Task<RefreshToken?> ConsumeRefreshToken(string rawToken)
     {
         var hash = HashToken(rawToken);
+        // No-tracking: the row is removed via ExecuteDeleteAsync below (which bypasses
+        // the change tracker), so we must not leave a phantom-tracked entity behind to
+        // interfere with the SaveChanges in GenerateRefreshToken.
         var token = await _db.RefreshTokens
+            .AsNoTracking()
             .Include(rt => rt.User)
             .FirstOrDefaultAsync(rt => rt.TokenHash == hash);
         if (token == null)

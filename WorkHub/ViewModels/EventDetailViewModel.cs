@@ -213,6 +213,9 @@ public partial class EventDetailViewModel : BaseViewModel
             await Task.WhenAll(customersTask, usersTask);
             Customers = new ObservableCollection<CustomerResponse>(customersTask.Result.Items);
             Users = new ObservableCollection<UserBriefResponse>(usersTask.Result);
+            // Pre-populate so the (pre-built, hidden) picker list renders during page
+            // load instead of on first open, where the build delay breaks focus.
+            FilterCustomers();
         }
         catch { }
     }
@@ -310,8 +313,10 @@ public partial class EventDetailViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
+#if DEBUG
             var path = Path.Combine(FileSystem.AppDataDirectory, "crash.log");
             File.WriteAllText(path, $"{DateTime.Now}\n{ex}\n");
+#endif
             ErrorMessage = $"{ex.GetType().Name}: {ex.Message}\nat {ex.StackTrace?.Split('\n').FirstOrDefault()}";
             HasError = true;
         }

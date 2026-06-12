@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using WorkHub.Api.Services;
 
 namespace WorkHub.Api.Controllers;
@@ -7,6 +8,7 @@ namespace WorkHub.Api.Controllers;
 [ApiController]
 [Route("v1/address")]
 [Authorize]
+[EnableRateLimiting("thirdparty")]
 public class AddressController : ControllerBase
 {
     private readonly AddressService _addressService;

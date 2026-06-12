@@ -66,13 +66,15 @@ public partial class LoginViewModel : BaseViewModel
             ErrorMessage = msg;
             HasError = true;
             System.Diagnostics.Debug.WriteLine(msg);
+#if DEBUG
             // Also write to a file we can check
             try
             {
                 var logPath = Path.Combine(FileSystem.AppDataDirectory, "crash.log");
-                await File.WriteAllTextAsync(logPath, $"{DateTime.Now}\n{ex}");
+                File.WriteAllText(logPath, $"{DateTime.Now}\n{ex}");
             }
             catch { }
+#endif
         }
     }
 }

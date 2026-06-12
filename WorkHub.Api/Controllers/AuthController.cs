@@ -31,6 +31,7 @@ public class AuthController : ControllerBase
         BCrypt.Net.BCrypt.HashPassword("workhub-timing-equalizer");
 
     private const int LockoutThreshold = 5;
+    private const int LockoutMinutes = 15;
 
     [HttpPost("login")]
     [AllowAnonymous]
@@ -52,16 +53,18 @@ public class AuthController : ControllerBase
         {
             if (user != null && !locked)
             {
-                // Real account, wrong password: count the failure and escalate the
-                // lockout. The counter is NOT reset when locking, so repeated
-                // lockouts lengthen the window instead of granting a fresh 5 tries.
+                // Real account, wrong password. A lockout that has already expired
+                // starts a fresh series, so an honest user always regains their full
+                // allowance and an attacker can't ratchet the account into a
+                // permanent lock by probing once per window.
+                if (user.LockedUntil.HasValue)
+                {
+                    user.FailedLoginAttempts = 0;
+                    user.LockedUntil = null;
+                }
                 user.FailedLoginAttempts++;
                 if (user.FailedLoginAttempts >= LockoutThreshold)
-                {
-                    var over = user.FailedLoginAttempts - LockoutThreshold;
-                    var minutes = Math.Min(15 * Math.Pow(2, over), 24 * 60);
-                    user.LockedUntil = DateTime.UtcNow.AddMinutes(minutes);
-                }
+                    user.LockedUntil = DateTime.UtcNow.AddMinutes(LockoutMinutes);
                 await _db.SaveChangesAsync();
             }
             return Unauthorized(new ErrorResponse { Error = "Invalid email or password" });
