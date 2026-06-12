@@ -23,6 +23,9 @@ public partial class OrdersViewModel : BaseViewModel
     public int OutstandingCount => Orders.Count(o => !o.IsOrdered);
     public int OrderedCount => Orders.Count(o => o.IsOrdered);
 
+    [ObservableProperty]
+    private OrderLineResponse? _selectedOrder;
+
     public OrdersViewModel(ApiService apiService, ListCacheService listCache)
     {
         _apiService = apiService;
@@ -114,6 +117,9 @@ public partial class OrdersViewModel : BaseViewModel
     private void SelectOrder(OrderLineResponse item)
     {
         if (item == null) return;
+        // The tap gesture consumes the touch before native selection happens —
+        // select here so the list shows the indicator.
+        SelectedOrder = item;
         WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
         {
             Route = "orderDetail",

@@ -170,6 +170,9 @@ public partial class JobsListViewModel : BaseViewModel
     private void SelectJob(JobListItemResponse job)
     {
         if (job == null || _suppressSelectionNav) return;
+        // The tap gesture consumes the touch before native selection happens —
+        // select here so the list shows the indicator.
+        SelectedJob = job;
         var id = job.Id.ToString();
         WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
         {

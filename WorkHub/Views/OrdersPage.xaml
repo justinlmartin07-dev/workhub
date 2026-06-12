@@ -27,6 +27,7 @@
             <controls:DataStateView.Body>
                 <CollectionView x:Name="OrdersCollectionView" ItemsSource="{Binding Orders}"
                                 SelectionMode="Single"
+                                SelectedItem="{Binding SelectedOrder, Mode=TwoWay}"
                                 TranslationX="6" Margin="0,0,6,0">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="4" />

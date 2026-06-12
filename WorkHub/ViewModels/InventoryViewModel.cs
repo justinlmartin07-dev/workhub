@@ -24,6 +24,9 @@ public partial class InventoryViewModel : BaseViewModel
     [ObservableProperty]
     private string _searchText = string.Empty;
 
+    [ObservableProperty]
+    private InventoryItemResponse? _selectedItem;
+
     public InventoryViewModel(ApiService apiService, ListCacheService listCache)
     {
         _apiService = apiService;
@@ -100,6 +103,9 @@ public partial class InventoryViewModel : BaseViewModel
     private void SelectItem(InventoryItemResponse item)
     {
         if (item == null) return;
+        // The tap gesture consumes the touch before native selection happens —
+        // select here so the list shows the indicator.
+        SelectedItem = item;
         var id = item.Id.ToString();
         WeakReferenceMessenger.Default.Send(new ShowDetailMessage(new DetailRequest
         {
