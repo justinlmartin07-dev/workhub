@@ -3,10 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.JobEditPage"
              x:DataType="vm:JobEditViewModel"
              Title="{Binding PageTitle}">
 
+    <Grid>
     <ScrollView>
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
             <!-- Customer picker (new only) -->
@@ -23,53 +25,13 @@
                         <Label Text="{Binding SelectedCustomer.DisplayName, FallbackValue='Tap to select a customer...'}"
                                TextColor="{Binding SelectedCustomer, Converter={StaticResource StringNotEmptyConverter}, FallbackValue={StaticResource Gray400}}"
                                VerticalTextAlignment="Center" FontSize="15" />
-                        <Label Grid.Column="1" Text="v" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                               VerticalTextAlignment="Center" />
+                        <!-- Material Symbols "expand_more" -->
+                        <shapes:Path Grid.Column="1" Data="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"
+                                     Fill="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                     Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
                     </Grid>
                 </Frame>
 
-                <!-- Searchable customer list (shown when open) -->
-                <Frame Padding="0" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
-                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceCardDark}}"
-                       IsVisible="{Binding IsCustomerPickerOpen}" HeightRequest="250">
-                    <VerticalStackLayout>
-                        <SearchBar x:Name="CustomerSearchBar" Placeholder="Search customers..." Text="{Binding CustomerSearchText}"
-                                   Margin="0" />
-                        <CollectionView ItemsSource="{Binding FilteredCustomers}" HeightRequest="200"
-                                        SelectionMode="None">
-                            <CollectionView.EmptyView>
-                                <Label Text="No customers found" Padding="16" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                                       HorizontalTextAlignment="Center" />
-                            </CollectionView.EmptyView>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="models:CustomerResponse">
-                                    <Grid Padding="12,8" ColumnDefinitions="*">
-                                        <VisualStateManager.VisualStateGroups>
-                                            <VisualStateGroup x:Name="CommonStates">
-                                                <VisualState x:Name="Normal" />
-                                                <VisualState x:Name="PointerOver">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray700}}" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-                                            </VisualStateGroup>
-                                        </VisualStateManager.VisualStateGroups>
-                                        <Grid.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobEditViewModel}}, Path=PickCustomerCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        </Grid.GestureRecognizers>
-                                        <VerticalStackLayout>
-                                            <Label Text="{Binding DisplayName}" FontSize="15" />
-                                            <Label Text="{Binding PrimaryPhone}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                                                   IsVisible="{Binding PrimaryPhone, Converter={StaticResource StringNotEmptyConverter}}" />
-                                        </VerticalStackLayout>
-                                    </Grid>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </VerticalStackLayout>
-                </Frame>
             </VerticalStackLayout>
 
             <Entry Placeholder="Job Title *" Text="{Binding Title}" ReturnType="Next" />
@@ -136,4 +98,56 @@
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
         </VerticalStackLayout>
     </ScrollView>
+
+    <!-- Customer picker overlay: floats above the page instead of expanding inside
+         the ScrollView — inline expansion resized the scroll content, which made
+         WinUI jump focus/scroll back to the top of the page on first open. -->
+    <BoxView IsVisible="{Binding IsCustomerPickerOpen}" Color="#80000000">
+        <BoxView.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding ToggleCustomerPickerCommand}" />
+        </BoxView.GestureRecognizers>
+    </BoxView>
+    <Frame IsVisible="{Binding IsCustomerPickerOpen}" Padding="0" CornerRadius="12"
+           BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+           BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceCardDark}}"
+           Margin="24" MaximumWidthRequest="420" HeightRequest="420"
+           HorizontalOptions="Center" VerticalOptions="Center">
+        <Grid RowDefinitions="Auto,*">
+            <SearchBar x:Name="CustomerSearchBar" Placeholder="Search customers..." Text="{Binding CustomerSearchText}" Margin="0" />
+            <CollectionView Grid.Row="1" ItemsSource="{Binding FilteredCustomers}"
+                            SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="No customers found" Padding="16" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                           HorizontalTextAlignment="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:CustomerResponse">
+                        <Grid Padding="12,8" ColumnDefinitions="*">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray700}}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobEditViewModel}}, Path=PickCustomerCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Grid.GestureRecognizers>
+                            <VerticalStackLayout>
+                                <Label Text="{Binding DisplayName}" FontSize="15" />
+                                <Label Text="{Binding PrimaryPhone}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                       IsVisible="{Binding PrimaryPhone, Converter={StaticResource StringNotEmptyConverter}}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Frame>
+    </Grid>
 </ContentPage>

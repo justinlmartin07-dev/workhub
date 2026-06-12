@@ -79,8 +79,10 @@
                                 <TapGestureRecognizer Command="{Binding ClearCustomerCommand}" />
                             </Label.GestureRecognizers>
                         </Label>
-                        <Label Grid.Column="2" Text="▾" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                               VerticalTextAlignment="Center" />
+                        <!-- Material Symbols "expand_more" -->
+                        <shapes:Path Grid.Column="2" Data="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"
+                                     Fill="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                     Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
                     </Grid>
                 </Frame>
 
