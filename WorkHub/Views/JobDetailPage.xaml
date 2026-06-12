@@ -150,33 +150,48 @@
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:JobItemResponse">
-                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
+                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
                                                 <VerticalStackLayout VerticalOptions="Center">
                                                     <Label Text="{Binding Name}" FontSize="14" />
                                                     <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
-                                                <Button Grid.Column="1" Text="−" FontSize="14" Padding="0" VerticalOptions="Center"
-                                                        WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
-                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
-                                                        Clicked="OnDecrementClicked" />
-                                                <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
-                                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center"
-                                                       WidthRequest="48" HeightRequest="40" Margin="0"
-                                                       Unfocused="OnQuantityEntryUnfocused" />
-                                                <Button Grid.Column="3" Text="+" FontSize="14" Padding="0" VerticalOptions="Center"
-                                                        WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
-                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
-                                                        Clicked="OnIncrementClicked" />
-                                                <Label Grid.Column="4" Text="✕" FontSize="16" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                                                       VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"
-                                                       MinimumWidthRequest="40" MinimumHeightRequest="40" Padding="10,8">
-                                                    <Label.GestureRecognizers>
+                                                <!-- Compact segmented stepper: [+][qty][−]. The Border clips the
+                                                     square segments into the pill shape. Code-behind expects the
+                                                     buttons and entry to share this inner Grid. -->
+                                                <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
+                                                        Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                                                        StrokeShape="RoundRectangle 8">
+                                                    <Grid ColumnDefinitions="32,40,32" HeightRequest="30">
+                                                        <Button Text="+" FontSize="16" Padding="0" Margin="0" CornerRadius="0"
+                                                                HeightRequest="30" MinimumWidthRequest="32" MinimumHeightRequest="30"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
+                                                                Clicked="OnIncrementClicked" />
+                                                        <Entry Grid.Column="1" Text="{Binding Quantity}" FontSize="13" Keyboard="Numeric" StyleId="stepper-qty"
+                                                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                                               HeightRequest="30" Margin="0"
+                                                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceInputLight}, Dark={StaticResource SurfaceInputDark}}"
+                                                               Unfocused="OnQuantityEntryUnfocused" />
+                                                        <Button Grid.Column="2" Text="−" FontSize="16" Padding="0" Margin="0" CornerRadius="0"
+                                                                HeightRequest="30" MinimumWidthRequest="32" MinimumHeightRequest="30"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
+                                                                Clicked="OnDecrementClicked" />
+                                                    </Grid>
+                                                </Border>
+                                                <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
+                                                        Padding="6" VerticalOptions="Center">
+                                                    <Border.GestureRecognizers>
                                                         <TapGestureRecognizer
                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
                                                             CommandParameter="{Binding .}" />
-                                                    </Label.GestureRecognizers>
-                                                </Label>
+                                                    </Border.GestureRecognizers>
+                                                    <!-- Material Symbols "close" -->
+                                                    <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                                                                 Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                                </Border>
                                             </Grid>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
@@ -198,33 +213,48 @@
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:JobItemResponse">
-                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
+                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
                                                 <VerticalStackLayout VerticalOptions="Center">
                                                     <Label Text="{Binding Name}" FontSize="14" />
                                                     <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
-                                                <Button Grid.Column="1" Text="−" FontSize="14" Padding="0" VerticalOptions="Center"
-                                                        WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
-                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
-                                                        Clicked="OnDecrementClicked" />
-                                                <Entry Grid.Column="2" Text="{Binding Quantity}" FontSize="12" Keyboard="Numeric"
-                                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center" VerticalOptions="Center"
-                                                       WidthRequest="48" HeightRequest="40" Margin="0"
-                                                       Unfocused="OnQuantityEntryUnfocused" />
-                                                <Button Grid.Column="3" Text="+" FontSize="14" Padding="0" VerticalOptions="Center"
-                                                        WidthRequest="40" HeightRequest="40" CornerRadius="6" MinimumWidthRequest="40" MinimumHeightRequest="40"
-                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}" TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
-                                                        Clicked="OnIncrementClicked" />
-                                                <Label Grid.Column="4" Text="✕" FontSize="16" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                                                       VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"
-                                                       MinimumWidthRequest="40" MinimumHeightRequest="40" Padding="10,8">
-                                                    <Label.GestureRecognizers>
+                                                <!-- Compact segmented stepper: [+][qty][−]. The Border clips the
+                                                     square segments into the pill shape. Code-behind expects the
+                                                     buttons and entry to share this inner Grid. -->
+                                                <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
+                                                        Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                                                        StrokeShape="RoundRectangle 8">
+                                                    <Grid ColumnDefinitions="32,40,32" HeightRequest="30">
+                                                        <Button Text="+" FontSize="16" Padding="0" Margin="0" CornerRadius="0"
+                                                                HeightRequest="30" MinimumWidthRequest="32" MinimumHeightRequest="30"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
+                                                                Clicked="OnIncrementClicked" />
+                                                        <Entry Grid.Column="1" Text="{Binding Quantity}" FontSize="13" Keyboard="Numeric" StyleId="stepper-qty"
+                                                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                                               HeightRequest="30" Margin="0"
+                                                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceInputLight}, Dark={StaticResource SurfaceInputDark}}"
+                                                               Unfocused="OnQuantityEntryUnfocused" />
+                                                        <Button Grid.Column="2" Text="−" FontSize="16" Padding="0" Margin="0" CornerRadius="0"
+                                                                HeightRequest="30" MinimumWidthRequest="32" MinimumHeightRequest="30"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
+                                                                Clicked="OnDecrementClicked" />
+                                                    </Grid>
+                                                </Border>
+                                                <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
+                                                        Padding="6" VerticalOptions="Center">
+                                                    <Border.GestureRecognizers>
                                                         <TapGestureRecognizer
                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
                                                             CommandParameter="{Binding .}" />
-                                                    </Label.GestureRecognizers>
-                                                </Label>
+                                                    </Border.GestureRecognizers>
+                                                    <!-- Material Symbols "close" -->
+                                                    <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                                                                 Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                                </Border>
                                             </Grid>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>

@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Platform;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 #if WINDOWS
 using Microsoft.Maui.LifecycleEvents;
@@ -213,7 +214,7 @@ public static class MauiProgram
 					var native = handler.PlatformView;
 					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
-					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(6);
+					native.CornerRadius = new Microsoft.UI.Xaml.CornerRadius(2);
 
 					var bgColor = isDark
 						? Windows.UI.Color.FromArgb(255, 30, 41, 59)
@@ -275,23 +276,31 @@ public static class MauiProgram
 				Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping(nameof(Microsoft.Maui.IView.Background), (handler, view) =>
 				{
 					var native = handler.PlatformView;
-					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+
+					// Stepper quantity cells: flat fill in the standard input colors —
+					// skip the rounded input shape (whose padding would crush the
+					// tiny cell). Set natively; a XAML BackgroundColor does not
+					// survive on the EditText here.
+					if (view is Microsoft.Maui.Controls.Entry { StyleId: "stepper-qty" })
+					{
+						native.BackgroundTintList = null;
+						native.SetBackgroundColor(ThemedColor("SurfaceInputLight", "SurfaceInputDark"));
+						native.SetPadding(0, 0, 0, 0);
+						return;
+					}
+
 					// Clear any tint — a transparent tint would render the custom
 					// background drawable below fully invisible.
 					native.BackgroundTintList = null;
 
 					// Rounded filled background
-					var bgColor = isDark
-						? Android.Graphics.Color.Argb(255, 39, 52, 73) // SurfaceInputDark #273449
-						: Android.Graphics.Color.Argb(255, 241, 245, 249);
+					var bgColor = ThemedColor("SurfaceInputLight", "SurfaceInputDark");
 
 					var shape = new Android.Graphics.Drawables.GradientDrawable();
 					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
 					shape.SetCornerRadius(28f); // ~10dp
 					shape.SetColor(bgColor);
-					var strokeColor = isDark
-						? Android.Graphics.Color.Argb(255, 51, 65, 85)    // SurfaceBorderDark #334155
-						: Android.Graphics.Color.Argb(255, 226, 232, 240); // SurfaceBorderLight #E2E8F0
+					var strokeColor = ThemedColor("SurfaceBorderLight", "SurfaceBorderDark");
 					shape.SetStroke(3, strokeColor); // ~1dp
 					native.Background = shape;
 					native.SetPadding(40, 24, 40, 24);
@@ -301,21 +310,16 @@ public static class MauiProgram
 				Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping(nameof(Microsoft.Maui.IView.Background), (handler, view) =>
 				{
 					var native = handler.PlatformView;
-					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
 					native.BackgroundTintList = null;
 
-					var bgColor = isDark
-						? Android.Graphics.Color.Argb(255, 39, 52, 73) // SurfaceInputDark #273449
-						: Android.Graphics.Color.Argb(255, 241, 245, 249);
+					var bgColor = ThemedColor("SurfaceInputLight", "SurfaceInputDark");
 
 					var shape = new Android.Graphics.Drawables.GradientDrawable();
 					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
 					shape.SetCornerRadius(28f);
 					shape.SetColor(bgColor);
-					var strokeColor = isDark
-						? Android.Graphics.Color.Argb(255, 51, 65, 85)    // SurfaceBorderDark #334155
-						: Android.Graphics.Color.Argb(255, 226, 232, 240); // SurfaceBorderLight #E2E8F0
+					var strokeColor = ThemedColor("SurfaceBorderLight", "SurfaceBorderDark");
 					shape.SetStroke(3, strokeColor); // ~1dp
 					native.Background = shape;
 					native.SetPadding(40, 24, 40, 24);
@@ -325,21 +329,16 @@ public static class MauiProgram
 				Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping(nameof(Microsoft.Maui.IView.Background), (handler, view) =>
 				{
 					var native = handler.PlatformView;
-					var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
 
 					native.BackgroundTintList = null;
 
-					var bgColor = isDark
-						? Android.Graphics.Color.Argb(255, 39, 52, 73) // SurfaceInputDark #273449
-						: Android.Graphics.Color.Argb(255, 241, 245, 249);
+					var bgColor = ThemedColor("SurfaceInputLight", "SurfaceInputDark");
 
 					var shape = new Android.Graphics.Drawables.GradientDrawable();
 					shape.SetShape(Android.Graphics.Drawables.ShapeType.Rectangle);
 					shape.SetCornerRadius(28f);
 					shape.SetColor(bgColor);
-					var strokeColor = isDark
-						? Android.Graphics.Color.Argb(255, 51, 65, 85)    // SurfaceBorderDark #334155
-						: Android.Graphics.Color.Argb(255, 226, 232, 240); // SurfaceBorderLight #E2E8F0
+					var strokeColor = ThemedColor("SurfaceBorderLight", "SurfaceBorderDark");
 					shape.SetStroke(3, strokeColor); // ~1dp
 					native.Background = shape;
 					native.SetPadding(40, 24, 40, 24);
@@ -441,6 +440,16 @@ public static class MauiProgram
 	}
 
 #if ANDROID
+	// Resolve a themed color from the app resource dictionary so native handler
+	// styling follows Colors.xaml instead of duplicating values.
+	private static Android.Graphics.Color ThemedColor(string lightKey, string darkKey)
+	{
+		var key = Application.Current?.RequestedTheme == AppTheme.Dark ? darkKey : lightKey;
+		if (Application.Current?.Resources.TryGetValue(key, out var value) == true && value is Color color)
+			return color.ToPlatform();
+		return Android.Graphics.Color.Transparent;
+	}
+
 	private static T? FindFirstChildOfType<T>(Android.Views.View view) where T : Android.Views.View
 	{
 		if (view is T match) return match;
