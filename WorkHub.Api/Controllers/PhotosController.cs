@@ -29,6 +29,10 @@ public class PhotosController : ControllerBase
     {
         if (file == null || file.Length == 0)
             return BadRequest(new ErrorResponse { Error = "No file provided" });
+        if (file.Length > PhotoService.MaxFileBytes)
+            return BadRequest(new ErrorResponse { Error = "File too large (max 15 MB)" });
+        if (!PhotoService.IsAllowedImage(file.ContentType))
+            return BadRequest(new ErrorResponse { Error = "Unsupported file type. Allowed: JPEG, PNG, WebP." });
 
         var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == customerId && c.DeletedAt == null);
         if (customer == null)
@@ -45,7 +49,7 @@ public class PhotosController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to upload customer photo for {CustomerId}", customerId);
-            return StatusCode(500, new ErrorResponse { Error = $"Photo upload failed: {ex.Message}" });
+            return StatusCode(500, new ErrorResponse { Error = "Photo upload failed" });
         }
 
         var photo = new CustomerPhoto
@@ -75,6 +79,10 @@ public class PhotosController : ControllerBase
     {
         if (file == null || file.Length == 0)
             return BadRequest(new ErrorResponse { Error = "No file provided" });
+        if (file.Length > PhotoService.MaxFileBytes)
+            return BadRequest(new ErrorResponse { Error = "File too large (max 15 MB)" });
+        if (!PhotoService.IsAllowedImage(file.ContentType))
+            return BadRequest(new ErrorResponse { Error = "Unsupported file type. Allowed: JPEG, PNG, WebP." });
 
         var job = await _db.Jobs.Include(j => j.Customer).FirstOrDefaultAsync(j => j.Id == jobId && j.DeletedAt == null);
         if (job == null)
@@ -91,7 +99,7 @@ public class PhotosController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to upload job photo for {JobId}", jobId);
-            return StatusCode(500, new ErrorResponse { Error = $"Photo upload failed: {ex.Message}" });
+            return StatusCode(500, new ErrorResponse { Error = "Photo upload failed" });
         }
 
         var photo = new JobPhoto

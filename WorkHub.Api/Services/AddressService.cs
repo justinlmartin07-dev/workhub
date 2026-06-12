@@ -112,7 +112,7 @@ public class AddressService
         if (_cache.TryGetValue<AddressDetails>(cacheKey, out var cached) && cached is not null)
             return cached;
 
-        var url = $"https://places.googleapis.com/v1/places/{placeId}";
+        var url = $"https://places.googleapis.com/v1/places/{Uri.EscapeDataString(placeId)}";
         if (!string.IsNullOrEmpty(sessionToken))
             url += $"?sessionToken={Uri.EscapeDataString(sessionToken)}";
 

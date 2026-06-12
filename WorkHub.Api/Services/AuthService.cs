@@ -68,23 +68,36 @@ public class AuthService
         return (rawToken, refreshToken);
     }
 
-    public async Task<RefreshToken?> ValidateRefreshToken(string rawToken)
+    // Atomically consumes (deletes) a refresh token, returning it only if it was
+    // valid and unexpired. Returns null if the token is missing, expired, or was
+    // already consumed by a concurrent request — the conditional delete affects
+    // 0 rows for the loser of a race, which closes the rotation replay window.
+    public async Task<RefreshToken?> ConsumeRefreshToken(string rawToken)
     {
         var hash = HashToken(rawToken);
-        return await _db.RefreshTokens
+        var token = await _db.RefreshTokens
             .Include(rt => rt.User)
-            .FirstOrDefaultAsync(rt => rt.TokenHash == hash && rt.ExpiresAt > DateTime.UtcNow);
+            .FirstOrDefaultAsync(rt => rt.TokenHash == hash);
+        if (token == null)
+            return null;
+
+        var deleted = await _db.RefreshTokens
+            .Where(rt => rt.Id == token.Id)
+            .ExecuteDeleteAsync();
+        if (deleted == 0)
+            return null;
+
+        return token.ExpiresAt > DateTime.UtcNow ? token : null;
     }
 
-    public async Task RevokeRefreshToken(string rawToken)
+    // Revokes a refresh token, scoped to its owner so a caller can only revoke
+    // tokens that belong to them.
+    public async Task RevokeRefreshToken(string rawToken, Guid userId)
     {
         var hash = HashToken(rawToken);
-        var token = await _db.RefreshTokens.FirstOrDefaultAsync(rt => rt.TokenHash == hash);
-        if (token != null)
-        {
-            _db.RefreshTokens.Remove(token);
-            await _db.SaveChangesAsync();
-        }
+        await _db.RefreshTokens
+            .Where(rt => rt.TokenHash == hash && rt.UserId == userId)
+            .ExecuteDeleteAsync();
     }
 
     public async Task RevokeAllUserTokens(Guid userId)

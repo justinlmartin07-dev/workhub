@@ -12,7 +12,9 @@ public class CreateJobRequest
     public string? Status { get; set; }
     [MaxLength(50)]
     public string? Priority { get; set; }
+    [MaxLength(10000)]
     public string? ScopeNotes { get; set; }
+    [MaxLength(500)]
     public string? Address { get; set; }
 }
 
@@ -24,18 +26,20 @@ public class UpdateJobRequest
     public string? Status { get; set; }
     [MaxLength(50)]
     public string? Priority { get; set; }
+    [MaxLength(10000)]
     public string? ScopeNotes { get; set; }
+    [MaxLength(500)]
     public string? Address { get; set; }
 }
 
 public class CreateJobNoteRequest
 {
-    [Required]
+    [Required, MaxLength(10000)]
     public string Content { get; set; } = string.Empty;
 }
 
 public class UpdateJobNoteRequest
 {
-    [Required]
+    [Required, MaxLength(10000)]
     public string Content { get; set; } = string.Empty;
 }

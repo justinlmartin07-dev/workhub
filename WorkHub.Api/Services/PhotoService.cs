@@ -5,6 +5,15 @@ namespace WorkHub.Api.Services;
 
 public class PhotoService
 {
+    // Accepted image upload types and per-file size cap. The global 50MB Kestrel
+    // limit is a backstop; uploads are capped much lower here.
+    public const long MaxFileBytes = 15 * 1024 * 1024;
+    private static readonly HashSet<string> AllowedContentTypes =
+        new(StringComparer.OrdinalIgnoreCase) { "image/jpeg", "image/png", "image/webp" };
+
+    public static bool IsAllowedImage(string? contentType) =>
+        contentType != null && AllowedContentTypes.Contains(contentType);
+
     private readonly IAmazonS3 _s3;
     private readonly string _bucketName;
     private readonly ILogger<PhotoService> _logger;
@@ -68,6 +77,9 @@ public class PhotoService
             Expires = DateTime.UtcNow.AddHours(1),
             Verb = HttpVerb.GET,
         };
+        // Force download semantics so a stored file can never be rendered inline
+        // as HTML/script by a browser opening the presigned URL.
+        request.ResponseHeaderOverrides.ContentDisposition = "attachment";
 
         return _s3.GetPreSignedURL(request);
     }

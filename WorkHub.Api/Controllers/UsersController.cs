@@ -107,6 +107,10 @@ public class UsersController : ControllerBase
     {
         if (file == null || file.Length == 0)
             return BadRequest(new ErrorResponse { Error = "No file provided" });
+        if (file.Length > PhotoService.MaxFileBytes)
+            return BadRequest(new ErrorResponse { Error = "File too large (max 15 MB)" });
+        if (!PhotoService.IsAllowedImage(file.ContentType))
+            return BadRequest(new ErrorResponse { Error = "Unsupported file type. Allowed: JPEG, PNG, WebP." });
 
         var userId = this.GetUserId();
         var user = await _db.Users.FindAsync(userId);
@@ -131,7 +135,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to upload profile photo for {UserId}", userId);
-            return StatusCode(500, new ErrorResponse { Error = $"Photo upload failed: {ex.Message}" });
+            return StatusCode(500, new ErrorResponse { Error = "Photo upload failed" });
         }
 
         user.ProfilePhotoR2Key = objectKey;

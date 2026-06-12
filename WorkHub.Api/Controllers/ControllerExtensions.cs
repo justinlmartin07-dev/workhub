@@ -8,6 +8,8 @@ public static class ControllerExtensions
     public static Guid GetUserId(this ControllerBase controller)
     {
         var claim = controller.User.FindFirst(ClaimTypes.NameIdentifier);
-        return Guid.Parse(claim!.Value);
+        if (claim == null || !Guid.TryParse(claim.Value, out var id))
+            throw new UnauthorizedAccessException("Missing or invalid user identifier claim.");
+        return id;
     }
 }

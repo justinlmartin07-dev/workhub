@@ -6,6 +6,7 @@ public class CreateInventoryItemRequest
 {
     [Required, MaxLength(200)]
     public string Name { get; set; } = string.Empty;
+    [MaxLength(10000)]
     public string? Description { get; set; }
     [MaxLength(100)]
     public string? PartNumber { get; set; }
@@ -15,6 +16,7 @@ public class UpdateInventoryItemRequest
 {
     [MaxLength(200)]
     public string? Name { get; set; }
+    [MaxLength(10000)]
     public string? Description { get; set; }
     [MaxLength(100)]
     public string? PartNumber { get; set; }
@@ -40,6 +42,7 @@ public class CreateJobAdhocItemRequest
 {
     [Required, MaxLength(200)]
     public string Name { get; set; } = string.Empty;
+    [MaxLength(10000)]
     public string? Description { get; set; }
     public int Quantity { get; set; } = 1;
     [Required]
@@ -50,6 +53,7 @@ public class UpdateJobAdhocItemRequest
 {
     [MaxLength(200)]
     public string? Name { get; set; }
+    [MaxLength(10000)]
     public string? Description { get; set; }
     public int? Quantity { get; set; }
     public string? ListType { get; set; }

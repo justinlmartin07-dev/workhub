@@ -13,4 +13,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:8080
+# Drop from root to the image's built-in non-root user.
+USER app
 ENTRYPOINT ["dotnet", "WorkHub.Api.dll"]

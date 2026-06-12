@@ -60,6 +60,19 @@ public class CalendarController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateEventRequest request)
     {
+        if (request.CustomerId.HasValue &&
+            !await _db.Customers.AnyAsync(c => c.Id == request.CustomerId && c.DeletedAt == null))
+            return BadRequest(new ErrorResponse { Error = "Customer not found" });
+        if (request.JobId.HasValue &&
+            !await _db.Jobs.AnyAsync(j => j.Id == request.JobId && j.DeletedAt == null))
+            return BadRequest(new ErrorResponse { Error = "Job not found" });
+        if (request.AssignedUserIds is { Count: > 0 })
+        {
+            var ids = request.AssignedUserIds.Distinct().ToList();
+            if (await _db.Users.CountAsync(u => ids.Contains(u.Id)) != ids.Count)
+                return BadRequest(new ErrorResponse { Error = "One or more assigned users not found" });
+        }
+
         var ev = new CalendarEvent
         {
             Id = Guid.NewGuid(),
@@ -116,6 +129,13 @@ public class CalendarController : ControllerBase
         if (ev == null)
             return NotFound(new ErrorResponse { Error = "Event not found" });
 
+        if (request.CustomerId.HasValue &&
+            !await _db.Customers.AnyAsync(c => c.Id == request.CustomerId && c.DeletedAt == null))
+            return BadRequest(new ErrorResponse { Error = "Customer not found" });
+        if (request.JobId.HasValue &&
+            !await _db.Jobs.AnyAsync(j => j.Id == request.JobId && j.DeletedAt == null))
+            return BadRequest(new ErrorResponse { Error = "Job not found" });
+
         if (request.Title != null) ev.Title = request.Title;
         if (request.Description != null) ev.Description = request.Description;
         if (request.StartTime.HasValue) ev.StartTime = request.StartTime.Value;
@@ -146,6 +166,9 @@ public class CalendarController : ControllerBase
         var ev = await _db.CalendarEvents.FindAsync(id);
         if (ev == null)
             return NotFound(new ErrorResponse { Error = "Event not found" });
+
+        if (!await _db.Users.AnyAsync(u => u.Id == request.UserId))
+            return BadRequest(new ErrorResponse { Error = "User not found" });
 
         var exists = await _db.CalendarEventAssignments
             .AnyAsync(a => a.CalendarEventId == id && a.UserId == request.UserId);
