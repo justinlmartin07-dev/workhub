@@ -62,6 +62,7 @@ public class WorkHubDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasColumnName("id");
             e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+            e.Property(x => x.CompanyName).HasColumnName("company_name").HasMaxLength(200);
             e.Property(x => x.Address).HasColumnName("address");
             e.Property(x => x.NormalizedAddress).HasColumnName("normalized_address").HasMaxLength(500);
             e.Property(x => x.Notes).HasColumnName("notes");

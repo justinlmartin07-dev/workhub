@@ -11,6 +11,7 @@
 
     <ScrollView>
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
+            <Entry Placeholder="Company (optional)" Text="{Binding CompanyName}" ReturnType="Next" />
             <Entry Placeholder="Name *" Text="{Binding Name}" ReturnType="Next" />
 
             <!-- Address -->

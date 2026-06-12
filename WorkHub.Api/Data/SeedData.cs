@@ -87,6 +87,7 @@ public static class SeedData
         var cities = new[] { "Springfield", "Riverside", "Fairview", "Georgetown", "Clinton", "Madison", "Franklin", "Greenville", "Bristol", "Oakland", "Salem", "Arlington", "Burlington", "Manchester", "Milton", "Newport", "Chester", "Richmond", "Kingston", "Lexington" };
         var states = new[] { "AL", "AZ", "CA", "CO", "FL", "GA", "IL", "IN", "KY", "LA", "MD", "MI", "MN", "MO", "NC", "NJ", "NY", "OH", "PA", "TX", "VA", "WA" };
         var contactLabels = new[] { "Mobile", "Home", "Work", "Office", "Main" };
+        var companyNames = new[] { "Acme Manufacturing", "Summit Dairy Farms", "Riverside Mill Works", "Precision Grain Co", "Northside Feed & Supply", "Valley Processing Plant", "Heritage Lumber", "Ironclad Fabrication", "Bluegrass Bottling", "Cornerstone Concrete", "Lakeside Packaging", "Pioneer Seed Co", "Allied Conveyor Systems", "Crestview Foods", "Granite State Machining" };
 
         var customers = new List<Customer>();
         var allContacts = new List<CustomerContact>();
@@ -106,6 +107,8 @@ public static class SeedData
             {
                 Id = Guid.NewGuid(),
                 Name = $"{first} {last}",
+                // About half are businesses — exercises the company-or-name display fallback
+                CompanyName = rng.Next(2) == 0 ? companyNames[rng.Next(companyNames.Length)] : null,
                 Address = address,
                 NormalizedAddress = AddressNormalizer.Normalize(address),
                 Notes = rng.Next(3) == 0 ? $"Preferred contact: {contactLabels[rng.Next(contactLabels.Length)]}. Gate code {rng.Next(1000, 9999)}." : null,

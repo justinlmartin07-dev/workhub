@@ -104,11 +104,13 @@ public partial class CustomersListViewModel : BaseViewModel
 
     private static bool MatchesSearch(CustomerResponse c, string query) =>
         c.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || (c.CompanyName?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
         || (c.Address?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
         || (c.Contacts?.Any(ct => ct.Value.Contains(query, StringComparison.OrdinalIgnoreCase)) ?? false);
 
     private static bool RowUnchanged(CustomerResponse a, CustomerResponse b) =>
         a.Name == b.Name
+        && a.CompanyName == b.CompanyName
         && a.Address == b.Address
         && a.UpdatedAt == b.UpdatedAt
         && a.PrimaryPhone == b.PrimaryPhone

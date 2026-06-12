@@ -20,7 +20,7 @@
                         <TapGestureRecognizer Command="{Binding ToggleCustomerPickerCommand}" />
                     </Frame.GestureRecognizers>
                     <Grid ColumnDefinitions="*,Auto">
-                        <Label Text="{Binding SelectedCustomer.Name, FallbackValue='Tap to select a customer...'}"
+                        <Label Text="{Binding SelectedCustomer.DisplayName, FallbackValue='Tap to select a customer...'}"
                                TextColor="{Binding SelectedCustomer, Converter={StaticResource StringNotEmptyConverter}, FallbackValue={StaticResource Gray400}}"
                                VerticalTextAlignment="Center" FontSize="15" />
                         <Label Grid.Column="1" Text="v" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
@@ -30,6 +30,7 @@
 
                 <!-- Searchable customer list (shown when open) -->
                 <Frame Padding="0" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceCardDark}}"
                        IsVisible="{Binding IsCustomerPickerOpen}" HeightRequest="250">
                     <VerticalStackLayout>
                         <SearchBar x:Name="CustomerSearchBar" Placeholder="Search customers..." Text="{Binding CustomerSearchText}"
@@ -48,7 +49,7 @@
                                                 <VisualState x:Name="Normal" />
                                                 <VisualState x:Name="PointerOver">
                                                     <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="{StaticResource Gray100}" />
+                                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray700}}" />
                                                     </VisualState.Setters>
                                                 </VisualState>
                                             </VisualStateGroup>
@@ -59,9 +60,9 @@
                                                 CommandParameter="{Binding .}" />
                                         </Grid.GestureRecognizers>
                                         <VerticalStackLayout>
-                                            <Label Text="{Binding Name}" FontSize="15" />
-                                            <Label Text="{Binding Phone}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                                                   IsVisible="{Binding Phone, Converter={StaticResource StringNotEmptyConverter}}" />
+                                            <Label Text="{Binding DisplayName}" FontSize="15" />
+                                            <Label Text="{Binding PrimaryPhone}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                                   IsVisible="{Binding PrimaryPhone, Converter={StaticResource StringNotEmptyConverter}}" />
                                         </VerticalStackLayout>
                                     </Grid>
                                 </DataTemplate>

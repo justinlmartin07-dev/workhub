@@ -6,6 +6,8 @@ public class CreateCustomerRequest
 {
     [Required, MaxLength(200)]
     public string Name { get; set; } = string.Empty;
+    [MaxLength(200)]
+    public string? CompanyName { get; set; }
     [MaxLength(500)]
     public string? Address { get; set; }
     [MaxLength(10000)]
@@ -17,6 +19,8 @@ public class UpdateCustomerRequest
 {
     [MaxLength(200)]
     public string? Name { get; set; }
+    [MaxLength(200)]
+    public string? CompanyName { get; set; }
     [MaxLength(500)]
     public string? Address { get; set; }
     [MaxLength(10000)]

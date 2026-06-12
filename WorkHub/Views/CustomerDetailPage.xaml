@@ -10,7 +10,7 @@
              x:DataType="vm:CustomerDetailViewModel"
              x:Name="thisPage"
              Shell.NavBarIsVisible="False"
-             Title="{Binding Customer.Name, FallbackValue='Customer'}">
+             Title="{Binding Customer.DisplayName, FallbackValue='Customer'}">
 
     <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
                             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
@@ -22,8 +22,13 @@
                     <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
                         <controls:BackButton Command="{Binding GoBackCommand}"
                                              IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
-                        <Label Grid.Column="1" Text="{Binding Customer.Name, FallbackValue='Customer'}" FontSize="20" FontAttributes="Bold"
-                               VerticalTextAlignment="Center" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                            <!-- Company is the title when present; person's name beneath -->
+                            <Label Text="{Binding Customer.DisplayName, FallbackValue='Customer'}" FontSize="20" FontAttributes="Bold" />
+                            <Label Text="{Binding Customer.Name}" FontSize="13"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                   IsVisible="{Binding Customer.CompanyName, Converter={StaticResource StringNotEmptyConverter}}" />
+                        </VerticalStackLayout>
                         <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding EditCommand}" />

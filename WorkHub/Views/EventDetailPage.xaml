@@ -10,7 +10,7 @@
              Shell.NavBarIsVisible="False"
              Title="{Binding PageTitle}">
 
-    <ScrollView>
+    <ScrollView x:Name="PageScroll">
         <VerticalStackLayout Spacing="16" Padding="16" HorizontalOptions="Fill">
             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4">
                 <controls:BackButton Command="{Binding GoBackCommand}" />
@@ -69,7 +69,7 @@
                         <TapGestureRecognizer Command="{Binding ToggleCustomerPickerCommand}" />
                     </Frame.GestureRecognizers>
                     <Grid ColumnDefinitions="*,Auto,Auto">
-                        <Label Text="{Binding SelectedCustomer.Name, FallbackValue='Tap to select a customer...'}"
+                        <Label Text="{Binding SelectedCustomer.DisplayName, FallbackValue='Tap to select a customer...'}"
                                VerticalTextAlignment="Center" FontSize="15" />
                         <Label Grid.Column="1" Text="✕" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                VerticalTextAlignment="Center" Padding="8,0"
@@ -85,6 +85,7 @@
 
                 <!-- Searchable customer list -->
                 <Frame Padding="0" CornerRadius="12" BorderColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource SurfaceCardDark}}"
                        IsVisible="{Binding IsCustomerPickerOpen}" HeightRequest="250">
                     <VerticalStackLayout>
                         <SearchBar x:Name="CustomerSearchBar" Placeholder="Search customers..." Text="{Binding CustomerSearchText}" Margin="0" />
@@ -103,7 +104,7 @@
                                                 CommandParameter="{Binding .}" />
                                         </Grid.GestureRecognizers>
                                         <VerticalStackLayout>
-                                            <Label Text="{Binding Name}" FontSize="15" />
+                                            <Label Text="{Binding DisplayName}" FontSize="15" />
                                             <Label Text="{Binding PrimaryPhone}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                    IsVisible="{Binding PrimaryPhone, Converter={StaticResource StringNotEmptyConverter}}" />
                                         </VerticalStackLayout>

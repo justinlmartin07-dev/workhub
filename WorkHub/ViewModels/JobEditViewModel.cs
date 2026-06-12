@@ -170,6 +170,7 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
             FilteredCustomers = new ObservableCollection<CustomerResponse>(
                 AllCustomers.Where(c =>
                     c.Name.ToLower().Contains(search) ||
+                    (c.CompanyName?.ToLower().Contains(search) ?? false) ||
                     (c.Contacts?.Any(ct => ct.Value.ToLower().Contains(search)) ?? false) ||
                     (c.Address?.ToLower().Contains(search) ?? false)));
         }
@@ -227,7 +228,7 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
             page++;
         } while (page <= totalPages);
 
-        AllCustomers = new ObservableCollection<CustomerResponse>(all.OrderBy(c => c.Name));
+        AllCustomers = new ObservableCollection<CustomerResponse>(all.OrderBy(c => c.DisplayName));
         FilterCustomers();
     }
 
