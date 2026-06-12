@@ -53,10 +53,35 @@ public partial class PhotoViewerViewModel : BaseViewModel
 
         if (Photos.Count == 0) SetEmpty();
         else SetContent();
+        RefreshNavCommands();
     }
 
-    private PhotoResponse? CurrentPhoto =>
-        CurrentIndex >= 0 && CurrentIndex < Photos.Count ? Photos[CurrentIndex].Photo : null;
+    private PhotoResponse? CurrentPhoto => CurrentPhotoModel?.Photo;
+
+    // Bound directly by the Windows photo view (a plain Image) — CarouselView's
+    // programmatic Position changes don't scroll backwards on WinUI.
+    public PhotoDisplayModel? CurrentPhotoModel =>
+        CurrentIndex >= 0 && CurrentIndex < Photos.Count ? Photos[CurrentIndex] : null;
+
+    // Previous/next buttons (Windows — CarouselView swiping is unreliable there).
+    [RelayCommand(CanExecute = nameof(CanGoToPrevious))]
+    private void PreviousPhoto() => CurrentIndex--;
+
+    private bool CanGoToPrevious() => CurrentIndex > 0;
+
+    [RelayCommand(CanExecute = nameof(CanGoToNext))]
+    private void NextPhoto() => CurrentIndex++;
+
+    private bool CanGoToNext() => CurrentIndex < Photos.Count - 1;
+
+    partial void OnCurrentIndexChanged(int value) => RefreshNavCommands();
+
+    private void RefreshNavCommands()
+    {
+        PreviousPhotoCommand.NotifyCanExecuteChanged();
+        NextPhotoCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(CurrentPhotoModel));
+    }
 
     [RelayCommand]
     private void Close() => CloseRequested?.Invoke();
@@ -82,6 +107,7 @@ public partial class PhotoViewerViewModel : BaseViewModel
             Photos.RemoveAt(CurrentIndex);
             if (CurrentIndex >= Photos.Count && Photos.Count > 0)
                 CurrentIndex = Photos.Count - 1;
+            RefreshNavCommands();
             if (Photos.Count == 0)
                 CloseRequested?.Invoke();
         }

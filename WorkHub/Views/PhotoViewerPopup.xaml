@@ -56,7 +56,15 @@
                                             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}">
                         <controls:DataStateView.Body>
                             <Grid BackgroundColor="White">
-                                <CarouselView ItemsSource="{Binding Photos}" Position="{Binding CurrentIndex}" Loop="False">
+                                <!-- Windows: a plain Image driven by the chevron buttons.
+                                     CarouselView is unusable there — swiping is janky and
+                                     programmatic Position changes don't scroll backwards. -->
+                                <Image Source="{Binding CurrentPhotoModel.Source}" Aspect="AspectFit"
+                                       VerticalOptions="Fill" HorizontalOptions="Fill"
+                                       IsVisible="{OnPlatform false, WinUI=true}" />
+                                <!-- Android: swipeable carousel as before. -->
+                                <CarouselView ItemsSource="{Binding Photos}" Position="{Binding CurrentIndex}" Loop="False"
+                                              IsVisible="{OnPlatform true, WinUI=false}">
                                     <CarouselView.ItemTemplate>
                                         <DataTemplate x:DataType="vm:PhotoDisplayModel">
                                             <Image Source="{Binding Source}" Aspect="AspectFit"
@@ -67,6 +75,32 @@
                                 <IndicatorView Position="{Binding CurrentIndex}" Count="{Binding Photos.Count}"
                                                HorizontalOptions="Center" VerticalOptions="End" Margin="0,0,0,16"
                                                IndicatorColor="#80FFFFFF" SelectedIndicatorColor="White" />
+
+                                <!-- Previous / next (Windows only) -->
+                                <Button Text="&#x2039;" FontSize="26" Padding="0,0,0,4"
+                                        WidthRequest="44" HeightRequest="44" CornerRadius="22"
+                                        BackgroundColor="#66000000" TextColor="White"
+                                        HorizontalOptions="Start" VerticalOptions="Center" Margin="16,0,0,0"
+                                        IsVisible="{OnPlatform false, WinUI=true}"
+                                        Command="{Binding PreviousPhotoCommand}">
+                                    <Button.Triggers>
+                                        <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.3" />
+                                        </Trigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button Text="&#x203A;" FontSize="26" Padding="0,0,0,4"
+                                        WidthRequest="44" HeightRequest="44" CornerRadius="22"
+                                        BackgroundColor="#66000000" TextColor="White"
+                                        HorizontalOptions="End" VerticalOptions="Center" Margin="0,0,16,0"
+                                        IsVisible="{OnPlatform false, WinUI=true}"
+                                        Command="{Binding NextPhotoCommand}">
+                                    <Button.Triggers>
+                                        <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.3" />
+                                        </Trigger>
+                                    </Button.Triggers>
+                                </Button>
                             </Grid>
                         </controls:DataStateView.Body>
                     </controls:DataStateView>
