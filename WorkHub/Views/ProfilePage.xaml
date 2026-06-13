@@ -69,7 +69,7 @@
                                         Padding="8,4" FontSize="13" />
                                 <Button Grid.Column="1" Text="Cancel"
                                         IsVisible="{Binding IsEditing}"
-                                        BackgroundColor="Transparent"
+                                        Style="{StaticResource GhostButton}"
                                         TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
                                         Command="{Binding ToggleEditCommand}"
                                         Padding="8,4" FontSize="13" />

@@ -6,10 +6,20 @@
              HorizontalOptions="End" VerticalOptions="End"
              Margin="16">
 
-    <Border WidthRequest="48" HeightRequest="48"
+    <Border x:Name="Fab" WidthRequest="48" HeightRequest="48"
             StrokeShape="RoundRectangle 24"
             StrokeThickness="0"
             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="PointerOver">
+                    <VisualState.Setters>
+                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryHover}, Dark={StaticResource PrimaryDarkHover}}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
         <Border.Shadow>
             <Shadow Brush="Black" Offset="0,2" Radius="8" Opacity="0.3" />
         </Border.Shadow>

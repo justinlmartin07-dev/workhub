@@ -26,6 +26,13 @@
     <Color x:Key="PrimaryLight">#C9DCEF</Color>
     <Color x:Key="PrimaryMuted">#093D75</Color>
 
+    <!-- Button feedback shades: light theme darkens on hover/press,
+         dark theme lightens (matches platform conventions). -->
+    <Color x:Key="PrimaryHover">#0C4078</Color>
+    <Color x:Key="PrimaryPressed">#093463</Color>
+    <Color x:Key="PrimaryDarkHover">#5E99D8</Color>
+    <Color x:Key="PrimaryDarkPressed">#74A8DF</Color>
+
     <!-- Secondary — Slate blue tones -->
     <Color x:Key="Secondary">#1E293B</Color>
     <Color x:Key="SecondaryLight">#334155</Color>

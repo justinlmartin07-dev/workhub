@@ -38,7 +38,8 @@
                                     StrokeShape="RoundRectangle 12"
                                     StrokeThickness="0"
                                     Stroke="Transparent"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                                    controls:RippleEffect.Enable="True">
                                 <Border.GestureRecognizers>
                                     <!-- Navigation rides on the tap, not SelectionChanged, so tapping
                                          the already-selected item still opens it. -->

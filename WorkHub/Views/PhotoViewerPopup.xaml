@@ -36,14 +36,12 @@
                     <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold"
                            VerticalTextAlignment="Center" LineBreakMode="TailTruncation" />
                     <Button Grid.Column="1" Text="⋯" FontSize="18" Padding="0"
-                            WidthRequest="40" HeightRequest="40"
-                            BackgroundColor="Transparent"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                            WidthRequest="40" HeightRequest="40" CornerRadius="20"
+                            Style="{StaticResource GhostButton}"
                             Command="{Binding ToggleMenuCommand}" />
                     <Button Grid.Column="2" Text="✕" FontSize="18" Padding="0"
-                            WidthRequest="40" HeightRequest="40"
-                            BackgroundColor="Transparent"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                            WidthRequest="40" HeightRequest="40" CornerRadius="20"
+                            Style="{StaticResource GhostButton}"
                             Command="{Binding CloseCommand}" />
                 </Grid>
 
@@ -79,28 +77,16 @@
                                 <!-- Previous / next (Windows only) -->
                                 <Button Text="&#x2039;" FontSize="26" Padding="0,0,0,4"
                                         WidthRequest="44" HeightRequest="44" CornerRadius="22"
-                                        BackgroundColor="#66000000" TextColor="White"
+                                        Style="{StaticResource OverlayNavButton}"
                                         HorizontalOptions="Start" VerticalOptions="Center" Margin="16,0,0,0"
                                         IsVisible="{OnPlatform false, WinUI=true}"
-                                        Command="{Binding PreviousPhotoCommand}">
-                                    <Button.Triggers>
-                                        <Trigger TargetType="Button" Property="IsEnabled" Value="False">
-                                            <Setter Property="Opacity" Value="0.3" />
-                                        </Trigger>
-                                    </Button.Triggers>
-                                </Button>
+                                        Command="{Binding PreviousPhotoCommand}" />
                                 <Button Text="&#x203A;" FontSize="26" Padding="0,0,0,4"
                                         WidthRequest="44" HeightRequest="44" CornerRadius="22"
-                                        BackgroundColor="#66000000" TextColor="White"
+                                        Style="{StaticResource OverlayNavButton}"
                                         HorizontalOptions="End" VerticalOptions="Center" Margin="0,0,16,0"
                                         IsVisible="{OnPlatform false, WinUI=true}"
-                                        Command="{Binding NextPhotoCommand}">
-                                    <Button.Triggers>
-                                        <Trigger TargetType="Button" Property="IsEnabled" Value="False">
-                                            <Setter Property="Opacity" Value="0.3" />
-                                        </Trigger>
-                                    </Button.Triggers>
-                                </Button>
+                                        Command="{Binding NextPhotoCommand}" />
                             </Grid>
                         </controls:DataStateView.Body>
                     </controls:DataStateView>
@@ -127,7 +113,8 @@
                     <RoundRectangle CornerRadius="10" />
                 </Border.StrokeShape>
                 <VerticalStackLayout Spacing="0">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="14,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="14,10"
+                          controls:TapFeedback.Enable="True">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SaveCurrentPhotoCommand}" />
                         </Grid.GestureRecognizers>
@@ -138,7 +125,8 @@
                         <Label Grid.Column="1" Text="Save" FontSize="14" VerticalTextAlignment="Center"
                                TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
                     </Grid>
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="14,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="14,10"
+                          controls:TapFeedback.Enable="True">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ShareCurrentPhotoCommand}" />
                         </Grid.GestureRecognizers>
@@ -149,7 +137,8 @@
                         <Label Grid.Column="1" Text="Share" FontSize="14" VerticalTextAlignment="Center"
                                TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
                     </Grid>
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="14,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="14,10"
+                          controls:TapFeedback.Enable="True">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding DeleteCurrentPhotoCommand}" />
                         </Grid.GestureRecognizers>

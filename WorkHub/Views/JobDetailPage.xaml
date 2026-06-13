@@ -26,7 +26,8 @@
                                                  IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
                             <Label Grid.Column="1" Text="{Binding Job.Title, FallbackValue='Job'}" FontSize="20" FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
-                            <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center">
+                            <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
+                                    StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding EditCommand}" />
                                 </Border.GestureRecognizers>
@@ -39,7 +40,8 @@
                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                                 </HorizontalStackLayout>
                             </Border>
-                            <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center">
+                            <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
+                                    StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding DeleteCommand}" />
                                 </Border.GestureRecognizers>
@@ -181,7 +183,8 @@
                                                     </Grid>
                                                 </Border>
                                                 <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
-                                                        Padding="6" VerticalOptions="Center">
+                                                        Padding="6" VerticalOptions="Center"
+                                                        StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                                                     <Border.GestureRecognizers>
                                                         <TapGestureRecognizer
                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
@@ -244,7 +247,8 @@
                                                     </Grid>
                                                 </Border>
                                                 <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
-                                                        Padding="6" VerticalOptions="Center">
+                                                        Padding="6" VerticalOptions="Center"
+                                                        StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                                                     <Border.GestureRecognizers>
                                                         <TapGestureRecognizer
                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}, Path=DeleteItemCommand}"
@@ -275,6 +279,9 @@
                                             StrokeShape="RoundRectangle 22" StrokeThickness="0"
                                             IsVisible="{Binding IsEditingNote}"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray600}}"
+                                            controls:TapFeedback.Enable="True"
+                                            controls:TapFeedback.HoverLight="{StaticResource Gray200}"
+                                            controls:TapFeedback.HoverDark="{StaticResource Gray500}"
                                             VerticalOptions="End">
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding CancelEditNoteCommand}" />
@@ -285,6 +292,9 @@
                                     <Border Grid.Column="2" WidthRequest="44" HeightRequest="44"
                                             StrokeShape="RoundRectangle 22" StrokeThickness="0"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            controls:TapFeedback.Enable="True"
+                                            controls:TapFeedback.HoverLight="{StaticResource PrimaryHover}"
+                                            controls:TapFeedback.HoverDark="{StaticResource PrimaryDarkHover}"
                                             VerticalOptions="End">
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding AddNoteCommand}" />
@@ -369,7 +379,7 @@
             <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Padding="16">
                 <!-- Header -->
                 <Grid ColumnDefinitions="Auto,*,Auto">
-                    <Button Text="✕" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                    <Button Text="✕" Style="{StaticResource GhostButton}" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
                             Command="{Binding ClosePartsPanelCommand}" FontSize="18" Padding="0" WidthRequest="36" />
                     <Label Grid.Column="1" Text="{Binding PartsPanelTitle}" FontSize="18" FontAttributes="Bold"
                            HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />

@@ -18,7 +18,8 @@
         <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center"
                                Spacing="4" Padding="16,8">
             <Border StrokeThickness="0" BackgroundColor="Transparent"
-                    WidthRequest="40" HeightRequest="40">
+                    WidthRequest="40" HeightRequest="40"
+                    StrokeShape="RoundRectangle 20" controls:TapFeedback.Enable="True">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding PreviousMonthCommand}" />
                 </Border.GestureRecognizers>
@@ -35,7 +36,8 @@
                    FontSize="18" FontFamily="OpenSansSemibold"
                    VerticalTextAlignment="Center" />
             <Border StrokeThickness="0" BackgroundColor="Transparent"
-                    WidthRequest="40" HeightRequest="40">
+                    WidthRequest="40" HeightRequest="40"
+                    StrokeShape="RoundRectangle 20" controls:TapFeedback.Enable="True">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding NextMonthCommand}" />
                 </Border.GestureRecognizers>

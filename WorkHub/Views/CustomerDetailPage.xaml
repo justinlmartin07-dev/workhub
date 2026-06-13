@@ -29,7 +29,8 @@
                                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
                                    IsVisible="{Binding Customer.CompanyName, Converter={StaticResource StringNotEmptyConverter}}" />
                         </VerticalStackLayout>
-                        <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center">
+                        <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
+                                StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding EditCommand}" />
                             </Border.GestureRecognizers>
@@ -42,7 +43,8 @@
                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                             </HorizontalStackLayout>
                         </Border>
-                        <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center">
+                        <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
+                                StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding DeleteCommand}" />
                             </Border.GestureRecognizers>

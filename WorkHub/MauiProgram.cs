@@ -54,6 +54,13 @@ public static class MauiProgram
 #endif
 			.ConfigureMauiHandlers(handlers =>
 			{
+				// ── All platforms: press feedback (scale pulse) on every Button ──
+				Microsoft.Maui.Handlers.ButtonHandler.Mapper.AppendToMapping("PressFeedback", (handler, view) =>
+				{
+					if (view is Button button)
+						ButtonPressAnimation.Attach(button);
+				});
+
 #if WINDOWS
 				// ── Entry: rounded, filled, borderless ──
 				Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("ThemedEntry", (handler, view) =>

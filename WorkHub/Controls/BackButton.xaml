@@ -2,10 +2,13 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Controls.BackButton">
 
     <Border StrokeThickness="0" BackgroundColor="Transparent"
-            WidthRequest="40" HeightRequest="40">
+            WidthRequest="40" HeightRequest="40"
+            StrokeShape="RoundRectangle 20"
+            controls:TapFeedback.Enable="True">
         <Border.GestureRecognizers>
             <TapGestureRecognizer Tapped="OnTapped" />
         </Border.GestureRecognizers>

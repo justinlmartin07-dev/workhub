@@ -6,14 +6,8 @@
              xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Views.OrderDetailPage"
              x:DataType="vm:OrderDetailViewModel"
+             Shell.NavBarIsVisible="False"
              Title="Part">
-
-    <Shell.TitleView>
-        <Grid ColumnDefinitions="Auto,*">
-            <controls:BackButton Command="{Binding CancelCommand}" />
-            <Label Grid.Column="1" Text="Part" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
-        </Grid>
-    </Shell.TitleView>
 
     <Grid>
         <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
@@ -21,6 +15,10 @@
 
         <ScrollView IsVisible="{Binding Order, Converter={StaticResource IsNotNullConverter}}">
             <VerticalStackLayout Padding="24" Spacing="20">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="-8,0,0,0">
+                    <controls:BackButton Command="{Binding CancelCommand}" />
+                    <Label Grid.Column="1" Text="Part" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                </Grid>
 
                 <!-- Part name -->
                 <VerticalStackLayout Spacing="4">

@@ -17,7 +17,8 @@
                 <controls:BackButton Command="{Binding GoBackCommand}" />
                 <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center" />
                 <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="4" VerticalOptions="Center"
-                        IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}">
+                        IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}"
+                        StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding DeleteCommand}" />
                     </Border.GestureRecognizers>

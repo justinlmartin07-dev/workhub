@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+             xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Views.MainLayout"
              x:DataType="vm:MainLayoutViewModel"
              Shell.NavBarIsVisible="False"
@@ -22,8 +23,10 @@
                   IsVisible="False" Padding="0,8" HorizontalOptions="Start">
                 <VerticalStackLayout Spacing="4" VerticalOptions="Start" Padding="6,8">
                     <!-- Tab 0: Customers -->
+                    <controls:RippleView Command="{Binding SelectTabCommand}" CommandParameter="0"
+                                         CornerRadius="14" HorizontalOptions="Fill">
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                            Padding="0" BackgroundColor="Transparent">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border"
                                          Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=0}"
@@ -32,9 +35,6 @@
                                         Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                             </DataTrigger>
                         </Border.Triggers>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="0" />
-                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
                             <shapes:Path Data="M96-192v-92q0-25.78 12.5-47.39T143-366q54-32 114.5-49T384-432q66 0 126.5 17T625-366q22 13 34.5 34.61T672-284v92H96Zm648 0v-92q0-42-19.5-78T672-421q39 8 75.5 21.5T817-366q22 13 34.5 34.67Q864-309.65 864-284v92H744ZM282-522q-42-42-42-102t42-102q42-42 102-42t102 42q42 42 42 102t-42 102q-42 42-102 42t-102-42Zm396 0q-42 42-102 42-8 0-15-.5t-15-2.5q25-29 39.5-64.5T600-624q0-41-14.5-76.5T546-765q8-2 15-2.5t15-.5q60 0 102 42t42 102q0 60-42 102ZM168-264h432v-20q0-6.47-3.03-11.76-3.02-5.3-7.97-8.24-47-27-99-41.5T384-360q-54 0-106 14t-99 42q-4.95 2.83-7.98 7.91-3.02 5.09-3.02 12V-264Zm267-309.21q21-21.21 21-51T434.79-675q-21.21-21-51-21T333-674.79q-21 21.21-21 51T333.21-573q21.21 21 51 21T435-573.21ZM384-264Zm0-360Z"
                                          Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -62,10 +62,13 @@
                             </Label>
                         </VerticalStackLayout>
                     </Border>
+                    </controls:RippleView>
 
                     <!-- Tab 1: Jobs -->
+                    <controls:RippleView Command="{Binding SelectTabCommand}" CommandParameter="1"
+                                         CornerRadius="14" HorizontalOptions="Fill">
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                            Padding="0" BackgroundColor="Transparent">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border"
                                          Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=1}"
@@ -74,9 +77,6 @@
                                         Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                             </DataTrigger>
                         </Border.Triggers>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="1" />
-                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
                             <shapes:Path Data="M696-600h72v-72h-72v72Zm0 156h72v-72h-72v72Zm0 156h72v-72h-72v72Zm-48 144v-72h192v-528H480v57l-72-52v-77h504v672H648Zm-600 0v-384l264-192 264 192v384H360v-192h-96v192H48Zm72-72h72v-192h240v192h72v-276L312-631 120-492v276Zm562-331ZM432-216v-192H192v192-192h240v192Z"
                                          Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -104,10 +104,13 @@
                             </Label>
                         </VerticalStackLayout>
                     </Border>
+                    </controls:RippleView>
 
                     <!-- Tab 2: Inventory -->
+                    <controls:RippleView Command="{Binding SelectTabCommand}" CommandParameter="2"
+                                         CornerRadius="14" HorizontalOptions="Fill">
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                            Padding="0" BackgroundColor="Transparent">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border"
                                          Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=2}"
@@ -116,9 +119,6 @@
                                         Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                             </DataTrigger>
                         </Border.Triggers>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="2" />
-                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
                             <shapes:Path Data="m408-549 72-36 72 36v-195H408v195ZM288-288v-72h192v72H288Zm-72 144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm0-600v528-528Zm0 528h528v-528H624v312l-144-72-144 72v-312H216v528Z"
                                          Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -146,10 +146,13 @@
                             </Label>
                         </VerticalStackLayout>
                     </Border>
+                    </controls:RippleView>
 
                     <!-- Tab 3: Calendar -->
+                    <controls:RippleView Command="{Binding SelectTabCommand}" CommandParameter="3"
+                                         CornerRadius="14" HorizontalOptions="Fill">
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                            Padding="0" BackgroundColor="Transparent">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border"
                                          Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=3}"
@@ -158,9 +161,6 @@
                                         Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                             </DataTrigger>
                         </Border.Triggers>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="3" />
-                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
                             <shapes:Path Data="M316-291.77q-28-27.78-28-68Q288-400 315.77-428q27.78-28 68-28Q424-456 452-428.23q28 27.78 28 68Q480-320 452.23-292q-27.78 28-68 28Q344-264 316-291.77ZM216-96q-29.7 0-50.85-21.5Q144-139 144-168v-528q0-29 21.15-50.5T216-768h72v-96h72v96h240v-96h72v96h72q29.7 0 50.85 21.5Q816-725 816-696v528q0 29-21.15 50.5T744-96H216Zm0-72h528v-360H216v360Zm0-432h528v-96H216v96Zm0 0v-96 96Z"
                                          Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -188,10 +188,13 @@
                             </Label>
                         </VerticalStackLayout>
                     </Border>
+                    </controls:RippleView>
 
                     <!-- Tab 4: Orders -->
+                    <controls:RippleView Command="{Binding SelectTabCommand}" CommandParameter="4"
+                                         CornerRadius="14" HorizontalOptions="Fill">
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
+                            Padding="0" BackgroundColor="Transparent">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border"
                                          Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=4}"
@@ -200,9 +203,6 @@
                                         Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                             </DataTrigger>
                         </Border.Triggers>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="4" />
-                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
                             <shapes:Path Data="M280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM246-720l96 200h280l110-200H246Zm-38-80h590q23 0 35 20.5t1 41.5L692-482q-11 20-29.5 31T622-440H324l-44 80h480v80H280q-45 0-68-39.5t-2-78.5l54-98-144-304H40v-80h130l38 80Zm134 280h280-280Z"
                                          Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -230,13 +230,13 @@
                             </Label>
                         </VerticalStackLayout>
                     </Border>
+                    </controls:RippleView>
 
                     <!-- Tab 5: Profile (no selected state, navigates via Shell) -->
+                    <controls:RippleView Command="{Binding GoToProfileCommand}"
+                                         CornerRadius="14" HorizontalOptions="Fill">
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                            Padding="0" BackgroundColor="Transparent" HorizontalOptions="Fill">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToProfileCommand}" />
-                        </Border.GestureRecognizers>
+                            Padding="0" BackgroundColor="Transparent">
                         <VerticalStackLayout Spacing="2" HorizontalOptions="Center" Padding="0,8">
                             <shapes:Path Data="M226-262q59-42.33 121.33-65.5 62.34-23.17 132.67-23.17 70.33 0 133 23.17T734.67-262q41-49.67 59.83-103.67T813.33-480q0-141-96.16-237.17Q621-813.33 480-813.33t-237.17 96.16Q146.67-621 146.67-480q0 60.33 19.16 114.33Q185-311.67 226-262Zm155.83-224.5Q342-526.33 342-584.67q0-58.33 39.83-98.16 39.84-39.84 98.17-39.84t98.17 39.84Q618-643 618-584.67q0 58.34-39.83 98.17-39.84 39.83-98.17 39.83t-98.17-39.83ZM480-80q-82.33 0-155.33-31.5-73-31.5-127.34-85.83Q143-251.67 111.5-324.67T80-480q0-83 31.5-155.67 31.5-72.66 85.83-127Q251.67-817 324.67-848.5T480-880q83 0 155.67 31.5 72.66 31.5 127 85.83 54.33 54.34 85.83 127Q880-563 880-480q0 82.33-31.5 155.33-31.5 73-85.83 127.34-54.34 54.33-127 85.83Q563-80 480-80Zm105-82.5q50.67-15.83 97.67-52.17-47-33.66-98-51.5Q533.67-284 480-284t-104.67 17.83q-51 17.84-98 51.5 47 36.34 97.67 52.17 50.67 15.83 105 15.83t105-15.83Zm-53.67-370.83q20-20 20-51.34 0-31.33-20-51.33T480-656q-31.33 0-51.33 20t-20 51.33q0 31.34 20 51.34 20 20 51.33 20t51.33-20ZM480-584.67Zm0 369.34Z"
                                          Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -246,6 +246,7 @@
                                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                         </VerticalStackLayout>
                     </Border>
+                    </controls:RippleView>
                 </VerticalStackLayout>
             </Grid>
 
@@ -285,8 +286,9 @@
                      BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}" />
 
             <!-- Tab 0: Customers -->
-            <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+            <controls:RippleView Grid.Column="0" Command="{Binding SelectTabCommand}" CommandParameter="0"
+                                 CornerRadius="14" Margin="6,8">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="0" BackgroundColor="Transparent">
                 <Border.Triggers>
                     <DataTrigger TargetType="Border"
                                  Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=0}"
@@ -295,9 +297,6 @@
                                 Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                     </DataTrigger>
                 </Border.Triggers>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="0" />
-                </Border.GestureRecognizers>
                 <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
                     <shapes:Path Data="M96-192v-92q0-25.78 12.5-47.39T143-366q54-32 114.5-49T384-432q66 0 126.5 17T625-366q22 13 34.5 34.61T672-284v92H96Zm648 0v-92q0-42-19.5-78T672-421q39 8 75.5 21.5T817-366q22 13 34.5 34.67Q864-309.65 864-284v92H744ZM282-522q-42-42-42-102t42-102q42-42 102-42t102 42q42 42 42 102t-42 102q-42 42-102 42t-102-42Zm396 0q-42 42-102 42-8 0-15-.5t-15-2.5q25-29 39.5-64.5T600-624q0-41-14.5-76.5T546-765q8-2 15-2.5t15-.5q60 0 102 42t42 102q0 60-42 102ZM168-264h432v-20q0-6.47-3.03-11.76-3.02-5.3-7.97-8.24-47-27-99-41.5T384-360q-54 0-106 14t-99 42q-4.95 2.83-7.98 7.91-3.02 5.09-3.02 12V-264Zm267-309.21q21-21.21 21-51T434.79-675q-21.21-21-51-21T333-674.79q-21 21.21-21 51T333.21-573q21.21 21 51 21T435-573.21ZM384-264Zm0-360Z"
                                  Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -325,10 +324,12 @@
                     </Label>
                 </VerticalStackLayout>
             </Border>
+            </controls:RippleView>
 
             <!-- Tab 1: Jobs -->
-            <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+            <controls:RippleView Grid.Column="1" Command="{Binding SelectTabCommand}" CommandParameter="1"
+                                 CornerRadius="14" Margin="6,8">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="0" BackgroundColor="Transparent">
                 <Border.Triggers>
                     <DataTrigger TargetType="Border"
                                  Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=1}"
@@ -337,9 +338,6 @@
                                 Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                     </DataTrigger>
                 </Border.Triggers>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="1" />
-                </Border.GestureRecognizers>
                 <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
                     <shapes:Path Data="M696-600h72v-72h-72v72Zm0 156h72v-72h-72v72Zm0 156h72v-72h-72v72Zm-48 144v-72h192v-528H480v57l-72-52v-77h504v672H648Zm-600 0v-384l264-192 264 192v384H360v-192h-96v192H48Zm72-72h72v-192h240v192h72v-276L312-631 120-492v276Zm562-331ZM432-216v-192H192v192-192h240v192Z"
                                  Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -367,10 +365,12 @@
                     </Label>
                 </VerticalStackLayout>
             </Border>
+            </controls:RippleView>
 
             <!-- Tab 2: Inventory -->
-            <Border Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+            <controls:RippleView Grid.Column="2" Command="{Binding SelectTabCommand}" CommandParameter="2"
+                                 CornerRadius="14" Margin="6,8">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="0" BackgroundColor="Transparent">
                 <Border.Triggers>
                     <DataTrigger TargetType="Border"
                                  Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=2}"
@@ -379,9 +379,6 @@
                                 Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                     </DataTrigger>
                 </Border.Triggers>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="2" />
-                </Border.GestureRecognizers>
                 <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
                     <shapes:Path Data="m408-549 72-36 72 36v-195H408v195ZM288-288v-72h192v72H288Zm-72 144q-29.7 0-50.85-21.15Q144-186.3 144-216v-528q0-29.7 21.15-50.85Q186.3-816 216-816h528q29.7 0 50.85 21.15Q816-773.7 816-744v528q0 29.7-21.15 50.85Q773.7-144 744-144H216Zm0-600v528-528Zm0 528h528v-528H624v312l-144-72-144 72v-312H216v528Z"
                                  Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -409,10 +406,12 @@
                     </Label>
                 </VerticalStackLayout>
             </Border>
+            </controls:RippleView>
 
             <!-- Tab 3: Calendar -->
-            <Border Grid.Column="3" StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+            <controls:RippleView Grid.Column="3" Command="{Binding SelectTabCommand}" CommandParameter="3"
+                                 CornerRadius="14" Margin="6,8">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="0" BackgroundColor="Transparent">
                 <Border.Triggers>
                     <DataTrigger TargetType="Border"
                                  Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=3}"
@@ -421,9 +420,6 @@
                                 Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                     </DataTrigger>
                 </Border.Triggers>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="3" />
-                </Border.GestureRecognizers>
                 <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
                     <shapes:Path Data="M316-291.77q-28-27.78-28-68Q288-400 315.77-428q27.78-28 68-28Q424-456 452-428.23q28 27.78 28 68Q480-320 452.23-292q-27.78 28-68 28Q344-264 316-291.77ZM216-96q-29.7 0-50.85-21.5Q144-139 144-168v-528q0-29 21.15-50.5T216-768h72v-96h72v96h240v-96h72v96h72q29.7 0 50.85 21.5Q816-725 816-696v528q0 29-21.15 50.5T744-96H216Zm0-72h528v-360H216v360Zm0-432h528v-96H216v96Zm0 0v-96 96Z"
                                  Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -451,10 +447,12 @@
                     </Label>
                 </VerticalStackLayout>
             </Border>
+            </controls:RippleView>
 
             <!-- Tab 4: Orders -->
-            <Border Grid.Column="4" StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
+            <controls:RippleView Grid.Column="4" Command="{Binding SelectTabCommand}" CommandParameter="4"
+                                 CornerRadius="14" Margin="6,8">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="0" BackgroundColor="Transparent">
                 <Border.Triggers>
                     <DataTrigger TargetType="Border"
                                  Binding="{Binding SelectedTabIndex, Converter={StaticResource IndexEqualsConverter}, ConverterParameter=4}"
@@ -463,9 +461,6 @@
                                 Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource SurfaceDark}}" />
                     </DataTrigger>
                 </Border.Triggers>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="4" />
-                </Border.GestureRecognizers>
                 <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
                     <shapes:Path Data="M280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM246-720l96 200h280l110-200H246Zm-38-80h590q23 0 35 20.5t1 41.5L692-482q-11 20-29.5 31T622-440H324l-44 80h480v80H280q-45 0-68-39.5t-2-78.5l54-98-144-304H40v-80h130l38 80Zm134 280h280-280Z"
                                  Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -493,13 +488,12 @@
                     </Label>
                 </VerticalStackLayout>
             </Border>
+            </controls:RippleView>
 
             <!-- Tab 5: Profile (no selected state, navigates via Shell) -->
-            <Border Grid.Column="5" StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                    Margin="6,8" Padding="0" BackgroundColor="Transparent">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding GoToProfileCommand}" />
-                </Border.GestureRecognizers>
+            <controls:RippleView Grid.Column="5" Command="{Binding GoToProfileCommand}"
+                                 CornerRadius="14" Margin="6,8">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="0" BackgroundColor="Transparent">
                 <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
                     <shapes:Path Data="M226-262q59-42.33 121.33-65.5 62.34-23.17 132.67-23.17 70.33 0 133 23.17T734.67-262q41-49.67 59.83-103.67T813.33-480q0-141-96.16-237.17Q621-813.33 480-813.33t-237.17 96.16Q146.67-621 146.67-480q0 60.33 19.16 114.33Q185-311.67 226-262Zm155.83-224.5Q342-526.33 342-584.67q0-58.33 39.83-98.16 39.84-39.84 98.17-39.84t98.17 39.84Q618-643 618-584.67q0 58.34-39.83 98.17-39.84 39.83-98.17 39.83t-98.17-39.83ZM480-80q-82.33 0-155.33-31.5-73-31.5-127.34-85.83Q143-251.67 111.5-324.67T80-480q0-83 31.5-155.67 31.5-72.66 85.83-127Q251.67-817 324.67-848.5T480-880q83 0 155.67 31.5 72.66 31.5 127 85.83 54.33 54.34 85.83 127Q880-563 880-480q0 82.33-31.5 155.33-31.5 73-85.83 127.34-54.34 54.33-127 85.83Q563-80 480-80Zm105-82.5q50.67-15.83 97.67-52.17-47-33.66-98-51.5Q533.67-284 480-284t-104.67 17.83q-51 17.84-98 51.5 47 36.34 97.67 52.17 50.67 15.83 105 15.83t105-15.83Zm-53.67-370.83q20-20 20-51.34 0-31.33-20-51.33T480-656q-31.33 0-51.33 20t-20 51.33q0 31.34 20 51.34 20 20 51.33 20t51.33-20ZM480-584.67Zm0 369.34Z"
                                  Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
@@ -509,6 +503,7 @@
                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                 </VerticalStackLayout>
             </Border>
+            </controls:RippleView>
         </Grid>
     </Grid>
 </ContentPage>

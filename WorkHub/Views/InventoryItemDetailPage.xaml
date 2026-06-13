@@ -6,17 +6,15 @@
              xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.InventoryItemDetailPage"
              x:DataType="vm:InventoryItemDetailViewModel"
+             Shell.NavBarIsVisible="False"
              Title="{Binding PageTitle}">
-
-    <Shell.TitleView>
-        <Grid ColumnDefinitions="Auto,*">
-            <controls:BackButton Command="{Binding CancelCommand}" />
-            <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
-        </Grid>
-    </Shell.TitleView>
 
     <ScrollView>
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="-8,0,0,0">
+                <controls:BackButton Command="{Binding CancelCommand}" />
+                <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
+            </Grid>
             <Entry Placeholder="Name *" Text="{Binding Name}" />
             <Entry Placeholder="Part Number" Text="{Binding PartNumber}" />
             <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" />
@@ -31,7 +29,10 @@
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}">
                 <Border StrokeThickness="0" StrokeShape="RoundRectangle 12" MinimumHeightRequest="44"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}">
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                        controls:TapFeedback.Enable="True"
+                        controls:TapFeedback.HoverLight="#DC2626"
+                        controls:TapFeedback.HoverDark="#FCA5A5">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding DeleteCommand}" />
                     </Border.GestureRecognizers>
