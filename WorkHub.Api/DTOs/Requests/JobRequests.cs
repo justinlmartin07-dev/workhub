@@ -9,7 +9,7 @@ public class CreateJobRequest
     [Required, MaxLength(200)]
     public string Title { get; set; } = string.Empty;
     [MaxLength(50)]
-    [RegularExpression("^(Pending|In Progress|Complete)$", ErrorMessage = "Invalid status.")]
+    [RegularExpression("^(New|In Progress|On Hold|Complete|Cancelled)$", ErrorMessage = "Invalid status.")]
     public string? Status { get; set; }
     [MaxLength(50)]
     public string? Priority { get; set; }
@@ -24,7 +24,7 @@ public class UpdateJobRequest
     [MaxLength(200)]
     public string? Title { get; set; }
     [MaxLength(50)]
-    [RegularExpression("^(Pending|In Progress|Complete)$", ErrorMessage = "Invalid status.")]
+    [RegularExpression("^(New|In Progress|On Hold|Complete|Cancelled)$", ErrorMessage = "Invalid status.")]
     public string? Status { get; set; }
     [MaxLength(50)]
     public string? Priority { get; set; }

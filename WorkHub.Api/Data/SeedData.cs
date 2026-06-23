@@ -170,8 +170,8 @@ public static class SeedData
             "Bathroom Remodel", "Kitchen Backsplash", "Cabinet Install",
             "Pressure Washing", "Tree Trimming",
         };
-        var statuses = new[] { "Pending", "In Progress", "Complete" };
-        var priorities = new[] { "Low", "Normal", "Normal", "Normal", "High" }; // weighted toward Normal
+        var statuses = new[] { "New", "In Progress", "Complete" };
+        var priorities = new[] { "Low", "Medium", "Medium", "Medium", "High" }; // weighted toward Medium
         var scopeNotes = new[]
         {
             "Customer reports intermittent issues. Check all connections.",

@@ -115,8 +115,8 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.Id).HasColumnName("id");
             e.Property(x => x.CustomerId).HasColumnName("customer_id");
             e.Property(x => x.Title).HasColumnName("title").HasMaxLength(200).IsRequired();
-            e.Property(x => x.Status).HasColumnName("status").HasMaxLength(50).HasDefaultValue("Pending");
-            e.Property(x => x.Priority).HasColumnName("priority").HasMaxLength(50).HasDefaultValue("Normal");
+            e.Property(x => x.Status).HasColumnName("status").HasMaxLength(50).HasDefaultValue("New");
+            e.Property(x => x.Priority).HasColumnName("priority").HasMaxLength(50).HasDefaultValue("Medium");
             e.Property(x => x.ScopeNotes).HasColumnName("scope_notes");
             e.Property(x => x.CreatedBy).HasColumnName("created_by");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");

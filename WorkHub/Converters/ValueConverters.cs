@@ -15,14 +15,14 @@ public class StatusColorConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        return value?.ToString()?.ToLower() switch
+        return value?.ToString() switch
         {
-            "new" => Color.FromArgb("#3B82F6"),       // Info blue
-            "in_progress" => Color.FromArgb("#F59E0B"), // Warning amber
-            "on_hold" => Color.FromArgb("#94A3B8"),     // Slate gray
-            "complete" => Color.FromArgb("#10B981"),     // Success green
-            "cancelled" => Color.FromArgb("#EF4444"),    // Danger red
-            _ => Color.FromArgb("#94A3B8")               // Slate gray
+            "New" => Color.FromArgb("#3B82F6"),          // Info blue
+            "In Progress" => Color.FromArgb("#F59E0B"),  // Warning amber
+            "On Hold" => Color.FromArgb("#94A3B8"),      // Slate gray
+            "Complete" => Color.FromArgb("#10B981"),      // Success green
+            "Cancelled" => Color.FromArgb("#EF4444"),     // Danger red
+            _ => Color.FromArgb("#94A3B8")                // Slate gray
         };
     }
 
@@ -34,12 +34,12 @@ public class PriorityColorConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        return value?.ToString()?.ToLower() switch
+        return value?.ToString() switch
         {
-            "high" => Color.FromArgb("#EF4444"),     // Danger red
-            "medium" => Color.FromArgb("#F59E0B"),    // Warning amber
-            "low" => Color.FromArgb("#10B981"),        // Success green
-            _ => Color.FromArgb("#94A3B8")              // Slate gray
+            "High" => Color.FromArgb("#EF4444"),     // Danger red
+            "Medium" => Color.FromArgb("#F59E0B"),   // Warning amber
+            "Low" => Color.FromArgb("#10B981"),      // Success green
+            _ => Color.FromArgb("#94A3B8")           // Slate gray
         };
     }
 

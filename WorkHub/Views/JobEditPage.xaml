@@ -37,11 +37,6 @@
             <Entry Placeholder="Job Title *" Text="{Binding Title}" ReturnType="Next" />
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="Status" Style="{StaticResource FieldLabel}" />
-                <Picker ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}" />
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Spacing="4">
                 <Label Text="Priority" Style="{StaticResource FieldLabel}" />
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                     <Label Text="Low" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Success}, Dark={StaticResource SuccessDark}}" VerticalTextAlignment="Center" />

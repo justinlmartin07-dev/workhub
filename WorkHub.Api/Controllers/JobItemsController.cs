@@ -52,8 +52,8 @@ public class JobItemsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(Guid jobId, [FromBody] CreateJobInventoryRequest request)
     {
-        var jobExists = await _db.Jobs.AnyAsync(j => j.Id == jobId && j.DeletedAt == null);
-        if (!jobExists)
+        var job = await _db.Jobs.FirstOrDefaultAsync(j => j.Id == jobId && j.DeletedAt == null);
+        if (job == null)
             return NotFound(new ErrorResponse { Error = "Job not found" });
 
         var inventoryItem = await _db.InventoryItems.FindAsync(request.InventoryItemId);
@@ -69,6 +69,9 @@ public class JobItemsController : ControllerBase
             ListType = request.ListType,
             CreatedAt = DateTime.UtcNow,
         };
+
+        if (job.Status == "New")
+            job.Status = "In Progress";
 
         _db.JobInventories.Add(ji);
         await _db.SaveChangesAsync();

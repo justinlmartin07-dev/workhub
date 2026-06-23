@@ -112,6 +112,9 @@ public class PhotosController : ControllerBase
             UploadedAt = DateTime.UtcNow,
         };
 
+        if (job.Status == "New")
+            job.Status = "In Progress";
+
         _db.JobPhotos.Add(photo);
         await _db.SaveChangesAsync();
 

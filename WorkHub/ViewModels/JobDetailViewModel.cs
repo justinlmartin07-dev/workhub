@@ -164,9 +164,18 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
             await LoadJobAsync();
     }
 
+    public bool CanComplete => Job?.Status is "New" or "In Progress";
+    public bool CanReopen   => Job?.Status is "Complete" or "Cancelled" or "On Hold";
+    public bool CanHold     => Job?.Status is "New" or "In Progress";
+    public bool CanCancel   => Job?.Status is not "Cancelled";
+
     private void ApplyJob(JobResponse job, bool urlsAreFresh)
     {
         Job = job;
+        OnPropertyChanged(nameof(CanComplete));
+        OnPropertyChanged(nameof(CanReopen));
+        OnPropertyChanged(nameof(CanHold));
+        OnPropertyChanged(nameof(CanCancel));
         UsedItems.MergeInto(job.UsedItems ?? [], i => i.Id, ItemUnchanged);
         ToOrderItems.MergeInto(job.ToOrderItems ?? [], i => i.Id, ItemUnchanged);
         UpdatePhotos(job.Photos, urlsAreFresh);
@@ -322,6 +331,42 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     }
 
     [RelayCommand]
+    private async Task MarkAsCompleteAsync()
+    {
+        if (Job == null) return;
+        var confirmed = await Shell.Current.DisplayAlert("Complete Job", "Mark this job as complete?", "Mark Complete", "Cancel");
+        if (!confirmed) return;
+        await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "Complete" });
+        await LoadJobAsync();
+    }
+
+    [RelayCommand]
+    private async Task ReopenJobAsync()
+    {
+        if (Job == null) return;
+        await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "In Progress" });
+        await LoadJobAsync();
+    }
+
+    [RelayCommand]
+    private async Task PutOnHoldAsync()
+    {
+        if (Job == null) return;
+        await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "On Hold" });
+        await LoadJobAsync();
+    }
+
+    [RelayCommand]
+    private async Task CancelJobAsync()
+    {
+        if (Job == null) return;
+        var confirmed = await Shell.Current.DisplayAlert("Cancel Job", "Are you sure you want to cancel this job?", "Cancel Job", "Keep");
+        if (!confirmed) return;
+        await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "Cancelled" });
+        await LoadJobAsync();
+    }
+
+    [RelayCommand]
     private async Task AddNoteAsync()
     {
         if (string.IsNullOrWhiteSpace(NewNoteText) || Job == null) return;
@@ -374,6 +419,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private async Task PickPhotoAsync()
     {
         if (Job == null) return;
+        if (!await EnsureJobReopenedAsync()) return;
         var photo = await _photoService.PickAndUploadJobPhotoAsync(Job.Id);
         if (photo != null) await LoadJobAsync();
     }
@@ -382,8 +428,19 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private async Task TakePhotoAsync()
     {
         if (Job == null) return;
+        if (!await EnsureJobReopenedAsync()) return;
         var photo = await _photoService.CaptureAndUploadJobPhotoAsync(Job.Id);
         if (photo != null) await LoadJobAsync();
+    }
+
+    private async Task<bool> EnsureJobReopenedAsync()
+    {
+        if (Job?.Status != "Complete") return true;
+        var reopen = await Shell.Current.DisplayAlert("Job Complete",
+            "This job is marked complete. Reopen it to add items?", "Reopen", "Cancel");
+        if (!reopen) return false;
+        await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "In Progress" });
+        return true;
     }
 
     [RelayCommand]
@@ -472,6 +529,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private async Task ConfirmAddPartsAsync()
     {
         if (Job == null) return;
+        if (!await EnsureJobReopenedAsync()) return;
         try
         {
             var selected = SelectableInventory.Where(i => i.IsSelected).ToList();

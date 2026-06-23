@@ -58,20 +58,50 @@
 
                         <!-- Status/Priority -->
                         <Frame Style="{StaticResource Card}">
-                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
-                                <Label Text="Customer" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding ViewCustomerCommand}" />
-                                    </Label.GestureRecognizers>
-                                </Label>
-                                <Label Grid.Row="1" Text="Status" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Job.Status, Converter={StaticResource LabelCaseConverter}}"
-                                       TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}" FontAttributes="Bold" />
-                                <Label Grid.Row="2" Text="Priority" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority, Converter={StaticResource LabelCaseConverter}}"
-                                       TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
-                            </Grid>
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+                                    <Label Text="Customer" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                    <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding ViewCustomerCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Grid.Row="1" Text="Status" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" VerticalTextAlignment="Center" />
+                                    <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                        <Label Text="{Binding Job.Status}"
+                                               TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}"
+                                               FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                        <Button Text="Mark Complete" Style="{StaticResource PrimaryButton}" FontSize="12"
+                                                Padding="10,4" HeightRequest="32"
+                                                Command="{Binding MarkAsCompleteCommand}"
+                                                IsVisible="{Binding CanComplete}" />
+                                        <Button Text="Reopen" Style="{StaticResource SecondaryButton}" FontSize="12"
+                                                Padding="10,4" HeightRequest="32"
+                                                Command="{Binding ReopenJobCommand}"
+                                                IsVisible="{Binding CanReopen}" />
+                                    </HorizontalStackLayout>
+                                    <Label Grid.Row="2" Text="Priority" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                    <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority}"
+                                           TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
+                                </Grid>
+                                <!-- Secondary status actions -->
+                                <HorizontalStackLayout Spacing="20" IsVisible="{Binding CanHold}">
+                                    <Label Text="Put on Hold"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                           FontSize="13">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding PutOnHoldCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="Cancel Job"
+                                           TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                           FontSize="13" IsVisible="{Binding CanCancel}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding CancelJobCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
                         </Frame>
 
                         <!-- Address -->
@@ -164,22 +194,25 @@
                                                 <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
                                                         Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                                                         StrokeShape="RoundRectangle 8">
-                                                    <Grid ColumnDefinitions="32,40,32" HeightRequest="30">
-                                                        <Button Text="+" FontSize="16" Padding="0" Margin="0" CornerRadius="0"
-                                                                HeightRequest="30" MinimumWidthRequest="32" MinimumHeightRequest="30"
-                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                                                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
-                                                                Clicked="OnIncrementClicked" />
-                                                        <Entry Grid.Column="1" Text="{Binding Quantity}" FontSize="13" Keyboard="Numeric" StyleId="stepper-qty"
-                                                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
-                                                               HeightRequest="30" Margin="0"
-                                                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceInputLight}, Dark={StaticResource SurfaceInputDark}}"
-                                                               Unfocused="OnQuantityEntryUnfocused" />
-                                                        <Button Grid.Column="2" Text="−" FontSize="16" Padding="0" Margin="0" CornerRadius="0"
-                                                                HeightRequest="30" MinimumWidthRequest="32" MinimumHeightRequest="30"
+                                                    <Grid ColumnDefinitions="26,40,26"
+                                                          HeightRequest="{OnPlatform 30, Android=36}">
+                                                        <Button Text="−" FontSize="15" Padding="0" Margin="0" CornerRadius="0"
+                                                                HeightRequest="{OnPlatform 30, Android=36}"
+                                                                VerticalOptions="Fill" MinimumWidthRequest="0" MinimumHeightRequest="0"
                                                                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                                                 TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
                                                                 Clicked="OnDecrementClicked" />
+                                                        <Entry Grid.Column="1" Text="{Binding Quantity}" FontSize="13" Keyboard="Numeric" StyleId="stepper-qty"
+                                                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                                               HeightRequest="{OnPlatform 30, Android=36}" Margin="0"
+                                                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceInputLight}, Dark={StaticResource SurfaceInputDark}}"
+                                                               Unfocused="OnQuantityEntryUnfocused" />
+                                                        <Button Grid.Column="2" Text="+" FontSize="15" Padding="0" Margin="0" CornerRadius="0"
+                                                                HeightRequest="{OnPlatform 30, Android=36}"
+                                                                VerticalOptions="Fill" MinimumWidthRequest="0" MinimumHeightRequest="0"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
+                                                                Clicked="OnIncrementClicked" />
                                                     </Grid>
                                                 </Border>
                                                 <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
@@ -228,22 +261,25 @@
                                                 <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
                                                         Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                                                         StrokeShape="RoundRectangle 8">
-                                                    <Grid ColumnDefinitions="32,40,32" HeightRequest="30">
-                                                        <Button Text="+" FontSize="16" Padding="0" Margin="0" CornerRadius="0"
-                                                                HeightRequest="30" MinimumWidthRequest="32" MinimumHeightRequest="30"
-                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                                                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
-                                                                Clicked="OnIncrementClicked" />
-                                                        <Entry Grid.Column="1" Text="{Binding Quantity}" FontSize="13" Keyboard="Numeric" StyleId="stepper-qty"
-                                                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
-                                                               HeightRequest="30" Margin="0"
-                                                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceInputLight}, Dark={StaticResource SurfaceInputDark}}"
-                                                               Unfocused="OnQuantityEntryUnfocused" />
-                                                        <Button Grid.Column="2" Text="−" FontSize="16" Padding="0" Margin="0" CornerRadius="0"
-                                                                HeightRequest="30" MinimumWidthRequest="32" MinimumHeightRequest="30"
+                                                    <Grid ColumnDefinitions="26,40,26"
+                                                          HeightRequest="{OnPlatform 30, Android=36}">
+                                                        <Button Text="−" FontSize="15" Padding="0" Margin="0" CornerRadius="0"
+                                                                HeightRequest="{OnPlatform 30, Android=36}"
+                                                                VerticalOptions="Fill" MinimumWidthRequest="0" MinimumHeightRequest="0"
                                                                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                                                 TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
                                                                 Clicked="OnDecrementClicked" />
+                                                        <Entry Grid.Column="1" Text="{Binding Quantity}" FontSize="13" Keyboard="Numeric" StyleId="stepper-qty"
+                                                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                                               HeightRequest="{OnPlatform 30, Android=36}" Margin="0"
+                                                               BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceInputLight}, Dark={StaticResource SurfaceInputDark}}"
+                                                               Unfocused="OnQuantityEntryUnfocused" />
+                                                        <Button Grid.Column="2" Text="+" FontSize="15" Padding="0" Margin="0" CornerRadius="0"
+                                                                HeightRequest="{OnPlatform 30, Android=36}"
+                                                                VerticalOptions="Fill" MinimumWidthRequest="0" MinimumHeightRequest="0"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                                TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
+                                                                Clicked="OnIncrementClicked" />
                                                     </Grid>
                                                 </Border>
                                                 <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"

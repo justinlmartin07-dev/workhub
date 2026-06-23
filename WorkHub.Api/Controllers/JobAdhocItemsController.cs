@@ -48,8 +48,8 @@ public class JobAdhocItemsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(Guid jobId, [FromBody] CreateJobAdhocItemRequest request)
     {
-        var jobExists = await _db.Jobs.AnyAsync(j => j.Id == jobId && j.DeletedAt == null);
-        if (!jobExists)
+        var job = await _db.Jobs.FirstOrDefaultAsync(j => j.Id == jobId && j.DeletedAt == null);
+        if (job == null)
             return NotFound(new ErrorResponse { Error = "Job not found" });
 
         var item = new JobAdhocItem
@@ -62,6 +62,9 @@ public class JobAdhocItemsController : ControllerBase
             ListType = request.ListType,
             CreatedAt = DateTime.UtcNow,
         };
+
+        if (job.Status == "New")
+            job.Status = "In Progress";
 
         _db.JobAdhocItems.Add(item);
         await _db.SaveChangesAsync();

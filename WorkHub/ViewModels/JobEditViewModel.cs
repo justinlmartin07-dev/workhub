@@ -18,8 +18,7 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
     private string? _addressSessionToken;
 
     private string _origTitle = string.Empty;
-    private string _origStatus = "new";
-    private string _origPriority = "medium";
+    private string _origPriority = "Medium";
     private string _origStreet = string.Empty;
     private string _origCity = string.Empty;
     private string _origState = string.Empty;
@@ -28,14 +27,13 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
     private Guid? _origCustomerId;
 
     public bool HasUnsavedChanges =>
-        Title != _origTitle || SelectedStatus != _origStatus || SelectedPriority != _origPriority ||
+        Title != _origTitle || SelectedPriority != _origPriority ||
         Street != _origStreet || City != _origCity || State != _origState || Zip != _origZip ||
         ScopeNotes != _origScopeNotes || SelectedCustomer?.Id != _origCustomerId;
 
     private void SnapshotOriginal()
     {
         _origTitle = Title;
-        _origStatus = SelectedStatus;
         _origPriority = SelectedPriority;
         _origStreet = Street;
         _origCity = City;
@@ -55,10 +53,7 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
     private string _title = string.Empty;
 
     [ObservableProperty]
-    private string _selectedStatus = "new";
-
-    [ObservableProperty]
-    private string _selectedPriority = "medium";
+    private string _selectedPriority = "Medium";
 
     [ObservableProperty]
     private double _prioritySliderValue = 1;
@@ -67,10 +62,10 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
     {
         SelectedPriority = (int)Math.Round(value) switch
         {
-            0 => "low",
-            1 => "medium",
-            2 => "high",
-            _ => "medium"
+            0 => "Low",
+            1 => "Medium",
+            2 => "High",
+            _ => "Medium"
         };
     }
 
@@ -119,8 +114,7 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
     [ObservableProperty]
     private string _pageTitle = "New Job";
 
-    public List<string> StatusOptions { get; } = new() { "new", "in_progress", "on_hold", "complete", "cancelled" };
-    public List<string> PriorityOptions { get; } = new() { "low", "medium", "high" };
+    public List<string> PriorityOptions { get; } = new() { "Low", "Medium", "High" };
 
     private bool _dataLoaded;
 
@@ -194,9 +188,8 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
                 if (job != null)
                 {
                     Title = job.Title;
-                    SelectedStatus = job.Status;
                     SelectedPriority = job.Priority;
-                    PrioritySliderValue = job.Priority switch { "low" => 0, "high" => 2, _ => 1 };
+                    PrioritySliderValue = job.Priority switch { "Low" => 0, "High" => 2, _ => 1 };
                     // Load customer for "Use Customer Address" button
                     var customer = await _apiService.GetCustomerAsync(job.CustomerId);
                     if (customer != null)
@@ -282,7 +275,6 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
                 {
                     CustomerId = SelectedCustomer.Id,
                     Title = Title.Trim(),
-                    Status = SelectedStatus,
                     Priority = SelectedPriority,
                     ScopeNotes = string.IsNullOrWhiteSpace(ScopeNotes) ? null : ScopeNotes.Trim(),
                     Address = BuildAddress()
@@ -296,7 +288,6 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
                 var request = new UpdateJobRequest
                 {
                     Title = Title.Trim(),
-                    Status = SelectedStatus,
                     Priority = SelectedPriority,
                     ScopeNotes = string.IsNullOrWhiteSpace(ScopeNotes) ? null : ScopeNotes.Trim(),
                     Address = BuildAddress()

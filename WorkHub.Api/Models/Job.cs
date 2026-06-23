@@ -6,8 +6,8 @@ public class Job
     public Guid CustomerId { get; set; }
     public Customer Customer { get; set; } = null!;
     public string Title { get; set; } = string.Empty;
-    public string Status { get; set; } = "Pending";
-    public string Priority { get; set; } = "Normal";
+    public string Status { get; set; } = "New";
+    public string Priority { get; set; } = "Medium";
     public string? ScopeNotes { get; set; }
     public string? Address { get; set; }
     public Guid CreatedBy { get; set; }
