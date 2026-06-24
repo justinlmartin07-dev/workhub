@@ -71,7 +71,7 @@
                                         <Label Text="{Binding Job.Status}"
                                                TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}"
                                                FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                        <Button Text="Mark Complete" Style="{StaticResource PrimaryButton}" FontSize="12"
+                                        <Button Text="Mark Complete" FontSize="12"
                                                 Padding="10,4" HeightRequest="32"
                                                 Command="{Binding MarkAsCompleteCommand}"
                                                 IsVisible="{Binding CanComplete}" />

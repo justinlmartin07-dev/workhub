@@ -5,6 +5,7 @@
              xmlns:controls="clr-namespace:WorkHub.Controls"
              x:Class="WorkHub.Views.ProfilePage"
              x:DataType="vm:ProfileViewModel"
+             Shell.NavBarIsVisible="False"
              Title="">
 
     <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"

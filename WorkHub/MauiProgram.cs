@@ -200,7 +200,7 @@ public static class MauiProgram
 						native.MinHeight = 0;
 						native.MinWidth = 0;
 						native.Height = button.HeightRequest;
-						native.Width = button.WidthRequest;
+						native.Width = button.WidthRequest > 0 ? button.WidthRequest : double.NaN;
 						if (native.Content is Microsoft.UI.Xaml.FrameworkElement content)
 						{
 							content.Margin = new Microsoft.UI.Xaml.Thickness(0);
