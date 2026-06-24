@@ -15,13 +15,17 @@ public partial class OrdersViewModel : BaseViewModel
     private readonly ApiService _apiService;
     private readonly ListCacheService _listCache;
 
+    // Full dataset; Orders below is the (possibly search-filtered) view of it.
+    private List<OrderLineResponse> _allOrders = new();
+
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(OutstandingCount))]
-    [NotifyPropertyChangedFor(nameof(OrderedCount))]
     private ObservableCollection<OrderLineResponse> _orders = new();
 
-    public int OutstandingCount => Orders.Count(o => !o.IsOrdered);
-    public int OrderedCount => Orders.Count(o => o.IsOrdered);
+    public int OutstandingCount => _allOrders.Count(o => !o.IsOrdered);
+    public int OrderedCount => _allOrders.Count(o => o.IsOrdered);
+
+    [ObservableProperty]
+    private string _searchText = string.Empty;
 
     [ObservableProperty]
     private OrderLineResponse? _selectedOrder;
@@ -47,7 +51,7 @@ public partial class OrdersViewModel : BaseViewModel
 
     private void ApplyOrderedChange(OrderOrderedChange change)
     {
-        var item = Orders.FirstOrDefault(o => o.Id == change.ItemId && o.Source == change.Source);
+        var item = _allOrders.FirstOrDefault(o => o.Id == change.ItemId && o.Source == change.Source);
         if (item != null)
             item.OrderedAt = change.OrderedAt;
 
@@ -60,36 +64,60 @@ public partial class OrdersViewModel : BaseViewModel
     {
         // First load: show the last-known data from disk instantly, then let the
         // network refresh below merge in whatever changed.
-        if (Orders.Count == 0 && !IsBusy)
+        if (_allOrders.Count == 0 && !IsBusy)
         {
             var cached = await _listCache.LoadAsync<OrderLineResponse>(CacheKey);
-            if (cached is { Count: > 0 } && Orders.Count == 0)
+            if (cached is { Count: > 0 } && _allOrders.Count == 0)
             {
-                Orders = new ObservableCollection<OrderLineResponse>(cached);
-                SetContent();
+                _allOrders = cached;
+                PublishList(rebuild: true);
             }
         }
 
         await LoadAsync(async () =>
         {
             var orders = await _apiService.GetOrdersAsync();
-
-            if (Orders.Count == 0)
-            {
-                Orders = new ObservableCollection<OrderLineResponse>(orders);
-            }
-            else
-            {
-                Orders.MergeInto(orders, o => (o.Id, o.Source), RowUnchanged, TryUpdateInPlace);
-                OnPropertyChanged(nameof(OutstandingCount));
-                OnPropertyChanged(nameof(OrderedCount));
-            }
-
-            if (Orders.Count == 0) SetEmpty();
-            else SetContent();
+            _allOrders = orders;
+            PublishList(rebuild: false);
             _ = _listCache.SaveAsync(CacheKey, orders);
         }, showLoading: Orders.Count == 0);
     }
+
+    // Projects the master list through the current search filter into the bound
+    // collection. rebuild swaps the collection wholesale (right for filter changes,
+    // where most rows differ); otherwise rows are merged in place so only actual
+    // changes re-render.
+    private void PublishList(bool rebuild)
+    {
+        var query = SearchText.Trim();
+        var visible = query.Length == 0
+            ? _allOrders
+            : _allOrders.Where(o => MatchesSearch(o, query)).ToList();
+
+        if (rebuild || Orders.Count == 0)
+            Orders = new ObservableCollection<OrderLineResponse>(visible);
+        else
+            Orders.MergeInto(visible, o => (o.Id, o.Source), RowUnchanged, TryUpdateInPlace);
+
+        OnPropertyChanged(nameof(OutstandingCount));
+        OnPropertyChanged(nameof(OrderedCount));
+
+        if (_allOrders.Count == 0) SetEmpty();
+        else SetContent();
+    }
+
+    private static bool MatchesSearch(OrderLineResponse o, string query) =>
+        o.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || (o.PartNumber?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (o.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
+        || o.JobTitle.Contains(query, StringComparison.OrdinalIgnoreCase)
+        || o.CustomerName.Contains(query, StringComparison.OrdinalIgnoreCase);
+
+    // Search filters the in-memory list — instant, no debounce, no network.
+    partial void OnSearchTextChanged(string value) => PublishList(rebuild: true);
+
+    [RelayCommand]
+    private void Search() => PublishList(rebuild: true);
 
     private static bool RowUnchanged(OrderLineResponse a, OrderLineResponse b) =>
         FieldsUnchanged(a, b) && a.OrderedAt == b.OrderedAt;

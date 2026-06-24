@@ -7,7 +7,7 @@
              x:Class="WorkHub.Views.OrdersPage"
              x:DataType="vm:OrdersViewModel">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <!-- Header -->
         <VerticalStackLayout Grid.Row="0" Padding="16,12,16,8" Spacing="2">
             <Label Text="To Order" FontSize="20" FontAttributes="Bold" />
@@ -20,7 +20,10 @@
             </HorizontalStackLayout>
         </VerticalStackLayout>
 
-        <controls:DataStateView Grid.Row="1"
+        <SearchBar Grid.Row="1" Placeholder="Search orders..." Text="{Binding SearchText}"
+                   SearchCommand="{Binding SearchCommand}" Margin="8,0,8,8" />
+
+        <controls:DataStateView Grid.Row="2"
             IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
             EmptyMessage="Nothing to order" RetryCommand="{Binding LoadOrdersCommand}">
