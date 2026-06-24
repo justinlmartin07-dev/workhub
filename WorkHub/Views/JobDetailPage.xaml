@@ -58,51 +58,42 @@
 
                         <!-- Status/Priority -->
                         <Frame Style="{StaticResource Card}">
-                            <VerticalStackLayout Spacing="8">
-                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
-                                    <Label Text="Customer" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                    <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding ViewCustomerCommand}" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
-                                    <Label Grid.Row="1" Text="Status" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" VerticalTextAlignment="Center" />
-                                    <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="8" VerticalOptions="Center">
-                                        <Label Text="{Binding Job.Status}"
-                                               TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}"
-                                               FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                        <Button Text="Mark Complete" FontSize="12"
-                                                Padding="10,4" HeightRequest="32"
-                                                Command="{Binding MarkAsCompleteCommand}"
-                                                IsVisible="{Binding CanComplete}" />
-                                        <Button Text="Reopen" Style="{StaticResource SecondaryButton}" FontSize="12"
-                                                Padding="10,4" HeightRequest="32"
-                                                Command="{Binding ReopenJobCommand}"
-                                                IsVisible="{Binding CanReopen}" />
-                                    </HorizontalStackLayout>
-                                    <Label Grid.Row="2" Text="Priority" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                    <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority}"
-                                           TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
-                                </Grid>
-                                <!-- Secondary status actions -->
-                                <HorizontalStackLayout Spacing="20" IsVisible="{Binding CanHold}">
-                                    <Label Text="Put on Hold"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
-                                           FontSize="13">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding PutOnHoldCommand}" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
-                                    <Label Text="Cancel Job"
-                                           TextColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                                           FontSize="13" IsVisible="{Binding CanCancel}">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding CancelJobCommand}" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
-                                </HorizontalStackLayout>
-                            </VerticalStackLayout>
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+                                <Label Text="Customer" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                <Label Grid.Column="1" Text="{Binding Job.CustomerName}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ViewCustomerCommand}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Label Grid.Row="1" Text="Status" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Job.Status}"
+                                       TextColor="{Binding Job.Status, Converter={StaticResource StatusColorConverter}}" FontAttributes="Bold" />
+                                <Label Grid.Row="2" Text="Priority" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Job.Priority}"
+                                       TextColor="{Binding Job.Priority, Converter={StaticResource PriorityColorConverter}}" FontAttributes="Bold" />
+                            </Grid>
                         </Frame>
+
+                        <!-- Primary status action -->
+                        <Button Text="Mark as Complete"
+                                Command="{Binding MarkAsCompleteCommand}"
+                                IsVisible="{Binding CanComplete}" />
+                        <Button Text="Reopen Job"
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding ReopenJobCommand}"
+                                IsVisible="{Binding CanReopen}" />
+
+                        <!-- Secondary status actions -->
+                        <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                            <Button Text="Put on Hold"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding PutOnHoldCommand}"
+                                    IsVisible="{Binding CanHold}" />
+                            <Button Text="Cancel Job"
+                                    Style="{StaticResource DangerButton}"
+                                    Command="{Binding CancelJobCommand}"
+                                    IsVisible="{Binding CanCancel}" />
+                        </HorizontalStackLayout>
 
                         <!-- Address -->
                         <Frame Style="{StaticResource Card}"

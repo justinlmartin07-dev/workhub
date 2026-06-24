@@ -167,7 +167,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     public bool CanComplete => Job?.Status is "New" or "In Progress";
     public bool CanReopen   => Job?.Status is "Complete" or "Cancelled" or "On Hold";
     public bool CanHold     => Job?.Status is "New" or "In Progress";
-    public bool CanCancel   => Job?.Status is not "Cancelled";
+    public bool CanCancel   => Job?.Status is "New" or "In Progress" or "On Hold";
 
     private void ApplyJob(JobResponse job, bool urlsAreFresh)
     {
