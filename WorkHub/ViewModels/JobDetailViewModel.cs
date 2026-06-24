@@ -502,6 +502,8 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     [RelayCommand]
     private async Task OpenPartsPanelAsync(string listType)
     {
+        if (!await EnsureJobReopenedAsync()) return;
+
         _activeListType = listType;
         PartsPanelTitle = listType == "used" ? "Add Parts Used" : "Add Parts To Order";
         NewItemSearchText = string.Empty;
@@ -529,7 +531,6 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private async Task ConfirmAddPartsAsync()
     {
         if (Job == null) return;
-        if (!await EnsureJobReopenedAsync()) return;
         try
         {
             var selected = SelectableInventory.Where(i => i.IsSelected).ToList();
