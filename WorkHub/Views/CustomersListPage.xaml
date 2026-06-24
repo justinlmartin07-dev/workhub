@@ -7,13 +7,16 @@
              x:Class="WorkHub.Views.CustomersListPage"
              x:DataType="vm:CustomersListViewModel">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Header -->
+        <Label Grid.Row="0" Text="Customers" FontSize="20" FontAttributes="Bold" Margin="16,12,16,8" />
+
         <!-- Search -->
-        <SearchBar Grid.Row="0" Placeholder="Search customers..." Text="{Binding SearchText}"
+        <SearchBar Grid.Row="1" Placeholder="Search customers..." Text="{Binding SearchText}"
                    SearchCommand="{Binding SearchCommand}" Margin="8" />
 
         <!-- Data State View -->
-        <controls:DataStateView Grid.Row="1"
+        <controls:DataStateView Grid.Row="2"
             IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
             EmptyMessage="No customers yet" RetryCommand="{Binding LoadCustomersCommand}">

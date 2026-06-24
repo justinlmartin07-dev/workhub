@@ -7,11 +7,14 @@
              x:Class="WorkHub.Views.InventoryPage"
              x:DataType="vm:InventoryViewModel">
 
-    <Grid RowDefinitions="Auto,*">
-        <SearchBar Placeholder="Search inventory..." Text="{Binding SearchText}"
-                   SearchCommand="{Binding SearchCommand}" Margin="8" />
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Header -->
+        <Label Grid.Row="0" Text="Inventory" FontSize="20" FontAttributes="Bold" Margin="16,12,16,8" />
 
-        <controls:DataStateView Grid.Row="1"
+        <SearchBar Grid.Row="1" Placeholder="Search inventory..." Text="{Binding SearchText}"
+                   SearchCommand="{Binding SearchCommand}" Margin="8,0,8,8" />
+
+        <controls:DataStateView Grid.Row="2"
             IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
             EmptyMessage="No inventory items" RetryCommand="{Binding LoadItemsCommand}">

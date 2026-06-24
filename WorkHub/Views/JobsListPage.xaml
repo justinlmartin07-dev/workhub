@@ -7,11 +7,14 @@
              x:Class="WorkHub.Views.JobsListPage"
              x:DataType="vm:JobsListViewModel">
 
-    <Grid RowDefinitions="Auto,*">
-        <SearchBar Placeholder="Search jobs..." Text="{Binding SearchText}"
-                   SearchCommand="{Binding SearchCommand}" Margin="8,8,8,0" />
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Header -->
+        <Label Grid.Row="0" Text="Jobs" FontSize="20" FontAttributes="Bold" Margin="16,12,16,8" />
 
-        <controls:DataStateView Grid.Row="1"
+        <SearchBar Grid.Row="1" Placeholder="Search jobs..." Text="{Binding SearchText}"
+                   SearchCommand="{Binding SearchCommand}" Margin="8,0,8,0" />
+
+        <controls:DataStateView Grid.Row="2"
             IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
             EmptyMessage="No jobs found" RetryCommand="{Binding LoadJobsCommand}">
