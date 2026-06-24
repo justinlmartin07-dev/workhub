@@ -147,8 +147,26 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
             LoadDataCommand.Execute(null);
     }
 
+    private CancellationTokenSource? _searchCts;
+
     partial void OnCustomerSearchTextChanged(string value)
     {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            _searchCts?.Cancel();
+            FilterCustomers();
+            return;
+        }
+
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        _ = DebounceSearchAsync(_searchCts.Token);
+    }
+
+    private async Task DebounceSearchAsync(CancellationToken ct)
+    {
+        try { await Task.Delay(200, ct); }
+        catch (OperationCanceledException) { return; }
         FilterCustomers();
     }
 

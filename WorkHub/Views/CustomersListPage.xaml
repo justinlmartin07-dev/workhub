@@ -85,7 +85,7 @@
         </controls:DataStateView>
 
         <!-- FAB (overlaid on list) -->
-        <controls:FloatingActionButton Grid.Row="1"
+        <controls:FloatingActionButton Grid.Row="2"
                                        Command="{Binding AddCustomerCommand}" ZIndex="10" />
     </Grid>
 </ContentView>

@@ -91,16 +91,30 @@ public partial class EventDetailViewModel : BaseViewModel
         _apiService = apiService;
     }
 
+    private CancellationTokenSource? _userSearchCts;
+    private CancellationTokenSource? _customerSearchCts;
+
     partial void OnUserSearchTextChanged(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
+            _userSearchCts?.Cancel();
             ShowUserSuggestions = false;
             FilteredUsers.Clear();
             return;
         }
 
-        var search = value.ToLower();
+        _userSearchCts?.Cancel();
+        _userSearchCts = new CancellationTokenSource();
+        _ = DebounceUserSearchAsync(_userSearchCts.Token);
+    }
+
+    private async Task DebounceUserSearchAsync(CancellationToken ct)
+    {
+        try { await Task.Delay(200, ct); }
+        catch (OperationCanceledException) { return; }
+
+        var search = UserSearchText.ToLower();
         var assignedIds = AssignedUsers.Select(u => u.Id).ToHashSet();
         var matches = Users
             .Where(u => !assignedIds.Contains(u.Id) && u.Name.ToLower().Contains(search))
@@ -119,7 +133,26 @@ public partial class EventDetailViewModel : BaseViewModel
         ShowUserSuggestions = false;
     }
 
-    partial void OnCustomerSearchTextChanged(string value) => FilterCustomers();
+    partial void OnCustomerSearchTextChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            _customerSearchCts?.Cancel();
+            FilterCustomers();
+            return;
+        }
+
+        _customerSearchCts?.Cancel();
+        _customerSearchCts = new CancellationTokenSource();
+        _ = DebounceCustomerSearchAsync(_customerSearchCts.Token);
+    }
+
+    private async Task DebounceCustomerSearchAsync(CancellationToken ct)
+    {
+        try { await Task.Delay(200, ct); }
+        catch (OperationCanceledException) { return; }
+        FilterCustomers();
+    }
 
     private void FilterCustomers()
     {

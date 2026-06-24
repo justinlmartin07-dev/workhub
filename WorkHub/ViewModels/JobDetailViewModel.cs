@@ -475,7 +475,21 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         }));
     }
 
-    partial void OnNewItemSearchTextChanged(string value) => FilterInventory();
+    private CancellationTokenSource? _searchCts;
+
+    partial void OnNewItemSearchTextChanged(string value)
+    {
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        _ = DebounceSearchAsync(_searchCts.Token);
+    }
+
+    private async Task DebounceSearchAsync(CancellationToken ct)
+    {
+        try { await Task.Delay(200, ct); }
+        catch (OperationCanceledException) { return; }
+        FilterInventory();
+    }
 
     private void FilterInventory()
     {

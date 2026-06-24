@@ -89,7 +89,7 @@
         </controls:DataStateView>
 
         <!-- FAB (overlaid on list) -->
-        <controls:FloatingActionButton Grid.Row="1"
+        <controls:FloatingActionButton Grid.Row="2"
                                        Command="{Binding AddJobCommand}" ZIndex="10" />
     </Grid>
 </ContentView>

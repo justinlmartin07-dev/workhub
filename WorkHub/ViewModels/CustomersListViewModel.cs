@@ -77,15 +77,18 @@ public partial class CustomersListViewModel : BaseViewModel
     }
 
     // Projects the master list through the current search filter into the bound
-    // collection. rebuild swaps the collection wholesale (right for filter changes,
-    // where most rows differ); otherwise rows are merged in place so only actual
-    // changes re-render.
-    private void PublishList(bool rebuild)
+    // collection. rebuild swaps the collection wholesale; otherwise rows are merged
+    // in place so only actual changes re-render. visible may be pre-computed off
+    // the main thread by the search debounce path.
+    private void PublishList(bool rebuild, IReadOnlyList<CustomerResponse>? visible = null)
     {
-        var query = SearchText.Trim();
-        var visible = query.Length == 0
-            ? _allCustomers
-            : _allCustomers.Where(c => MatchesSearch(c, query)).ToList();
+        if (visible == null)
+        {
+            var query = SearchText.Trim();
+            visible = query.Length == 0
+                ? _allCustomers
+                : _allCustomers.Where(c => MatchesSearch(c, query)).ToList();
+        }
 
         if (rebuild || Customers.Count == 0 || visible.Count == 0)
         {
@@ -152,8 +155,26 @@ public partial class CustomersListViewModel : BaseViewModel
         return false;
     }
 
-    // Search filters the in-memory list — instant, no debounce, no network.
-    partial void OnSearchTextChanged(string value) => PublishList(rebuild: true);
+    private CancellationTokenSource? _searchCts;
+
+    partial void OnSearchTextChanged(string value)
+    {
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        _ = DebounceSearchAsync(_searchCts.Token);
+    }
+
+    private async Task DebounceSearchAsync(CancellationToken ct)
+    {
+        try { await Task.Delay(200, ct); }
+        catch (OperationCanceledException) { return; }
+        var query = SearchText.Trim();
+        var snapshot = _allCustomers;
+        var visible = await Task.Run(() =>
+            query.Length == 0 ? snapshot : snapshot.Where(c => MatchesSearch(c, query)).ToList(), ct);
+        if (ct.IsCancellationRequested) return;
+        PublishList(rebuild: false, visible);
+    }
 
     [RelayCommand]
     private void Search() => PublishList(rebuild: true);
