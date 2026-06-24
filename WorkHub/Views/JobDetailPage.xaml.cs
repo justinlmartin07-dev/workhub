@@ -24,6 +24,16 @@ public partial class JobDetailPage : ContentPage
             PartsPanel.WidthRequest = Math.Min(360, width - 32);
     }
 
+    protected override bool OnBackButtonPressed()
+    {
+        if (BindingContext is JobDetailViewModel vm && vm.IsPartsPanelOpen)
+        {
+            vm.ClosePartsPanelCommand.Execute(null);
+            return true;
+        }
+        return base.OnBackButtonPressed();
+    }
+
     private void OnNoteEditRequested(object? sender, EventArgs e)
     {
         NoteEditor.Focus();
