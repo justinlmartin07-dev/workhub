@@ -6,8 +6,11 @@ public partial class OrderDetailPage : ContentPage
 {
     private readonly OrderDetailViewModel _viewModel;
 
+    public bool IsNarrowLayout { get; }
+
     public OrderDetailPage(OrderDetailViewModel viewModel)
     {
+        IsNarrowLayout = !(MainLayout.Current?.IsWideLayout ?? false);
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;

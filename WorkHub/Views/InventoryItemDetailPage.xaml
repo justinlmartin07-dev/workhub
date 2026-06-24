@@ -6,13 +6,15 @@
              xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.InventoryItemDetailPage"
              x:DataType="vm:InventoryItemDetailViewModel"
+             x:Name="thisPage"
              Shell.NavBarIsVisible="False"
              Title="{Binding PageTitle}">
 
     <ScrollView>
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="-8,0,0,0">
-                <controls:BackButton Command="{Binding CancelCommand}" />
+                <controls:BackButton Command="{Binding CancelCommand}"
+                                     IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
                 <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
             </Grid>
             <Entry Placeholder="Name *" Text="{Binding Name}" />
