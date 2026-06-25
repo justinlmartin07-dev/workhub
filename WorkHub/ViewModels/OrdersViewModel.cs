@@ -14,6 +14,7 @@ public partial class OrdersViewModel : BaseViewModel
 
     private readonly ApiService _apiService;
     private readonly ListCacheService _listCache;
+    private readonly AuthService _authService;
 
     // Full dataset; Orders below is the (possibly search-filtered) view of it.
     private List<OrderLineResponse> _allOrders = new();
@@ -30,16 +31,35 @@ public partial class OrdersViewModel : BaseViewModel
     [ObservableProperty]
     private OrderLineResponse? _selectedOrder;
 
-    public OrdersViewModel(ApiService apiService, ListCacheService listCache)
+    public string UserName => _authService.CurrentUser?.Name ?? "";
+    public string UserInitials
+    {
+        get
+        {
+            var parts = UserName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length switch { 0 => "?", 1 => parts[0][..1].ToUpper(), _ => $"{parts[0][0]}{parts[^1][0]}".ToUpper() };
+        }
+    }
+    [ObservableProperty]
+    private string? _userPhotoUrl;
+
+    [RelayCommand]
+    private async Task GoToProfileAsync() => await Shell.Current.GoToAsync("profile");
+
+    public OrdersViewModel(ApiService apiService, ListCacheService listCache, AuthService authService)
     {
         _apiService = apiService;
         _listCache = listCache;
+        _authService = authService;
+        _userPhotoUrl = authService.CurrentUser?.ProfilePhotoUrl;
 
         // Adding/removing to-order parts (or job changes) needs a fresh list.
         WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
         {
             if (m.Value is "orders" or "job")
                 MainThread.BeginInvokeOnMainThread(() => LoadOrdersCommand.Execute(null));
+            else if (m.Value == "user_photo")
+                MainThread.BeginInvokeOnMainThread(() => UserPhotoUrl = _authService.CurrentUser?.ProfilePhotoUrl);
         });
 
         // Marking a single part ordered updates just that row — no network reload.

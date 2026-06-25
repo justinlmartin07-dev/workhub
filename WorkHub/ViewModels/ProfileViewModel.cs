@@ -38,7 +38,10 @@ public partial class ProfileViewModel : BaseViewModel
         {
             Profile = await _apiService.GetProfileAsync();
             if (Profile != null)
+            {
                 Name = Profile.Name;
+                _authService.UpdateCurrentUserPhoto(Profile.ProfilePhotoUrl);
+            }
         });
     }
 

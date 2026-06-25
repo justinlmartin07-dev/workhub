@@ -9,7 +9,13 @@
 
     <Grid RowDefinitions="Auto,Auto,*">
         <!-- Header -->
-        <Label Grid.Row="0" Text="Jobs" FontSize="20" FontAttributes="Bold" Margin="16,12,16,8" />
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="8,8,16,4">
+            <controls:UserAvatarView Grid.Column="0"
+                UserName="{Binding UserName}" PhotoUrl="{Binding UserPhotoUrl}"
+                Command="{Binding GoToProfileCommand}" VerticalOptions="Center" />
+            <Label Grid.Column="1" Text="Jobs" FontSize="20" FontAttributes="Bold"
+                   Margin="8,0,0,0" VerticalOptions="Center" />
+        </Grid>
 
         <SearchBar Grid.Row="1" Placeholder="Search jobs..." Text="{Binding SearchText}"
                    SearchCommand="{Binding SearchCommand}" Margin="8,0,8,0" />

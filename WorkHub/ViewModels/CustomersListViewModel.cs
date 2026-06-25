@@ -14,6 +14,7 @@ public partial class CustomersListViewModel : BaseViewModel
 
     private readonly ApiService _apiService;
     private readonly ListCacheService _listCache;
+    private readonly AuthService _authService;
 
     // Full dataset; Customers below is the (possibly search-filtered) view of it.
     private List<CustomerResponse> _allCustomers = new();
@@ -32,10 +33,27 @@ public partial class CustomersListViewModel : BaseViewModel
 
     public event Action<CustomerResponse>? ScrollToRequested;
 
-    public CustomersListViewModel(ApiService apiService, ListCacheService listCache)
+    public string UserName => _authService.CurrentUser?.Name ?? "";
+    public string UserInitials
+    {
+        get
+        {
+            var parts = UserName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length switch { 0 => "?", 1 => parts[0][..1].ToUpper(), _ => $"{parts[0][0]}{parts[^1][0]}".ToUpper() };
+        }
+    }
+    [ObservableProperty]
+    private string? _userPhotoUrl;
+
+    [RelayCommand]
+    private async Task GoToProfileAsync() => await Shell.Current.GoToAsync("profile");
+
+    public CustomersListViewModel(ApiService apiService, ListCacheService listCache, AuthService authService)
     {
         _apiService = apiService;
         _listCache = listCache;
+        _authService = authService;
+        _userPhotoUrl = authService.CurrentUser?.ProfilePhotoUrl;
 
         WeakReferenceMessenger.Default.Register<SelectListItemMessage>(this, (r, m) =>
         {
@@ -48,6 +66,8 @@ public partial class CustomersListViewModel : BaseViewModel
         {
             if (m.Value == "customer")
                 MainThread.BeginInvokeOnMainThread(() => LoadCustomersCommand.Execute(null));
+            else if (m.Value == "user_photo")
+                MainThread.BeginInvokeOnMainThread(() => UserPhotoUrl = _authService.CurrentUser?.ProfilePhotoUrl);
         });
     }
 

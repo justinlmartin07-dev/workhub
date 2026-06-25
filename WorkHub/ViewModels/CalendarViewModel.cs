@@ -11,6 +11,7 @@ namespace WorkHub.ViewModels;
 public partial class CalendarViewModel : BaseViewModel
 {
     private readonly ApiService _apiService;
+    private readonly AuthService _authService;
 
     [ObservableProperty]
     private ObservableCollection<CalendarEventResponse> _events = new();
@@ -30,15 +31,34 @@ public partial class CalendarViewModel : BaseViewModel
     private readonly ListCacheService _listCache;
     private DateTime? _loadedMonth;
 
-    public CalendarViewModel(ApiService apiService, ListCacheService listCache)
+    public string UserName => _authService.CurrentUser?.Name ?? "";
+    public string UserInitials
+    {
+        get
+        {
+            var parts = UserName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length switch { 0 => "?", 1 => parts[0][..1].ToUpper(), _ => $"{parts[0][0]}{parts[^1][0]}".ToUpper() };
+        }
+    }
+    [ObservableProperty]
+    private string? _userPhotoUrl;
+
+    [RelayCommand]
+    private async Task GoToProfileAsync() => await Shell.Current.GoToAsync("profile");
+
+    public CalendarViewModel(ApiService apiService, ListCacheService listCache, AuthService authService)
     {
         _apiService = apiService;
         _listCache = listCache;
+        _authService = authService;
+        _userPhotoUrl = authService.CurrentUser?.ProfilePhotoUrl;
 
         WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
         {
             if (m.Value == "event")
                 MainThread.BeginInvokeOnMainThread(() => LoadEventsCommand.Execute(null));
+            else if (m.Value == "user_photo")
+                MainThread.BeginInvokeOnMainThread(() => UserPhotoUrl = _authService.CurrentUser?.ProfilePhotoUrl);
         });
     }
 

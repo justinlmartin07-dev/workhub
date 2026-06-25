@@ -85,8 +85,8 @@ public static class MauiProgram
 
 					// Border on focus
 					var borderColor = isDark
-						? Windows.UI.Color.FromArgb(255, 45, 212, 191)  // PrimaryDark
-						: Windows.UI.Color.FromArgb(255, 20, 184, 166); // Primary
+						? Windows.UI.Color.FromArgb(255, 74, 139, 208)  // PrimaryDark #4A8BD0
+						: Windows.UI.Color.FromArgb(255, 14, 74, 137);  // Primary #0E4A89
 					var borderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(borderColor);
 					native.Resources["TextControlBorderBrushFocused"] = borderBrush;
 					native.Resources["TextControlBorderThemeThicknessFocused"] = new Microsoft.UI.Xaml.Thickness(2);
@@ -124,8 +124,8 @@ public static class MauiProgram
 					native.Resources["TextControlBackgroundFocused"] = bgBrush;
 
 					var borderColor = isDark
-						? Windows.UI.Color.FromArgb(255, 45, 212, 191)
-						: Windows.UI.Color.FromArgb(255, 20, 184, 166);
+						? Windows.UI.Color.FromArgb(255, 74, 139, 208)  // PrimaryDark #4A8BD0
+						: Windows.UI.Color.FromArgb(255, 14, 74, 137);  // Primary #0E4A89
 					native.Resources["TextControlBorderBrushFocused"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(borderColor);
 					native.Resources["TextControlBorderThemeThicknessFocused"] = new Microsoft.UI.Xaml.Thickness(2);
 

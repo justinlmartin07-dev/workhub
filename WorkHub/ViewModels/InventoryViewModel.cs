@@ -14,6 +14,7 @@ public partial class InventoryViewModel : BaseViewModel
 
     private readonly ApiService _apiService;
     private readonly ListCacheService _listCache;
+    private readonly AuthService _authService;
 
     // Full dataset; Items below is the (possibly search-filtered) view of it.
     private List<InventoryItemResponse> _allItems = new();
@@ -27,15 +28,34 @@ public partial class InventoryViewModel : BaseViewModel
     [ObservableProperty]
     private InventoryItemResponse? _selectedItem;
 
-    public InventoryViewModel(ApiService apiService, ListCacheService listCache)
+    public string UserName => _authService.CurrentUser?.Name ?? "";
+    public string UserInitials
+    {
+        get
+        {
+            var parts = UserName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length switch { 0 => "?", 1 => parts[0][..1].ToUpper(), _ => $"{parts[0][0]}{parts[^1][0]}".ToUpper() };
+        }
+    }
+    [ObservableProperty]
+    private string? _userPhotoUrl;
+
+    [RelayCommand]
+    private async Task GoToProfileAsync() => await Shell.Current.GoToAsync("profile");
+
+    public InventoryViewModel(ApiService apiService, ListCacheService listCache, AuthService authService)
     {
         _apiService = apiService;
         _listCache = listCache;
+        _authService = authService;
+        _userPhotoUrl = authService.CurrentUser?.ProfilePhotoUrl;
 
         WeakReferenceMessenger.Default.Register<DataChangedMessage>(this, (r, m) =>
         {
             if (m.Value == "inventory")
                 MainThread.BeginInvokeOnMainThread(() => LoadItemsCommand.Execute(null));
+            else if (m.Value == "user_photo")
+                MainThread.BeginInvokeOnMainThread(() => UserPhotoUrl = _authService.CurrentUser?.ProfilePhotoUrl);
         });
     }
 

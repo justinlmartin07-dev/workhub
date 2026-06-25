@@ -15,42 +15,49 @@
         </Grid.GestureRecognizers>
 
         <!-- Month Navigation -->
-        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center"
-                               Spacing="4" Padding="16,8">
-            <Border StrokeThickness="0" BackgroundColor="Transparent"
-                    WidthRequest="40" HeightRequest="40"
-                    StrokeShape="RoundRectangle 20" controls:TapFeedback.Enable="True">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding PreviousMonthCommand}" />
-                </Border.GestureRecognizers>
-                <shapes:Path Data="M 15 18 L 9 12 L 15 6"
-                             Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                             StrokeThickness="2"
-                             StrokeLineCap="Round"
-                             StrokeLineJoin="Round"
-                             Aspect="Uniform"
-                             WidthRequest="16.5" HeightRequest="16.5"
-                             HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Label Text="{Binding MonthYearLabel}"
-                   FontSize="18" FontFamily="OpenSansSemibold"
-                   VerticalTextAlignment="Center" />
-            <Border StrokeThickness="0" BackgroundColor="Transparent"
-                    WidthRequest="40" HeightRequest="40"
-                    StrokeShape="RoundRectangle 20" controls:TapFeedback.Enable="True">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NextMonthCommand}" />
-                </Border.GestureRecognizers>
-                <shapes:Path Data="M 9 18 L 15 12 L 9 6"
-                             Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                             StrokeThickness="2"
-                             StrokeLineCap="Round"
-                             StrokeLineJoin="Round"
-                             Aspect="Uniform"
-                             WidthRequest="16.5" HeightRequest="16.5"
-                             HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-        </HorizontalStackLayout>
+        <Grid ColumnDefinitions="Auto,*,Auto" Padding="8,4">
+            <controls:UserAvatarView Grid.Column="0"
+                UserName="{Binding UserName}" PhotoUrl="{Binding UserPhotoUrl}"
+                Command="{Binding GoToProfileCommand}" VerticalOptions="Center" />
+            <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center"
+                                   Spacing="4" Padding="8,4">
+                <Border StrokeThickness="0" BackgroundColor="Transparent"
+                        WidthRequest="40" HeightRequest="40"
+                        StrokeShape="RoundRectangle 20" controls:TapFeedback.Enable="True">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PreviousMonthCommand}" />
+                    </Border.GestureRecognizers>
+                    <shapes:Path Data="M 15 18 L 9 12 L 15 6"
+                                 Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                 StrokeThickness="2"
+                                 StrokeLineCap="Round"
+                                 StrokeLineJoin="Round"
+                                 Aspect="Uniform"
+                                 WidthRequest="16.5" HeightRequest="16.5"
+                                 HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Label Text="{Binding MonthYearLabel}"
+                       FontSize="18" FontFamily="OpenSansSemibold"
+                       VerticalTextAlignment="Center" />
+                <Border StrokeThickness="0" BackgroundColor="Transparent"
+                        WidthRequest="40" HeightRequest="40"
+                        StrokeShape="RoundRectangle 20" controls:TapFeedback.Enable="True">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding NextMonthCommand}" />
+                    </Border.GestureRecognizers>
+                    <shapes:Path Data="M 9 18 L 15 12 L 9 6"
+                                 Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                 StrokeThickness="2"
+                                 StrokeLineCap="Round"
+                                 StrokeLineJoin="Round"
+                                 Aspect="Uniform"
+                                 WidthRequest="16.5" HeightRequest="16.5"
+                                 HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+            </HorizontalStackLayout>
+            <!-- Col 2 mirrors avatar width to keep month nav centered -->
+            <BoxView Grid.Column="2" WidthRequest="36" BackgroundColor="Transparent" />
+        </Grid>
 
         <!-- Day-of-week headers -->
         <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*,*,*" Padding="4,0" HeightRequest="24">

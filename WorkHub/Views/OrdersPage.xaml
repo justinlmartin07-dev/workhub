@@ -9,16 +9,21 @@
 
     <Grid RowDefinitions="Auto,Auto,*">
         <!-- Header -->
-        <VerticalStackLayout Grid.Row="0" Padding="16,12,16,8" Spacing="2">
-            <Label Text="To Order" FontSize="20" FontAttributes="Bold" />
-            <HorizontalStackLayout Spacing="6">
-                <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                       FontAttributes="Bold" Text="{Binding OutstandingCount, StringFormat='{0} to order'}" />
-                <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" Text="•" />
-                <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
-                       Text="{Binding OrderedCount, StringFormat='{0} ordered'}" />
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="8,8,16,4">
+            <controls:UserAvatarView Grid.Column="0"
+                UserName="{Binding UserName}" PhotoUrl="{Binding UserPhotoUrl}"
+                Command="{Binding GoToProfileCommand}" VerticalOptions="Start" Margin="0,4,0,0" />
+            <VerticalStackLayout Grid.Column="1" Padding="8,0,0,0" Spacing="2">
+                <Label Text="To Order" FontSize="20" FontAttributes="Bold" />
+                <HorizontalStackLayout Spacing="6">
+                    <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                           FontAttributes="Bold" Text="{Binding OutstandingCount, StringFormat='{0} to order'}" />
+                    <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" Text="•" />
+                    <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                           Text="{Binding OrderedCount, StringFormat='{0} ordered'}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
 
         <SearchBar Grid.Row="1" Placeholder="Search orders..." Text="{Binding SearchText}"
                    SearchCommand="{Binding SearchCommand}" Margin="8,0,8,8" />

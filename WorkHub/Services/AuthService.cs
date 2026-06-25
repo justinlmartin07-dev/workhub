@@ -1,4 +1,6 @@
 using System.Net.Http.Json;
+using CommunityToolkit.Mvvm.Messaging;
+using WorkHub.Messages;
 using WorkHub.Models;
 
 namespace WorkHub.Services;
@@ -17,6 +19,7 @@ public class AuthService
     private const string UserIdKey = "user_id";
     private const string UserNameKey = "user_name";
     private const string UserEmailKey = "user_email";
+    private const string UserPhotoUrlKey = "user_photo_url";
 
     public UserBriefResponse? CurrentUser => _currentUser;
     public bool IsAuthenticated => !string.IsNullOrEmpty(_accessToken) && _expiresAt > DateTime.UtcNow;
@@ -44,13 +47,16 @@ public class AuthService
             var userName = await SecureStorage.GetAsync(UserNameKey);
             var userEmail = await SecureStorage.GetAsync(UserEmailKey);
 
+            var userPhotoUrl = await SecureStorage.GetAsync(UserPhotoUrlKey);
+
             if (userId != null && userName != null && userEmail != null)
             {
                 _currentUser = new UserBriefResponse
                 {
                     Id = Guid.Parse(userId),
                     Name = userName,
-                    Email = userEmail
+                    Email = userEmail,
+                    ProfilePhotoUrl = string.IsNullOrEmpty(userPhotoUrl) ? null : userPhotoUrl
                 };
             }
 
@@ -178,6 +184,14 @@ public class AuthService
         }
     }
 
+    public void UpdateCurrentUserPhoto(string? photoUrl)
+    {
+        if (_currentUser != null)
+            _currentUser.ProfilePhotoUrl = photoUrl;
+        _ = SecureStorage.SetAsync(UserPhotoUrlKey, photoUrl ?? "");
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("user_photo"));
+    }
+
     private async Task SaveTokensAsync()
     {
         await SecureStorage.SetAsync(AccessTokenKey, _accessToken ?? "");
@@ -188,6 +202,7 @@ public class AuthService
             await SecureStorage.SetAsync(UserIdKey, _currentUser.Id.ToString());
             await SecureStorage.SetAsync(UserNameKey, _currentUser.Name);
             await SecureStorage.SetAsync(UserEmailKey, _currentUser.Email);
+            await SecureStorage.SetAsync(UserPhotoUrlKey, _currentUser.ProfilePhotoUrl ?? "");
         }
     }
 }
