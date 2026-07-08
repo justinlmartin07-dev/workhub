@@ -76,6 +76,8 @@
 
                         <!-- Primary status action -->
                         <Button Text="Mark as Complete"
+                                ImageSource="select_check_box_light.png"
+                                ContentLayout="Left,8"
                                 Command="{Binding MarkAsCompleteCommand}"
                                 IsVisible="{Binding CanComplete}" />
                         <Button Text="Reopen Job"

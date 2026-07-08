@@ -122,6 +122,8 @@
                                         HorizontalOptions="Fill" />
                                 <Button x:Name="LogoutButton" Text="Logout"
                                         Command="{Binding LogoutCommand}"
+                                        ImageSource="logout_light.png"
+                                        ContentLayout="Left,8"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
                                         TextColor="White"
                                         HorizontalOptions="Fill" />
