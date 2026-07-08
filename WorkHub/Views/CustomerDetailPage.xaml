@@ -143,6 +143,10 @@
                                 <Button Grid.Column="1" Text="Pick" Style="{StaticResource SecondaryButton}" Command="{Binding PickPhotoCommand}" />
                                 <Button Grid.Column="2" Text="Camera" Style="{StaticResource SecondaryButton}" Command="{Binding TakePhotoCommand}" />
                             </Grid>
+                            <Label Text="{Binding UploadStatus}"
+                                   IsVisible="{Binding UploadStatus, Converter={StaticResource StringNotEmptyConverter}}"
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                             <CollectionView ItemsSource="{Binding Photos}" HeightRequest="120"
                                             ItemsLayout="HorizontalList">
                                 <CollectionView.ItemTemplate>

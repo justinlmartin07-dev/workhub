@@ -39,6 +39,9 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
     [ObservableProperty]
     private int _locationPhotoCount;
 
+    [ObservableProperty]
+    private string _uploadStatus = string.Empty;
+
     public List<CustomerContactResponse> PhoneContacts =>
         Customer?.Contacts?.Where(c => c.Type == "phone").ToList() ?? [];
 
@@ -263,8 +266,10 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
     private async Task PickPhotoAsync()
     {
         if (Customer == null) return;
-        var photo = await _photoService.PickAndUploadCustomerPhotoAsync(Customer.Id);
-        if (photo != null) await LoadCustomerAsync();
+        var uploaded = await _photoService.PickAndUploadMultipleCustomerPhotosAsync(Customer.Id, (current, total) =>
+            UploadStatus = total > 1 ? $"Uploading {current} of {total}..." : "Uploading...");
+        UploadStatus = string.Empty;
+        if (uploaded.Count > 0) await LoadCustomerAsync();
     }
 
     [RelayCommand]

@@ -34,6 +34,18 @@ public class PhotoService
         return await CompressAndUploadAsync(photo, (stream, name) => _apiService.UploadJobPhotoAsync(jobId, stream, name));
     }
 
+    public async Task<List<Models.PhotoResponse>> PickAndUploadMultipleJobPhotosAsync(Guid jobId, Action<int, int>? onProgress = null)
+    {
+        var photos = await PickMultiplePhotosSafeAsync();
+        return await UploadMultipleAsync(photos, (stream, name) => _apiService.UploadJobPhotoAsync(jobId, stream, name), onProgress);
+    }
+
+    public async Task<List<Models.PhotoResponse>> PickAndUploadMultipleCustomerPhotosAsync(Guid customerId, Action<int, int>? onProgress = null)
+    {
+        var photos = await PickMultiplePhotosSafeAsync();
+        return await UploadMultipleAsync(photos, (stream, name) => _apiService.UploadCustomerPhotoAsync(customerId, stream, name), onProgress);
+    }
+
     public async Task<Models.PhotoResponse?> CaptureAndUploadJobPhotoAsync(Guid jobId)
     {
         var photo = await CapturePhotoSafeAsync();
@@ -77,6 +89,123 @@ public class PhotoService
             await Shell.Current.DisplayAlert("Photos", "Photo access was denied. Enable it in Settings > Apps > WorkHub > Permissions.", "OK");
             return null;
         }
+    }
+
+#if ANDROID
+    internal const int MultiPickRequestCode = 9876;
+    private static TaskCompletionSource<IReadOnlyList<Android.Net.Uri>>? _multiPickTcs;
+
+    // Called by MainActivity.OnActivityResult.
+    internal static void HandleMultiPickResult(Android.App.Result resultCode, Android.Content.Intent? data)
+    {
+        var tcs = System.Threading.Interlocked.Exchange(ref _multiPickTcs, null);
+        if (tcs == null) return;
+
+        if (resultCode != Android.App.Result.Ok || data == null)
+        {
+            tcs.TrySetResult([]);
+            return;
+        }
+
+        var uris = new List<Android.Net.Uri>();
+        if (data.ClipData != null)
+        {
+            for (int i = 0; i < data.ClipData.ItemCount; i++)
+            {
+                var uri = data.ClipData.GetItemAt(i)?.Uri;
+                if (uri != null) uris.Add(uri);
+            }
+        }
+        else if (data.Data != null)
+        {
+            uris.Add(data.Data);
+        }
+        tcs.TrySetResult(uris);
+    }
+
+    private static async Task<IReadOnlyList<FileResult>> PickMultiplePhotosSafeAsync()
+    {
+        try
+        {
+            _multiPickTcs = new TaskCompletionSource<IReadOnlyList<Android.Net.Uri>>();
+
+            Android.Content.Intent intent;
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Tiramisu)
+            {
+                // API 33+: use the dedicated Android Photo Picker (same UI as MediaPicker)
+                intent = new Android.Content.Intent("android.provider.action.PICK_IMAGES");
+                intent.PutExtra("android.provider.extra.PICK_IMAGES_MAX", 50);
+            }
+            else
+            {
+                // Pre-API 33: ACTION_GET_CONTENT with multi-select opens Google Photos / gallery
+                intent = new Android.Content.Intent(Android.Content.Intent.ActionGetContent);
+                intent.SetType("image/*");
+                intent.AddCategory(Android.Content.Intent.CategoryOpenable);
+                intent.PutExtra(Android.Content.Intent.ExtraAllowMultiple, true);
+            }
+
+            Platform.CurrentActivity!.StartActivityForResult(intent, MultiPickRequestCode);
+            var uris = await _multiPickTcs.Task;
+
+            // Content URIs can't be opened via File.OpenRead — copy each to a temp file
+            // so the rest of the compression pipeline works with a regular file path.
+            var results = new List<FileResult>();
+            var resolver = Platform.CurrentActivity!.ContentResolver!;
+            foreach (var uri in uris)
+            {
+                var tempPath = Path.Combine(FileSystem.CacheDirectory, $"pick_{Guid.NewGuid():N}.jpg");
+                using var input = resolver.OpenInputStream(uri)!;
+                using var output = File.Create(tempPath);
+                await input.CopyToAsync(output);
+                results.Add(new FileResult(tempPath));
+            }
+            return results;
+        }
+        catch (PermissionException)
+        {
+            _multiPickTcs = null;
+            await Shell.Current.DisplayAlert("Photos", "Photo access was denied. Enable it in Settings > Apps > WorkHub > Permissions.", "OK");
+            return [];
+        }
+    }
+#else
+    private static async Task<IReadOnlyList<FileResult>> PickMultiplePhotosSafeAsync()
+    {
+        try
+        {
+            var options = new PickOptions
+            {
+                PickerTitle = "Select Photos",
+                FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.WinUI, [".jpg", ".jpeg", ".png", ".webp"] },
+                })
+            };
+            var results = await FilePicker.PickMultipleAsync(options);
+            return results?.ToList() ?? [];
+        }
+        catch (PermissionException)
+        {
+            await Shell.Current.DisplayAlert("Photos", "Photo access was denied. Enable it in Settings > Apps > WorkHub > Permissions.", "OK");
+            return [];
+        }
+    }
+#endif
+
+    private async Task<List<Models.PhotoResponse>> UploadMultipleAsync(
+        IReadOnlyList<FileResult> photos,
+        Func<Stream, string, Task<Models.PhotoResponse?>> uploadFunc,
+        Action<int, int>? onProgress)
+    {
+        var results = new List<Models.PhotoResponse>();
+        for (int i = 0; i < photos.Count; i++)
+        {
+            onProgress?.Invoke(i + 1, photos.Count);
+            var result = await CompressAndUploadAsync(photos[i], uploadFunc);
+            if (result != null) results.Add(result);
+        }
+        return results;
     }
 
     private async Task<Models.PhotoResponse?> CompressAndUploadAsync(FileResult photo, Func<Stream, string, Task<Models.PhotoResponse?>> uploadFunc)

@@ -50,6 +50,9 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private int _locationPhotoCount;
 
     [ObservableProperty]
+    private string _uploadStatus = string.Empty;
+
+    [ObservableProperty]
     private bool _isPartsPanelOpen;
 
     [ObservableProperty]
@@ -420,8 +423,10 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     {
         if (Job == null) return;
         if (!await EnsureJobReopenedAsync()) return;
-        var photo = await _photoService.PickAndUploadJobPhotoAsync(Job.Id);
-        if (photo != null) await LoadJobAsync();
+        var uploaded = await _photoService.PickAndUploadMultipleJobPhotosAsync(Job.Id, (current, total) =>
+            UploadStatus = total > 1 ? $"Uploading {current} of {total}..." : "Uploading...");
+        UploadStatus = string.Empty;
+        if (uploaded.Count > 0) await LoadJobAsync();
     }
 
     [RelayCommand]

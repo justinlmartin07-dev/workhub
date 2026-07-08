@@ -1,6 +1,8 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using WorkHub.Services;
 
 namespace WorkHub;
 
@@ -13,5 +15,12 @@ public class MainActivity : MauiAppCompatActivity
         // MauiAppCompatActivity swaps the theme during base.OnCreate; layer the
         // override on top of whatever it installed.
         Theme?.ApplyStyle(Resource.Style.WorkHubThemeOverlay, force: true);
+    }
+
+    protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
+    {
+        base.OnActivityResult(requestCode, resultCode, data);
+        if (requestCode == PhotoService.MultiPickRequestCode)
+            PhotoService.HandleMultiPickResult(resultCode, data);
     }
 }
