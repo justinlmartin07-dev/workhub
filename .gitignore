@@ -489,5 +489,9 @@ $RECYCLE.BIN/
 # App secrets
 appsettings.Development.json
 
+# Android release signing (keep local backups — losing the keystore breaks app updates)
+*.keystore
+signing.props
+
 # Claude Code local settings, plans, memory
 .claude/
