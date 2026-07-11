@@ -439,37 +439,51 @@ Deletes the refresh token record from the database. The access token will natura
 
 | Param | Type | Description |
 |---|---|---|
-| `q` | string | Search filter — matches against `name` via `ILIKE` |
+| `q` | string | Search filter — `ILIKE` match against customer `name`, `company_name`, contact `value`s, and contact person `name`/`phone`/`email` |
 | `page` | int | Page number (default 1) |
 | `pageSize` | int | Results per page (default 25, max 100) |
 
 **Request body for `POST /v1/customers`:**
 ```json
 {
-  "name": "Martin Residence",
-  "phone": "555-123-4567",
-  "email": "martin@example.com",
+  "name": "Ray Martin",
+  "companyName": "Martin Residence",
   "address": "48 Elm St, Minneapolis, MN 55401",
-  "notes": "Gate code: 4421"
+  "notes": "Gate code: 4421",
+  "contacts": [
+    { "type": "phone", "label": "Mobile", "value": "555-123-4567", "isPrimary": true },
+    { "type": "email", "label": "Work", "value": "martin@example.com", "isPrimary": true }
+  ],
+  "persons": [
+    { "name": "Bob Wilson", "role": "Site Super", "phone": "555-987-6543", "email": "bob@example.com" }
+  ]
 }
 ```
-Required: `name`. All other fields optional.
+Required: `name`. All other fields optional. `contacts` are typed phone/email method rows; `persons` are named people (only `name` required per person).
 
 **Request body for `PUT /v1/customers/{id}`:**
 Same shape as POST. All fields optional — only provided fields are updated. `normalized_address` is recomputed automatically if `address` is provided.
+
+The two contact collections have different update semantics:
+- **`contacts` — full replace.** All existing rows are deleted and the submitted list is inserted. Ids are not stable across saves.
+- **`persons` — upsert by id.** A row with an `id` matching an existing person updates it in place (id preserved — jobs may reference it as main contact). A row without an `id` (or with an unknown/foreign id) inserts a new person. Existing persons omitted from the list are deleted (any job referencing one gets its `main_contact_id` set to NULL by the database). The client always sends the full list on update; an empty list removes all persons.
 
 **Response for `GET /v1/customers/{id}`:**
 ```json
 {
   "id": "abc-123",
-  "name": "Martin Residence",
-  "phone": "555-123-4567",
-  "email": "martin@example.com",
+  "name": "Ray Martin",
+  "companyName": "Martin Residence",
   "address": "48 Elm St, Minneapolis, MN 55401",
   "notes": "Gate code: 4421",
-  "createdBy": "user-uuid",
   "createdAt": "2025-01-15T10:30:00Z",
   "updatedAt": "2025-02-01T14:00:00Z",
+  "contacts": [
+    { "id": "contact-uuid", "type": "phone", "label": "Mobile", "value": "555-123-4567", "isPrimary": true }
+  ],
+  "persons": [
+    { "id": "person-uuid", "name": "Bob Wilson", "role": "Site Super", "phone": "555-987-6543", "email": "bob@example.com" }
+  ],
   "photos": [
     { "id": "photo-uuid", "url": "https://presigned-r2-url...", "uploadedAt": "2025-01-20T09:00:00Z" }
   ],
@@ -478,6 +492,8 @@ Same shape as POST. All fields optional — only provided fields are updated. `n
   ]
 }
 ```
+
+The list endpoint (`GET /v1/customers`) includes `contacts` and `persons` on every item (they're small); `photos` and full `jobs` are detail-only.
 
 Photo `url` fields are presigned R2 URLs valid for 1 hour. The client should treat them as ephemeral and re-fetch if needed.
 
@@ -521,13 +537,14 @@ Photo `url` fields are presigned R2 URLs valid for 1 hour. The client should tre
   "title": "Panel Upgrade",
   "status": "Pending",
   "priority": "Normal",
-  "scopeNotes": "Replace main panel and add 20A circuits for new equipment"
+  "scopeNotes": "Replace main panel and add 20A circuits for new equipment",
+  "mainContactId": "person-uuid"
 }
 ```
-Required: `customerId`, `title`. `status` defaults to `Pending`, `priority` defaults to `Normal` if omitted.
+Required: `customerId`, `title`. `status` defaults to `Pending`, `priority` defaults to `Normal` if omitted. `mainContactId` (optional) must reference a `contact_persons` row belonging to the same customer — otherwise `400 { "error": "Main contact does not belong to this customer" }`.
 
 **Request body for `PUT /v1/jobs/{id}`:**
-Same shape as POST minus `customerId` (a job's customer cannot be reassigned). All fields optional — only provided fields are updated.
+Same shape as POST minus `customerId` (a job's customer cannot be reassigned). All fields optional — only provided fields are updated. `mainContactId` semantics on update: omitted/null = unchanged, the all-zeros GUID (`00000000-0000-0000-0000-000000000000`) = clear, any other value = set (validated against the job's customer, `400` on mismatch). The client always sends this field.
 
 **Response for `GET /v1/jobs/{id}`:**
 ```json
@@ -540,6 +557,8 @@ Same shape as POST minus `customerId` (a job's customer cannot be reassigned). A
   "status": "In Progress",
   "priority": "High",
   "scopeNotes": "Replace main panel...",
+  "mainContactId": "person-uuid",
+  "mainContact": { "id": "person-uuid", "name": "Bob Wilson", "role": "Site Super", "phone": "555-987-6543", "email": "bob@example.com" },
   "createdBy": "user-uuid",
   "createdAt": "2025-01-15T10:30:00Z",
   "updatedAt": "2025-02-01T14:00:00Z",

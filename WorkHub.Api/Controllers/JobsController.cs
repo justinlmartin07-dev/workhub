@@ -85,6 +85,7 @@ public class JobsController : ControllerBase
         var job = await _db.Jobs
             .Where(j => j.Id == id && j.DeletedAt == null)
             .Include(j => j.Customer)
+            .Include(j => j.MainContact)
             .Include(j => j.Photos.OrderByDescending(p => p.UploadedAt))
             .Include(j => j.Notes.Where(n => n.DeletedAt == null).OrderBy(n => n.CreatedAt))
                 .ThenInclude(n => n.CreatedByUser)
@@ -143,6 +144,8 @@ public class JobsController : ControllerBase
             Priority = job.Priority,
             ScopeNotes = job.ScopeNotes,
             Address = job.Address,
+            MainContactId = job.MainContactId,
+            MainContact = MapContact(job.MainContact),
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
             Photos = job.Photos.Select(p => new PhotoResponse
@@ -174,10 +177,19 @@ public class JobsController : ControllerBase
         if (customer == null)
             return BadRequest(new ErrorResponse { Error = "Customer not found" });
 
+        ContactPerson? mainContact = null;
+        if (request.MainContactId is Guid mcId && mcId != Guid.Empty)
+        {
+            mainContact = await _db.ContactPersons.FirstOrDefaultAsync(p => p.Id == mcId);
+            if (mainContact == null || mainContact.CustomerId != request.CustomerId)
+                return BadRequest(new ErrorResponse { Error = "Main contact does not belong to this customer" });
+        }
+
         var job = new Job
         {
             Id = Guid.NewGuid(),
             CustomerId = request.CustomerId,
+            MainContactId = mainContact?.Id,
             Title = request.Title,
             Status = request.Status ?? "New",
             Priority = request.Priority ?? "Medium",
@@ -201,6 +213,8 @@ public class JobsController : ControllerBase
             Priority = job.Priority,
             ScopeNotes = job.ScopeNotes,
             Address = job.Address,
+            MainContactId = job.MainContactId,
+            MainContact = MapContact(mainContact),
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
         });
@@ -209,7 +223,10 @@ public class JobsController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateJobRequest request)
     {
-        var job = await _db.Jobs.Include(j => j.Customer).FirstOrDefaultAsync(j => j.Id == id && j.DeletedAt == null);
+        var job = await _db.Jobs
+            .Include(j => j.Customer)
+            .Include(j => j.MainContact)
+            .FirstOrDefaultAsync(j => j.Id == id && j.DeletedAt == null);
         if (job == null)
             return NotFound(new ErrorResponse { Error = "Job not found" });
 
@@ -218,6 +235,22 @@ public class JobsController : ControllerBase
         if (request.Priority != null) job.Priority = request.Priority;
         if (request.ScopeNotes != null) job.ScopeNotes = request.ScopeNotes;
         if (request.Address != null) job.Address = request.Address;
+        if (request.MainContactId.HasValue)
+        {
+            if (request.MainContactId.Value == Guid.Empty)
+            {
+                job.MainContactId = null;
+                job.MainContact = null;
+            }
+            else
+            {
+                var person = await _db.ContactPersons.FirstOrDefaultAsync(p => p.Id == request.MainContactId.Value);
+                if (person == null || person.CustomerId != job.CustomerId)
+                    return BadRequest(new ErrorResponse { Error = "Main contact does not belong to this customer" });
+                job.MainContactId = person.Id;
+                job.MainContact = person;
+            }
+        }
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -232,6 +265,8 @@ public class JobsController : ControllerBase
             Priority = job.Priority,
             ScopeNotes = job.ScopeNotes,
             Address = job.Address,
+            MainContactId = job.MainContactId,
+            MainContact = MapContact(job.MainContact),
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
         });
@@ -248,4 +283,10 @@ public class JobsController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    private static JobContactResponse? MapContact(ContactPerson? p) =>
+        p == null ? null : new JobContactResponse
+        {
+            Id = p.Id, Name = p.Name, Role = p.Role, Phone = p.Phone, Email = p.Email
+        };
 }

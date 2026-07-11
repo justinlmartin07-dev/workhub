@@ -35,7 +35,10 @@ public class CustomersController : ControllerBase
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(c => EF.Functions.ILike(c.Name, $"%{q}%")
                 || EF.Functions.ILike(c.CompanyName!, $"%{q}%")
-                || c.Contacts.Any(ct => EF.Functions.ILike(ct.Value, $"%{q}%")));
+                || c.Contacts.Any(ct => EF.Functions.ILike(ct.Value, $"%{q}%"))
+                || c.Persons.Any(p => EF.Functions.ILike(p.Name, $"%{q}%")
+                    || EF.Functions.ILike(p.Phone!, $"%{q}%")
+                    || EF.Functions.ILike(p.Email!, $"%{q}%")));
 
         var totalCount = await query.CountAsync();
         var items = await query
@@ -58,6 +61,10 @@ public class CustomersController : ControllerBase
                 {
                     Id = ct.Id, Type = ct.Type, Label = ct.Label, Value = ct.Value, IsPrimary = ct.IsPrimary
                 }).ToList(),
+                Persons = c.Persons.Select(p => new ContactPersonResponse
+                {
+                    Id = p.Id, Name = p.Name, Role = p.Role, Phone = p.Phone, Email = p.Email
+                }).ToList(),
                 Jobs = c.Jobs.Where(j => j.DeletedAt == null).OrderByDescending(j => j.CreatedAt).Take(1)
                     .Select(j => new JobBriefResponse { Id = j.Id, Title = j.Title, Status = j.Status, Priority = j.Priority }).ToList(),
             })
@@ -79,6 +86,7 @@ public class CustomersController : ControllerBase
         var customer = await _db.Customers
             .Where(c => c.Id == id && c.DeletedAt == null)
             .Include(c => c.Contacts)
+            .Include(c => c.Persons)
             .Include(c => c.Photos.OrderByDescending(p => p.UploadedAt))
             .Include(c => c.Jobs.Where(j => j.DeletedAt == null).OrderByDescending(j => j.CreatedAt))
             .FirstOrDefaultAsync();
@@ -119,6 +127,20 @@ public class CustomersController : ControllerBase
             }).ToList();
         }
 
+        if (request.Persons?.Count > 0)
+        {
+            customer.Persons = request.Persons.Select(p => new ContactPerson
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = customer.Id,
+                Name = p.Name.Trim(),
+                Role = string.IsNullOrWhiteSpace(p.Role) ? null : p.Role.Trim(),
+                Phone = string.IsNullOrWhiteSpace(p.Phone) ? null : p.Phone.Trim(),
+                Email = string.IsNullOrWhiteSpace(p.Email) ? null : p.Email.Trim(),
+                CreatedAt = DateTime.UtcNow,
+            }).ToList();
+        }
+
         _db.Customers.Add(customer);
         await _db.SaveChangesAsync();
 
@@ -130,6 +152,7 @@ public class CustomersController : ControllerBase
     {
         var customer = await _db.Customers
             .Include(c => c.Contacts)
+            .Include(c => c.Persons)
             .FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null);
         if (customer == null)
             return NotFound(new ErrorResponse { Error = "Customer not found" });
@@ -159,6 +182,48 @@ public class CustomersController : ControllerBase
                     IsPrimary = c.IsPrimary,
                     CreatedAt = DateTime.UtcNow,
                 });
+            }
+        }
+
+        // Persons are upserted (not replaced like contacts) because jobs.main_contact_id
+        // references their ids — a matched row keeps its id across saves.
+        if (request.Persons != null)
+        {
+            var existingById = customer.Persons.ToDictionary(p => p.Id);
+            var seen = new HashSet<Guid>();
+            foreach (var p in request.Persons)
+            {
+                if (p.Id.HasValue && existingById.TryGetValue(p.Id.Value, out var existing))
+                {
+                    existing.Name = p.Name.Trim();
+                    existing.Role = string.IsNullOrWhiteSpace(p.Role) ? null : p.Role.Trim();
+                    existing.Phone = string.IsNullOrWhiteSpace(p.Phone) ? null : p.Phone.Trim();
+                    existing.Email = string.IsNullOrWhiteSpace(p.Email) ? null : p.Email.Trim();
+                    seen.Add(existing.Id);
+                }
+                else
+                {
+                    // Unknown or foreign id: never adopt it — mint a new row.
+                    // Explicit Add: a set Guid key on a nav-discovered entity would
+                    // otherwise be tracked as Modified (UPDATE on a missing row).
+                    var person = new ContactPerson
+                    {
+                        Id = Guid.NewGuid(),
+                        CustomerId = customer.Id,
+                        Name = p.Name.Trim(),
+                        Role = string.IsNullOrWhiteSpace(p.Role) ? null : p.Role.Trim(),
+                        Phone = string.IsNullOrWhiteSpace(p.Phone) ? null : p.Phone.Trim(),
+                        Email = string.IsNullOrWhiteSpace(p.Email) ? null : p.Email.Trim(),
+                        CreatedAt = DateTime.UtcNow,
+                    };
+                    // Navigation fixup places it in customer.Persons for the response
+                    _db.ContactPersons.Add(person);
+                }
+            }
+            foreach (var removed in existingById.Values.Where(x => !seen.Contains(x.Id)).ToList())
+            {
+                customer.Persons.Remove(removed);
+                _db.ContactPersons.Remove(removed); // DB ON DELETE SET NULL clears jobs.main_contact_id
             }
         }
 
@@ -216,6 +281,10 @@ public class CustomersController : ControllerBase
             Contacts = customer.Contacts.Select(c => new CustomerContactResponse
             {
                 Id = c.Id, Type = c.Type, Label = c.Label, Value = c.Value, IsPrimary = c.IsPrimary
+            }).ToList(),
+            Persons = customer.Persons?.Select(p => new ContactPersonResponse
+            {
+                Id = p.Id, Name = p.Name, Role = p.Role, Phone = p.Phone, Email = p.Email
             }).ToList(),
             Photos = customer.Photos?.Select(p => new PhotoResponse
             {

@@ -5,6 +5,8 @@ public class Job
     public Guid Id { get; set; }
     public Guid CustomerId { get; set; }
     public Customer Customer { get; set; } = null!;
+    public Guid? MainContactId { get; set; }
+    public ContactPerson? MainContact { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Status { get; set; } = "New";
     public string Priority { get; set; } = "Medium";

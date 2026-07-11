@@ -11,6 +11,7 @@ public class WorkHubDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerContact> CustomerContacts => Set<CustomerContact>();
+    public DbSet<ContactPerson> ContactPersons => Set<ContactPerson>();
     public DbSet<CustomerPhoto> CustomerPhotos => Set<CustomerPhoto>();
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<JobNote> JobNotes => Set<JobNote>();
@@ -91,6 +92,22 @@ public class WorkHubDbContext : DbContext
             e.HasIndex(x => x.CustomerId).HasDatabaseName("idx_customer_contacts_customer_id");
         });
 
+        // Contact Persons
+        modelBuilder.Entity<ContactPerson>(e =>
+        {
+            e.ToTable("contact_persons");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.CustomerId).HasColumnName("customer_id");
+            e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+            e.Property(x => x.Role).HasColumnName("role").HasMaxLength(100);
+            e.Property(x => x.Phone).HasColumnName("phone").HasMaxLength(50);
+            e.Property(x => x.Email).HasColumnName("email").HasMaxLength(200);
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.HasOne(x => x.Customer).WithMany(c => c.Persons).HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => x.CustomerId).HasDatabaseName("idx_contact_persons_customer_id");
+        });
+
         // Customer Photos
         modelBuilder.Entity<CustomerPhoto>(e =>
         {
@@ -114,6 +131,7 @@ public class WorkHubDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasColumnName("id");
             e.Property(x => x.CustomerId).HasColumnName("customer_id");
+            e.Property(x => x.MainContactId).HasColumnName("main_contact_id");
             e.Property(x => x.Title).HasColumnName("title").HasMaxLength(200).IsRequired();
             e.Property(x => x.Status).HasColumnName("status").HasMaxLength(50).HasDefaultValue("New");
             e.Property(x => x.Priority).HasColumnName("priority").HasMaxLength(50).HasDefaultValue("Medium");
@@ -123,9 +141,11 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             e.Property(x => x.DeletedAt).HasColumnName("deleted_at");
             e.HasOne(x => x.Customer).WithMany(c => c.Jobs).HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.MainContact).WithMany().HasForeignKey(x => x.MainContactId).OnDelete(DeleteBehavior.SetNull);
             e.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedBy).OnDelete(DeleteBehavior.Restrict);
             e.HasIndex(x => x.DeletedAt).HasFilter("deleted_at IS NULL").HasDatabaseName("idx_jobs_deleted_at");
             e.HasIndex(x => x.CustomerId).HasDatabaseName("idx_jobs_customer_id");
+            e.HasIndex(x => x.MainContactId).HasDatabaseName("idx_jobs_main_contact_id");
             e.HasIndex(x => x.Status).HasDatabaseName("idx_jobs_status");
         });
 

@@ -50,6 +50,8 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
             parts.Add($"phone:{p.Label}:{p.Value}:{p.IsPrimary}");
         foreach (var e in EmailEntries)
             parts.Add($"email:{e.Label}:{e.Value}:{e.IsPrimary}");
+        foreach (var p in PersonEntries)
+            parts.Add($"person:{p.Id}:{p.Name}:{p.Role}:{p.Phone}:{p.Email}");
         return string.Join("|", parts);
     }
 
@@ -85,6 +87,7 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
 
     public ObservableCollection<ContactEntry> PhoneEntries { get; } = [];
     public ObservableCollection<ContactEntry> EmailEntries { get; } = [];
+    public ObservableCollection<PersonEntry> PersonEntries { get; } = [];
 
     [ObservableProperty]
     private ObservableCollection<AddressSuggestionResponse> _addressSuggestions = new();
@@ -167,6 +170,17 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
                 if (EmailEntries.Count == 0)
                     EmailEntries.Add(new ContactEntry { Label = "Work" });
 
+                PersonEntries.Clear();
+                foreach (var p in customer.Persons ?? [])
+                    PersonEntries.Add(new PersonEntry
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Role = p.Role ?? string.Empty,
+                        Phone = p.Phone ?? string.Empty,
+                        Email = p.Email ?? string.Empty,
+                    });
+
                 SnapshotOriginal();
             }
         });
@@ -209,6 +223,18 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
     }
 
     [RelayCommand]
+    private void AddPerson()
+    {
+        PersonEntries.Add(new PersonEntry());
+    }
+
+    [RelayCommand]
+    private void RemovePerson(PersonEntry entry)
+    {
+        PersonEntries.Remove(entry);
+    }
+
+    [RelayCommand]
     private async Task SaveAsync()
     {
         if (string.IsNullOrWhiteSpace(Name))
@@ -221,6 +247,7 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
         await LoadAsync(async () =>
         {
             var contacts = BuildContacts();
+            var persons = BuildPersons();
 
             if (IsNew)
             {
@@ -231,6 +258,7 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
                     Address = BuildAddress(),
                     Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
                     Contacts = contacts.Count > 0 ? contacts : null,
+                    Persons = persons.Count > 0 ? persons : null,
                 };
                 var created = await _apiService.CreateCustomerAsync(request);
                 if (created != null)
@@ -246,6 +274,8 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
                     Address = BuildAddress(),
                     Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
                     Contacts = contacts,
+                    // Always sent — the server upserts by id; an empty list removes all
+                    Persons = persons,
                 };
                 await _apiService.UpdateCustomerAsync(Guid.Parse(CustomerId!), request);
             }
@@ -358,6 +388,21 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
         return contacts;
     }
 
+    private List<ContactPersonRequest> BuildPersons()
+    {
+        return PersonEntries
+            .Where(p => !string.IsNullOrWhiteSpace(p.Name))
+            .Select(p => new ContactPersonRequest
+            {
+                Id = p.Id,
+                Name = p.Name.Trim(),
+                Role = p.Role.Trim(),
+                Phone = p.Phone.Trim(),
+                Email = p.Email.Trim(),
+            })
+            .ToList();
+    }
+
     private void ParseAddress(string? address)
     {
         if (string.IsNullOrWhiteSpace(address))
@@ -456,4 +501,23 @@ public partial class ContactEntry : ObservableObject
 
     [ObservableProperty]
     private bool _isPrimary;
+}
+
+public partial class PersonEntry : ObservableObject
+{
+    // Set when editing an existing person — the server matches by id so the
+    // row keeps its identity (jobs reference it as main contact).
+    public Guid? Id { get; set; }
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    private string _role = string.Empty;
+
+    [ObservableProperty]
+    private string _phone = string.Empty;
+
+    [ObservableProperty]
+    private string _email = string.Empty;
 }

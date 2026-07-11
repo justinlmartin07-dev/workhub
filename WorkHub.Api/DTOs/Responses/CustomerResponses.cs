@@ -10,6 +10,7 @@ public class CustomerResponse
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<CustomerContactResponse>? Contacts { get; set; }
+    public List<ContactPersonResponse>? Persons { get; set; }
     public List<PhotoResponse>? Photos { get; set; }
     public List<JobBriefResponse>? Jobs { get; set; }
 }
@@ -21,6 +22,15 @@ public class CustomerContactResponse
     public string Label { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
     public bool IsPrimary { get; set; }
+}
+
+public class ContactPersonResponse
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Role { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
 }
 
 public class JobBriefResponse

@@ -10,12 +10,23 @@ public class JobResponse
     public string Priority { get; set; } = string.Empty;
     public string? ScopeNotes { get; set; }
     public string? Address { get; set; }
+    public Guid? MainContactId { get; set; }
+    public JobContactResponse? MainContact { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<PhotoResponse>? Photos { get; set; }
     public List<JobNoteResponse>? Notes { get; set; }
     public List<JobItemResponse>? UsedItems { get; set; }
     public List<JobItemResponse>? ToOrderItems { get; set; }
+}
+
+public class JobContactResponse
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Role { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
 }
 
 public class JobListItemResponse

@@ -10,6 +10,7 @@ public class CustomerResponse
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<CustomerContactResponse>? Contacts { get; set; }
+    public List<ContactPersonResponse>? Persons { get; set; }
     public List<PhotoResponse>? Photos { get; set; }
     public List<JobBriefResponse>? Jobs { get; set; }
 
@@ -31,6 +32,28 @@ public class CustomerContactResponse
     public bool IsPrimary { get; set; }
 }
 
+public class ContactPersonResponse
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Role { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+
+    public string Display => string.IsNullOrWhiteSpace(Role) ? Name : $"{Name} — {Role}";
+    public bool HasPhone => !string.IsNullOrWhiteSpace(Phone);
+    public bool HasEmail => !string.IsNullOrWhiteSpace(Email);
+}
+
+public class ContactPersonRequest
+{
+    public Guid? Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Role { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+}
+
 public class JobBriefResponse
 {
     public Guid Id { get; set; }
@@ -46,6 +69,7 @@ public class CreateCustomerRequest
     public string? Address { get; set; }
     public string? Notes { get; set; }
     public List<CustomerContactRequest>? Contacts { get; set; }
+    public List<ContactPersonRequest>? Persons { get; set; }
 }
 
 public class UpdateCustomerRequest
@@ -55,6 +79,7 @@ public class UpdateCustomerRequest
     public string? Address { get; set; }
     public string? Notes { get; set; }
     public List<CustomerContactRequest>? Contacts { get; set; }
+    public List<ContactPersonRequest>? Persons { get; set; }
 }
 
 public class CustomerContactRequest

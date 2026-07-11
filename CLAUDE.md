@@ -105,7 +105,7 @@ dotnet ef database update --project WorkHub.Api
 
 ## Database
 
-13 tables: `users`, `refresh_tokens`, `customers`, `customer_contacts`, `customer_photos`, `jobs`, `job_notes`, `job_photos`, `inventory_items`, `job_inventory`, `job_adhoc_items`, `calendar_events`, `calendar_event_assignments`. All PKs are UUIDs. Auto-migration on API startup via `db.Database.Migrate()`. Seed data in `SeedData.cs` populates test data (200 customers, 500 jobs, 100 inventory items, 150 calendar events) when DB is empty.
+14 tables: `users`, `refresh_tokens`, `customers`, `customer_contacts`, `contact_persons`, `customer_photos`, `jobs`, `job_notes`, `job_photos`, `inventory_items`, `job_inventory`, `job_adhoc_items`, `calendar_events`, `calendar_event_assignments`. All PKs are UUIDs. Auto-migration on API startup via `db.Database.Migrate()`. Seed data in `SeedData.cs` populates test data (200 customers, 500 jobs, 100 inventory items, 150 calendar events) when DB is empty.
 
 Local dev uses PostgreSQL via Docker: `docker run -d --name workhub-db -e POSTGRES_USER=Admin -e POSTGRES_PASSWORD=Admin -e POSTGRES_DB=workhub -p 5432:5432 postgres:16`
 

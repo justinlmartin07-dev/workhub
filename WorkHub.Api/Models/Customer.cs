@@ -15,6 +15,7 @@ public class Customer
     public DateTime? DeletedAt { get; set; }
 
     public List<CustomerContact> Contacts { get; set; } = [];
+    public List<ContactPerson> Persons { get; set; } = [];
     public List<Job> Jobs { get; set; } = [];
     public List<CustomerPhoto> Photos { get; set; } = [];
 }

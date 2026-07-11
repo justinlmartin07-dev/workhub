@@ -126,6 +126,36 @@
                         </VerticalStackLayout>
                     </Frame>
 
+                    <!-- People -->
+                    <Frame Style="{StaticResource Card}" IsVisible="{Binding HasPersons}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="People" Style="{StaticResource SectionHeading}" />
+                            <CollectionView ItemsSource="{Binding Persons}">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:ContactPersonResponse">
+                                        <VerticalStackLayout Padding="0,4" Spacing="2">
+                                            <Label Text="{Binding Display}" FontFamily="OpenSansSemibold" />
+                                            <Label Text="{Binding Phone}" IsVisible="{Binding HasPhone}"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                                <Label.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=CallPhoneCommand}"
+                                                                          CommandParameter="{Binding Phone}" />
+                                                </Label.GestureRecognizers>
+                                            </Label>
+                                            <Label Text="{Binding Email}" IsVisible="{Binding HasEmail}"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                                <Label.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=SendEmailCommand}"
+                                                                          CommandParameter="{Binding Email}" />
+                                                </Label.GestureRecognizers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Frame>
+
                     <!-- Notes -->
                     <Frame Style="{StaticResource Card}"
                            IsVisible="{Binding Customer.Notes, Converter={StaticResource StringNotEmptyConverter}}">

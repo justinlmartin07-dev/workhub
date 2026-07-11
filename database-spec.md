@@ -41,8 +41,7 @@ Stores active refresh tokens. Each row represents one valid session. Tokens are 
 |---|---|---|
 | `id` | `uuid` | Primary key, default `gen_random_uuid()` |
 | `name` | `varchar(200)` | Required |
-| `phone` | `varchar(50)` | |
-| `email` | `varchar(200)` | |
+| `company_name` | `varchar(200)` | Optional — UI displays company when present, else name |
 | `address` | `text` | Full address string |
 | `normalized_address` | `varchar(500)` | Lowercased, punctuation-stripped version of address. Auto-populated on save. Used for location photo lookups |
 | `notes` | `text` | General notes — single freeform text field, edited via `PUT /v1/customers/{id}` |
@@ -50,6 +49,34 @@ Stores active refresh tokens. Each row represents one valid session. Tokens are 
 | `created_at` | `timestamptz` | Auto-set on insert |
 | `updated_at` | `timestamptz` | Auto-updated |
 | `deleted_at` | `timestamptz` | Null = active, set = soft deleted |
+
+### `customer_contacts`
+
+Contact *methods* for a customer (phone numbers and email addresses with labels). Replaced the old inline `phone`/`email` columns on `customers`. Fully replaced on every customer update (`Clear()` + re-add — ids are not stable across saves).
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | Primary key |
+| `customer_id` | `uuid` | FK → `customers.id`, `ON DELETE CASCADE` |
+| `type` | `varchar(20)` | `phone` or `email` |
+| `label` | `varchar(50)` | e.g. `Mobile`, `Work` — defaults to `Other`; options come from `contact_labels` |
+| `value` | `varchar(200)` | The phone number or email address |
+| `is_primary` | `boolean` | Per-type primary flag, default false |
+| `created_at` | `timestamptz` | |
+
+### `contact_persons`
+
+Named *people* at a customer (e.g. "Bob — Site Super"), distinct from contact methods above. Jobs can reference one as their main contact, so rows are **upserted by id** on customer update (row with `id` = update in place, without = insert, existing row omitted from request = delete) — ids stay stable across saves.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | Primary key |
+| `customer_id` | `uuid` | FK → `customers.id`, `ON DELETE CASCADE` |
+| `name` | `varchar(200)` | Required |
+| `role` | `varchar(100)` | Optional, e.g. `Site Super`, `Office Manager` |
+| `phone` | `varchar(50)` | Optional |
+| `email` | `varchar(200)` | Optional |
+| `created_at` | `timestamptz` | |
 
 ### `customer_photos`
 
@@ -68,6 +95,7 @@ Stores active refresh tokens. Each row represents one valid session. Tokens are 
 |---|---|---|
 | `id` | `uuid` | Primary key |
 | `customer_id` | `uuid` | FK → `customers.id` |
+| `main_contact_id` | `uuid` | Nullable FK → `contact_persons.id`, `ON DELETE SET NULL`. Must belong to the job's customer (validated server-side) |
 | `title` | `varchar(200)` | Short job description |
 | `status` | `varchar(50)` | `Pending`, `In Progress`, or `Complete` |
 | `priority` | `varchar(50)` | `Low`, `Normal`, or `High` |
@@ -179,6 +207,9 @@ users
   └── job_notes           (created_by)
 
 customers
+  ├── customer_contacts   (one-to-many, cascade delete — phone/email method rows)
+  ├── contact_persons     (one-to-many, cascade delete — named people)
+  │     └── jobs.main_contact_id (many-to-one, ON DELETE SET NULL)
   ├── customer_photos     (one-to-many)
   ├── jobs                (one-to-many)
   │     ├── job_notes     (one-to-many)
@@ -207,6 +238,8 @@ public class WorkHubDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<CustomerContact> CustomerContacts => Set<CustomerContact>();
+    public DbSet<ContactPerson> ContactPersons => Set<ContactPerson>();
     public DbSet<CustomerPhoto> CustomerPhotos => Set<CustomerPhoto>();
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<JobNote> JobNotes => Set<JobNote>();
@@ -283,7 +316,7 @@ DELETE /v1/customers/{id}
         └── Set deleted_at on all linked Complete jobs
 ```
 
-Customer photos, job photos, job notes, and job items are **not** soft-deleted or removed — they remain in the database attached to the soft-deleted parent. If a restore feature is added later, all child data is still intact.
+Customer photos, contacts, contact persons, job photos, job notes, and job items are **not** soft-deleted or removed — they remain in the database attached to the soft-deleted parent. (`customer_contacts` and `contact_persons` only hard-delete via their `ON DELETE CASCADE` FK, which never fires today since customer rows are never hard-deleted. Removing a contact person through the customer edit flow hard-deletes that row, and any job referencing it as main contact gets `main_contact_id` set to NULL by the database.) If a restore feature is added later, all child data is still intact.
 
 ### Job deletion
 
@@ -344,7 +377,10 @@ CREATE INDEX idx_customers_normalized_address ON customers(normalized_address);
 
 -- Foreign key lookups
 CREATE INDEX idx_jobs_customer_id ON jobs(customer_id);
+CREATE INDEX idx_jobs_main_contact_id ON jobs(main_contact_id);
 CREATE INDEX idx_jobs_status ON jobs(status);
+CREATE INDEX idx_customer_contacts_customer_id ON customer_contacts(customer_id);
+CREATE INDEX idx_contact_persons_customer_id ON contact_persons(customer_id);
 CREATE INDEX idx_job_notes_job_id ON job_notes(job_id);
 CREATE INDEX idx_job_inventory_job_id ON job_inventory(job_id);
 CREATE INDEX idx_job_adhoc_items_job_id ON job_adhoc_items(job_id);

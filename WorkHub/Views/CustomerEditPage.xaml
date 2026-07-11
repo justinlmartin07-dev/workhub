@@ -102,6 +102,39 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
+            <!-- People -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="People" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                <Button Grid.Column="1" Text="+ Add" Style="{StaticResource SecondaryButton}" Command="{Binding AddPersonCommand}" />
+            </Grid>
+            <CollectionView ItemsSource="{Binding PersonEntries}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PersonEntry">
+                        <Border Padding="8" Margin="0,2" StrokeThickness="1" StrokeShape="RoundRectangle 8"
+                                Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}">
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*,Auto" RowSpacing="4" ColumnSpacing="4">
+                                <Entry Placeholder="Name" Text="{Binding Name}" />
+                                <Entry Grid.Column="1" Placeholder="Role (e.g. Site Super)" Text="{Binding Role}" />
+                                <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
+                                        Padding="6" VerticalOptions="Center"
+                                        StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding BindingContext.RemovePersonCommand, Source={x:Reference thisPage}}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <!-- Material Symbols "close" -->
+                                    <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                                                 Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                </Border>
+                                <Entry Grid.Row="1" Placeholder="Phone" Text="{Binding Phone}" Keyboard="Telephone" />
+                                <Entry Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Placeholder="Email" Text="{Binding Email}" Keyboard="Email" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
             <Editor Placeholder="Notes" Text="{Binding Notes}" HeightRequest="120" />
 
             <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" IsVisible="{Binding HasError}" />

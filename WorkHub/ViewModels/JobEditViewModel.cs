@@ -25,11 +25,17 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
     private string _origZip = string.Empty;
     private string _origScopeNotes = string.Empty;
     private Guid? _origCustomerId;
+    private Guid? _origMainContactId;
+
+    // The None sentinel normalized away: null when nothing (or None) is picked.
+    private Guid? CurrentMainContactId =>
+        SelectedMainContact is { } mc && mc.Id != Guid.Empty ? mc.Id : null;
 
     public bool HasUnsavedChanges =>
         Title != _origTitle || SelectedPriority != _origPriority ||
         Street != _origStreet || City != _origCity || State != _origState || Zip != _origZip ||
-        ScopeNotes != _origScopeNotes || SelectedCustomer?.Id != _origCustomerId;
+        ScopeNotes != _origScopeNotes || SelectedCustomer?.Id != _origCustomerId ||
+        CurrentMainContactId != _origMainContactId;
 
     private void SnapshotOriginal()
     {
@@ -41,6 +47,7 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
         _origZip = Zip;
         _origScopeNotes = ScopeNotes;
         _origCustomerId = SelectedCustomer?.Id;
+        _origMainContactId = CurrentMainContactId;
     }
 
     [ObservableProperty]
@@ -101,6 +108,25 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
 
     [ObservableProperty]
     private CustomerResponse? _selectedCustomer;
+
+    private static readonly ContactPersonResponse NoneContact = new() { Id = Guid.Empty, Name = "None" };
+
+    [ObservableProperty]
+    private ObservableCollection<ContactPersonResponse> _mainContactOptions = new([NoneContact]);
+
+    [ObservableProperty]
+    private ContactPersonResponse? _selectedMainContact = NoneContact;
+
+    partial void OnSelectedCustomerChanged(CustomerResponse? value)
+    {
+        // Customer changed → any previously picked person belongs to the old
+        // customer; rebuild the options and reset to None.
+        var options = new List<ContactPersonResponse> { NoneContact };
+        if (value?.Persons != null)
+            options.AddRange(value.Persons);
+        MainContactOptions = new ObservableCollection<ContactPersonResponse>(options);
+        SelectedMainContact = NoneContact;
+    }
 
     [ObservableProperty]
     private string _customerSearchText = string.Empty;
@@ -208,10 +234,13 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
                     Title = job.Title;
                     SelectedPriority = job.Priority;
                     PrioritySliderValue = job.Priority switch { "Low" => 0, "High" => 2, _ => 1 };
-                    // Load customer for "Use Customer Address" button
+                    // Load customer for "Use Customer Address" button and the contact picker
                     var customer = await _apiService.GetCustomerAsync(job.CustomerId);
                     if (customer != null)
                         SelectedCustomer = customer;
+                    // After OnSelectedCustomerChanged rebuilt the options — select by id
+                    // from the current list (the Picker matches by reference)
+                    SelectedMainContact = MainContactOptions.FirstOrDefault(p => p.Id == job.MainContactId) ?? NoneContact;
                     ScopeNotes = job.ScopeNotes ?? string.Empty;
                     _skipAddressSearch = true;
                     ParseAddress(job.Address);
@@ -295,7 +324,8 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
                     Title = Title.Trim(),
                     Priority = SelectedPriority,
                     ScopeNotes = string.IsNullOrWhiteSpace(ScopeNotes) ? null : ScopeNotes.Trim(),
-                    Address = BuildAddress()
+                    Address = BuildAddress(),
+                    MainContactId = CurrentMainContactId
                 };
                 var created = await _apiService.CreateJobAsync(request);
                 if (created != null)
@@ -308,7 +338,9 @@ public partial class JobEditViewModel : BaseViewModel, IHasUnsavedChanges
                     Title = Title.Trim(),
                     Priority = SelectedPriority,
                     ScopeNotes = string.IsNullOrWhiteSpace(ScopeNotes) ? null : ScopeNotes.Trim(),
-                    Address = BuildAddress()
+                    Address = BuildAddress(),
+                    // Always sent — Guid.Empty tells the server to clear the contact
+                    MainContactId = CurrentMainContactId ?? Guid.Empty
                 };
                 await _apiService.UpdateJobAsync(Guid.Parse(JobId!), request);
             }

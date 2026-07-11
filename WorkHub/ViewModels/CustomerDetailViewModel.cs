@@ -48,6 +48,9 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
     public List<CustomerContactResponse> EmailContacts =>
         Customer?.Contacts?.Where(c => c.Type == "email").ToList() ?? [];
 
+    public List<ContactPersonResponse> Persons => Customer?.Persons ?? [];
+    public bool HasPersons => Persons.Count > 0;
+
     public CustomerDetailViewModel(ApiService apiService, PhotoService photoService,
         ListCacheService listCache, PhotoCacheService photoCache)
     {
@@ -61,6 +64,8 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
     {
         OnPropertyChanged(nameof(PhoneContacts));
         OnPropertyChanged(nameof(EmailContacts));
+        OnPropertyChanged(nameof(Persons));
+        OnPropertyChanged(nameof(HasPersons));
     }
 
     partial void OnCustomerIdChanged(string? value)

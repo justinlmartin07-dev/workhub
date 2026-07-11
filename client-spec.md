@@ -304,13 +304,14 @@ The login page is intentionally simple — no "Forgot Password" link (passwords 
 - Pagination: loads first page on open, "Load More" button or infinite scroll for subsequent pages
 
 ### Customer Detail
-- Name, phone (tap to call), email, address (tap to open Maps)
+- Name, contact info card listing all phone numbers (tap to call) and emails (tap to email) with their labels, address (tap to open Maps)
+- **People card** — named contact persons (`name — role`), each with tappable phone/email lines. Hidden when the customer has no persons
 - Customer photo with camera capture / gallery pick
 - Photos section — if other photos exist at the same address, show "See N other photos at this location" button below
 - **Add Job** button — creates a new job pre-linked to this customer
 - List of linked jobs (tap to open)
 - Notes section (single text field, editable inline)
-- Edit button (opens CustomerEditPage)
+- Edit button (opens CustomerEditPage — includes add/remove rows for phone numbers, emails, and a People section with name/role/phone/email per person; person rows keep their server ids so job main-contact references survive edits)
 - Delete button with confirmation dialog — if blocked by active jobs, show error with the blocking job names
 
 **Tap-to-call:** `PhoneDialer.Open(phoneNumber)` via `CommunityToolkit.Maui`
@@ -354,6 +355,7 @@ if (response.StatusCode == HttpStatusCode.Conflict)
 - Title, status (picker), priority (picker)
 - Scope notes (multiline text)
 - Linked customer shown at top (tappable to navigate to customer detail)
+- Main contact row in the customer/status card when set — `name — role` plus tappable phone/email lines
 - Photo gallery (newest first) with camera capture — if other photos exist at the customer's address, show "See N other photos at this location" button below the gallery
 - Notes list (oldest first — reads as a chronological log, new notes appear at the bottom; each note shows author name and timestamp)
   - Add note: text input + "Add" button
@@ -361,7 +363,7 @@ if (response.StatusCode == HttpStatusCode.Conflict)
   - Delete note: swipe-to-delete with confirmation
 - Used items list (library + ad-hoc combined, showing `source` badge)
 - To-be-ordered items list (library + ad-hoc combined)
-- Edit button (opens JobEditPage for title/status/priority/scope)
+- Edit button (opens JobEditPage for title/priority/address/scope plus a **Main Contact** `Picker` listing the customer's persons + None. On a new job the options rebuild — and the selection resets to None — whenever the chosen customer changes; on an existing job the customer is fixed, so the picker just loads that customer's persons)
 
 ### Inventory
 - Searchable list of inventory items (searches `name` and `part_number`)

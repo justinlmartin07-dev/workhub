@@ -155,6 +155,36 @@ public static class SeedData
         db.CustomerContacts.AddRange(allContacts);
         await db.SaveChangesAsync();
 
+        // --- Contact persons (0-3 named people per customer) ---
+        var personRoles = new string?[] { "Owner", "Site Super", "Office Manager", "Foreman", "Maintenance Lead", null };
+        var allPersons = new List<ContactPerson>();
+        var personsByCustomer = new Dictionary<Guid, List<ContactPerson>>();
+        foreach (var customer in customers)
+        {
+            var list = new List<ContactPerson>();
+            var personCount = rng.Next(0, 4);
+            for (var p = 0; p < personCount; p++)
+            {
+                var first = firstNames[rng.Next(firstNames.Length)];
+                var last = lastNames[rng.Next(lastNames.Length)];
+                var person = new ContactPerson
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerId = customer.Id,
+                    Name = $"{first} {last}",
+                    Role = personRoles[rng.Next(personRoles.Length)],
+                    Phone = rng.Next(4) > 0 ? $"({rng.Next(200, 999)}) {rng.Next(200, 999)}-{rng.Next(1000, 9999)}" : null,
+                    Email = rng.Next(3) > 0 ? $"{first.ToLower()}.{last.ToLower()}@example.com" : null,
+                    CreatedAt = customer.CreatedAt,
+                };
+                list.Add(person);
+                allPersons.Add(person);
+            }
+            personsByCustomer[customer.Id] = list;
+        }
+        db.ContactPersons.AddRange(allPersons);
+        await db.SaveChangesAsync();
+
         // --- Jobs (500) ---
         var jobTitles = new[] {
             "AC Repair", "Furnace Inspection", "Water Heater Install", "Duct Cleaning",
@@ -199,10 +229,14 @@ public static class SeedData
             if (createdAt > now) createdAt = now.AddDays(-rng.Next(1, 10));
             var status = statuses[rng.Next(statuses.Length)];
 
+            var custPersons = personsByCustomer[customer.Id];
             var job = new Job
             {
                 Id = Guid.NewGuid(),
                 CustomerId = customer.Id,
+                MainContactId = custPersons.Count > 0 && rng.Next(2) == 0
+                    ? custPersons[rng.Next(custPersons.Count)].Id
+                    : null,
                 Title = jobTitles[rng.Next(jobTitles.Length)],
                 Status = status,
                 Priority = priorities[rng.Next(priorities.Length)],

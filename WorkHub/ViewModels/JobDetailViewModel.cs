@@ -240,6 +240,26 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     [RelayCommand]
     private async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
 
+    [RelayCommand]
+    private void CallPhone(string? phoneNumber)
+    {
+        if (!string.IsNullOrEmpty(phoneNumber))
+        {
+            try { PhoneDialer.Open(phoneNumber); }
+            catch { }
+        }
+    }
+
+    [RelayCommand]
+    private async Task SendEmailAsync(string? email)
+    {
+        if (!string.IsNullOrEmpty(email))
+        {
+            try { await Launcher.OpenAsync($"mailto:{email}"); }
+            catch { }
+        }
+    }
+
     // Releasing the long-press that opened the options popup still registers
     // as a tap (the tap recognizer doesn't disqualify long holds), which would
     // open Maps over the popup — swallow taps while the popup is up.

@@ -17,6 +17,7 @@ public class CreateJobRequest
     public string? ScopeNotes { get; set; }
     [MaxLength(500)]
     public string? Address { get; set; }
+    public Guid? MainContactId { get; set; }
 }
 
 public class UpdateJobRequest
@@ -32,6 +33,8 @@ public class UpdateJobRequest
     public string? ScopeNotes { get; set; }
     [MaxLength(500)]
     public string? Address { get; set; }
+    // Null = don't change; Guid.Empty = clear (the client always sends the field)
+    public Guid? MainContactId { get; set; }
 }
 
 public class CreateJobNoteRequest
