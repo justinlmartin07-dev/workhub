@@ -22,7 +22,7 @@
                         <TapGestureRecognizer Command="{Binding ToggleCustomerPickerCommand}" />
                     </Frame.GestureRecognizers>
                     <Grid ColumnDefinitions="*,Auto">
-                        <Label Text="{Binding SelectedCustomer.DisplayName, FallbackValue='Tap to select a customer...'}"
+                        <Label Text="{Binding SelectedCustomer.Name, FallbackValue='Tap to select a customer...'}"
                                TextColor="{Binding SelectedCustomer, Converter={StaticResource StringNotEmptyConverter}, FallbackValue={StaticResource Gray400}}"
                                VerticalTextAlignment="Center" FontSize="15" />
                         <!-- Material Symbols "expand_more" -->
@@ -141,7 +141,7 @@
                                     CommandParameter="{Binding .}" />
                             </Grid.GestureRecognizers>
                             <VerticalStackLayout>
-                                <Label Text="{Binding DisplayName}" FontSize="15" />
+                                <Label Text="{Binding Name}" FontSize="15" />
                                 <Label Text="{Binding PrimaryPhone}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                        IsVisible="{Binding PrimaryPhone, Converter={StaticResource StringNotEmptyConverter}}" />
                             </VerticalStackLayout>

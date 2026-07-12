@@ -106,9 +106,8 @@ public static class SeedData
             var customer = new Customer
             {
                 Id = Guid.NewGuid(),
-                Name = $"{first} {last}",
-                // About half are businesses — exercises the company-or-name display fallback
-                CompanyName = rng.Next(2) == 0 ? companyNames[rng.Next(companyNames.Length)] : null,
+                // About half are businesses, half residential (named after a person)
+                Name = rng.Next(2) == 0 ? companyNames[rng.Next(companyNames.Length)] : $"{first} {last}",
                 Address = address,
                 NormalizedAddress = AddressNormalizer.Normalize(address),
                 Notes = rng.Next(3) == 0 ? $"Preferred contact: {contactLabels[rng.Next(contactLabels.Length)]}. Gate code {rng.Next(1000, 9999)}." : null,

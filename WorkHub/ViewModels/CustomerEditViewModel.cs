@@ -17,7 +17,6 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
     private string? _addressSessionToken;
 
     private string _origName = string.Empty;
-    private string _origCompanyName = string.Empty;
     private string _origStreet = string.Empty;
     private string _origCity = string.Empty;
     private string _origState = string.Empty;
@@ -26,7 +25,7 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
     private string _origContactsHash = string.Empty;
 
     public bool HasUnsavedChanges =>
-        Name != _origName || CompanyName != _origCompanyName ||
+        Name != _origName ||
         Street != _origStreet || City != _origCity ||
         State != _origState || Zip != _origZip || Notes != _origNotes ||
         GetContactsHash() != _origContactsHash;
@@ -34,7 +33,6 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
     private void SnapshotOriginal()
     {
         _origName = Name;
-        _origCompanyName = CompanyName;
         _origStreet = Street;
         _origCity = City;
         _origState = State;
@@ -60,9 +58,6 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
 
     [ObservableProperty]
     private string _name = string.Empty;
-
-    [ObservableProperty]
-    private string _companyName = string.Empty;
 
     [ObservableProperty]
     private string _street = string.Empty;
@@ -148,7 +143,6 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
             if (customer != null)
             {
                 Name = customer.Name;
-                CompanyName = customer.CompanyName ?? string.Empty;
                 _skipAddressSearch = true;
                 ParseAddress(customer.Address);
                 _skipAddressSearch = false;
@@ -254,7 +248,6 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
                 var request = new CreateCustomerRequest
                 {
                     Name = Name.Trim(),
-                    CompanyName = CompanyName.Trim(),
                     Address = BuildAddress(),
                     Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
                     Contacts = contacts.Count > 0 ? contacts : null,
@@ -269,8 +262,6 @@ public partial class CustomerEditViewModel : BaseViewModel, IHasUnsavedChanges
                 var request = new UpdateCustomerRequest
                 {
                     Name = Name.Trim(),
-                    // Always sent — an empty string clears the company on the server
-                    CompanyName = CompanyName.Trim(),
                     Address = BuildAddress(),
                     Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
                     Contacts = contacts,

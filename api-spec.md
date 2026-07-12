@@ -439,15 +439,14 @@ Deletes the refresh token record from the database. The access token will natura
 
 | Param | Type | Description |
 |---|---|---|
-| `q` | string | Search filter — `ILIKE` match against customer `name`, `company_name`, contact `value`s, and contact person `name`/`phone`/`email` |
+| `q` | string | Search filter — `ILIKE` match against customer `name`, contact `value`s, and contact person `name`/`phone`/`email` |
 | `page` | int | Page number (default 1) |
 | `pageSize` | int | Results per page (default 25, max 100) |
 
 **Request body for `POST /v1/customers`:**
 ```json
 {
-  "name": "Ray Martin",
-  "companyName": "Martin Residence",
+  "name": "Martin Residence",
   "address": "48 Elm St, Minneapolis, MN 55401",
   "notes": "Gate code: 4421",
   "contacts": [
@@ -472,8 +471,7 @@ The two contact collections have different update semantics:
 ```json
 {
   "id": "abc-123",
-  "name": "Ray Martin",
-  "companyName": "Martin Residence",
+  "name": "Martin Residence",
   "address": "48 Elm St, Minneapolis, MN 55401",
   "notes": "Gate code: 4421",
   "createdAt": "2025-01-15T10:30:00Z",

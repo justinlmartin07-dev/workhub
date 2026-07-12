@@ -4,7 +4,6 @@ public class CustomerResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? CompanyName { get; set; }
     public string? Address { get; set; }
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -13,9 +12,6 @@ public class CustomerResponse
     public List<ContactPersonResponse>? Persons { get; set; }
     public List<PhotoResponse>? Photos { get; set; }
     public List<JobBriefResponse>? Jobs { get; set; }
-
-    // What the UI shows as the customer's primary identity.
-    public string DisplayName => string.IsNullOrWhiteSpace(CompanyName) ? Name : CompanyName!;
 
     public string? PrimaryPhone => Contacts?.FirstOrDefault(c => c.Type == "phone" && c.IsPrimary)?.Value
                                 ?? Contacts?.FirstOrDefault(c => c.Type == "phone")?.Value;
@@ -65,7 +61,6 @@ public class JobBriefResponse
 public class CreateCustomerRequest
 {
     public string Name { get; set; } = string.Empty;
-    public string? CompanyName { get; set; }
     public string? Address { get; set; }
     public string? Notes { get; set; }
     public List<CustomerContactRequest>? Contacts { get; set; }
@@ -75,7 +70,6 @@ public class CreateCustomerRequest
 public class UpdateCustomerRequest
 {
     public string? Name { get; set; }
-    public string? CompanyName { get; set; }
     public string? Address { get; set; }
     public string? Notes { get; set; }
     public List<CustomerContactRequest>? Contacts { get; set; }

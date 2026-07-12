@@ -34,7 +34,6 @@ public class CustomersController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(c => EF.Functions.ILike(c.Name, $"%{q}%")
-                || EF.Functions.ILike(c.CompanyName!, $"%{q}%")
                 || c.Contacts.Any(ct => EF.Functions.ILike(ct.Value, $"%{q}%"))
                 || c.Persons.Any(p => EF.Functions.ILike(p.Name, $"%{q}%")
                     || EF.Functions.ILike(p.Phone!, $"%{q}%")
@@ -42,8 +41,7 @@ public class CustomersController : ControllerBase
 
         var totalCount = await query.CountAsync();
         var items = await query
-            // Sort by what the client displays: company when present, else name
-            .OrderBy(c => c.CompanyName ?? c.Name)
+            .OrderBy(c => c.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Include(c => c.Contacts)
@@ -52,7 +50,6 @@ public class CustomersController : ControllerBase
             {
                 Id = c.Id,
                 Name = c.Name,
-                CompanyName = c.CompanyName,
                 Address = c.Address,
                 Notes = c.Notes,
                 CreatedAt = c.CreatedAt,
@@ -104,7 +101,6 @@ public class CustomersController : ControllerBase
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
-            CompanyName = string.IsNullOrWhiteSpace(request.CompanyName) ? null : request.CompanyName.Trim(),
             Address = request.Address,
             NormalizedAddress = AddressNormalizer.Normalize(request.Address),
             Notes = request.Notes,
@@ -158,9 +154,6 @@ public class CustomersController : ControllerBase
             return NotFound(new ErrorResponse { Error = "Customer not found" });
 
         if (request.Name != null) customer.Name = request.Name;
-        // Empty string clears the company (the client always sends the field)
-        if (request.CompanyName != null)
-            customer.CompanyName = string.IsNullOrWhiteSpace(request.CompanyName) ? null : request.CompanyName.Trim();
         if (request.Notes != null) customer.Notes = request.Notes;
         if (request.Address != null)
         {
@@ -273,7 +266,6 @@ public class CustomersController : ControllerBase
         {
             Id = customer.Id,
             Name = customer.Name,
-            CompanyName = customer.CompanyName,
             Address = customer.Address,
             Notes = customer.Notes,
             CreatedAt = customer.CreatedAt,

@@ -40,8 +40,7 @@ Stores active refresh tokens. Each row represents one valid session. Tokens are 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | `uuid` | Primary key, default `gen_random_uuid()` |
-| `name` | `varchar(200)` | Required |
-| `company_name` | `varchar(200)` | Optional — UI displays company when present, else name |
+| `name` | `varchar(200)` | Required — the customer's display identity (company or person). Individual people at the customer live in `contact_persons` |
 | `address` | `text` | Full address string |
 | `normalized_address` | `varchar(500)` | Lowercased, punctuation-stripped version of address. Auto-populated on save. Used for location photo lookups |
 | `notes` | `text` | General notes — single freeform text field, edited via `PUT /v1/customers/{id}` |

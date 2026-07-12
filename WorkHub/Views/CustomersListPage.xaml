@@ -71,12 +71,7 @@
 
                                     <!-- Content -->
                                     <VerticalStackLayout Grid.Column="1" Padding="14,12" Spacing="3">
-                                        <!-- Company is the primary identity when present; falls back to the name -->
-                                        <Label Text="{Binding DisplayName}" FontSize="16" FontAttributes="Bold" />
-                                        <Label Text="{Binding Name}" FontSize="12"
-                                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
-                                               IsVisible="{Binding CompanyName, Converter={StaticResource StringNotEmptyConverter}}"
-                                               LineBreakMode="TailTruncation" MaxLines="1" />
+                                        <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold" />
                                         <Label Text="{Binding Address}" FontSize="12"
                                                TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                IsVisible="{Binding Address, Converter={StaticResource StringNotEmptyConverter}}"

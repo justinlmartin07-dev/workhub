@@ -166,7 +166,6 @@ public partial class EventDetailViewModel : BaseViewModel
             FilteredCustomers = new ObservableCollection<CustomerResponse>(
                 Customers.Where(c =>
                     c.Name.ToLower().Contains(search) ||
-                    (c.CompanyName?.ToLower().Contains(search) ?? false) ||
                     (c.Contacts?.Any(ct => ct.Value.ToLower().Contains(search)) ?? false) ||
                     (c.Address?.ToLower().Contains(search) ?? false)));
         }
