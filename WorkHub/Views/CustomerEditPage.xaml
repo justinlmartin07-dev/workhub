@@ -43,68 +43,83 @@
                 <Entry Grid.Column="2" Placeholder="Zip" Text="{Binding Zip}" Keyboard="Numeric" ReturnType="Next" />
             </Grid>
 
-            <!-- Phone Numbers -->
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Text="Phone Numbers" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
-                <Button Grid.Column="1" Text="+ Add" Style="{StaticResource SecondaryButton}" Command="{Binding AddPhoneCommand}" />
-            </Grid>
-            <CollectionView ItemsSource="{Binding PhoneEntries}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ContactEntry">
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4" Padding="0,2">
-                            <Picker WidthRequest="{OnPlatform 92, WinUI=140}" ItemsSource="{Binding BindingContext.PhoneLabelOptions, Source={x:Reference thisPage}}"
-                                    SelectedItem="{Binding Label}" />
-                            <Entry Grid.Column="1" Placeholder="Phone number" Text="{Binding Value}" Keyboard="Telephone" />
-                            <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
-                                    Padding="6" VerticalOptions="Center"
-                                    StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding BindingContext.RemovePhoneCommand, Source={x:Reference thisPage}}"
-                                                          CommandParameter="{Binding .}" />
-                                </Border.GestureRecognizers>
-                                <!-- Material Symbols "close" -->
-                                <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
-                                             Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                                             Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                            </Border>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+            <!-- Company phone/email — secondary to People, kept compact -->
+            <VerticalStackLayout Spacing="2">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="4">
+                    <!-- Material Symbols "domain" -->
+                    <shapes:Path Data="M80-120v-720h400v160h400v560H80Zm80-80h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm160 480h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm160 480h320v-400H480v80h80v80h-80v80h80v80h-80v80Zm160-240v-80h80v80h-80Zm0 160v-80h80v80h-80Z"
+                                 Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                 Aspect="Uniform" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
+                    <Label Grid.Column="1" Text="Company Phone &amp; Email" Style="{StaticResource FieldLabel}" VerticalTextAlignment="Center" />
+                    <Button Grid.Column="2" Text="+ Phone" Style="{StaticResource SecondaryButton}" FontSize="12" Command="{Binding AddPhoneCommand}" />
+                    <Button Grid.Column="3" Text="+ Email" Style="{StaticResource SecondaryButton}" FontSize="12" Command="{Binding AddEmailCommand}" />
+                </Grid>
+                <CollectionView ItemsSource="{Binding PhoneEntries}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ContactEntry">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="4" Padding="0,1">
+                                <!-- Material Symbols "call" -->
+                                <shapes:Path Data="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12ZM241-600l66-66-17-94h-89q5 41 14 81t26 79Zm358 358q39 17 79.5 27t81.5 13v-88l-94-19-67 67ZM241-600Zm358 358Z"
+                                             Fill="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                             Aspect="Uniform" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" Margin="2,0" />
+                                <Picker Grid.Column="1" WidthRequest="{OnPlatform 92, WinUI=120}" FontSize="13"
+                                        ItemsSource="{Binding BindingContext.PhoneLabelOptions, Source={x:Reference thisPage}}"
+                                        SelectedItem="{Binding Label}" />
+                                <Entry Grid.Column="2" Placeholder="Phone number" Text="{Binding Value}" Keyboard="Telephone" FontSize="13" />
+                                <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0"
+                                        Padding="6" VerticalOptions="Center"
+                                        StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding BindingContext.RemovePhoneCommand, Source={x:Reference thisPage}}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <!-- Material Symbols "close" -->
+                                    <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                                                 Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                                 Aspect="Uniform" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <CollectionView ItemsSource="{Binding EmailEntries}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ContactEntry">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="4" Padding="0,1">
+                                <!-- Material Symbols "mail" -->
+                                <shapes:Path Data="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"
+                                             Fill="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                             Aspect="Uniform" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" Margin="2,0" />
+                                <Picker Grid.Column="1" WidthRequest="{OnPlatform 92, WinUI=120}" FontSize="13"
+                                        ItemsSource="{Binding BindingContext.EmailLabelOptions, Source={x:Reference thisPage}}"
+                                        SelectedItem="{Binding Label}" />
+                                <Entry Grid.Column="2" Placeholder="Email address" Text="{Binding Value}" Keyboard="Email" FontSize="13" />
+                                <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0"
+                                        Padding="6" VerticalOptions="Center"
+                                        StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding BindingContext.RemoveEmailCommand, Source={x:Reference thisPage}}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <!-- Material Symbols "close" -->
+                                    <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                                                 Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                                 Aspect="Uniform" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
 
-            <!-- Email Addresses -->
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Text="Email Addresses" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
-                <Button Grid.Column="1" Text="+ Add" Style="{StaticResource SecondaryButton}" Command="{Binding AddEmailCommand}" />
-            </Grid>
-            <CollectionView ItemsSource="{Binding EmailEntries}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ContactEntry">
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4" Padding="0,2">
-                            <Picker WidthRequest="{OnPlatform 92, WinUI=140}" ItemsSource="{Binding BindingContext.EmailLabelOptions, Source={x:Reference thisPage}}"
-                                    SelectedItem="{Binding Label}" />
-                            <Entry Grid.Column="1" Placeholder="Email address" Text="{Binding Value}" Keyboard="Email" />
-                            <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
-                                    Padding="6" VerticalOptions="Center"
-                                    StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding BindingContext.RemoveEmailCommand, Source={x:Reference thisPage}}"
-                                                          CommandParameter="{Binding .}" />
-                                </Border.GestureRecognizers>
-                                <!-- Material Symbols "close" -->
-                                <shapes:Path Data="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
-                                             Fill="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                                             Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                            </Border>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-            <!-- People -->
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Text="People" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
-                <Button Grid.Column="1" Text="+ Add" Style="{StaticResource SecondaryButton}" Command="{Binding AddPersonCommand}" />
+            <!-- People — primary contact info -->
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                <!-- Material Symbols "group" -->
+                <shapes:Path Data="M40-160v-112q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v112H40Zm720 0v-120q0-44-24.5-84.5T666-434q51 6 96 20.5t84 35.5q36 20 55 44.5t19 53.5v120H760ZM360-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm400-160q0 66-47 113t-113 47q-11 0-28-2.5t-28-5.5q27-32 41.5-71t14.5-81q0-42-14.5-81T544-792q14-5 28-6.5t28-1.5q66 0 113 47t47 113ZM120-240h480v-32q0-11-5.5-20T580-306q-54-27-109-40.5T360-360q-56 0-111 13.5T140-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T440-640q0-33-23.5-56.5T360-720q-33 0-56.5 23.5T280-640q0 33 23.5 56.5T360-560Zm0 320Zm0-320Z"
+                             Fill="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                             Aspect="Uniform" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="People" Style="{StaticResource SectionHeading}" VerticalTextAlignment="Center" />
+                <Button Grid.Column="2" Text="+ Add" Style="{StaticResource SecondaryButton}" Command="{Binding AddPersonCommand}" />
             </Grid>
             <CollectionView ItemsSource="{Binding PersonEntries}">
                 <CollectionView.ItemTemplate>
