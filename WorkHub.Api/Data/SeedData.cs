@@ -377,6 +377,43 @@ public static class SeedData
         await db.SaveChangesAsync();
     }
 
+    // Creates real user accounts from the BOOTSTRAP_USERS env var, format:
+    // "email:Name:password;email2:Name2:password2". Passwords may contain ':'
+    // but not ';'. Existing emails are skipped, so the variable is safe to
+    // leave set — but remove it after first boot so passwords don't linger.
+    public static async Task<List<string>> BootstrapUsersAsync(WorkHubDbContext db)
+    {
+        var created = new List<string>();
+        var raw = Environment.GetEnvironmentVariable("BOOTSTRAP_USERS");
+        if (string.IsNullOrWhiteSpace(raw))
+            return created;
+
+        foreach (var entry in raw.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var parts = entry.Split(':', 3);
+            if (parts.Length != 3)
+                throw new InvalidOperationException(
+                    $"BOOTSTRAP_USERS entry \"{entry[..Math.Min(entry.Length, 20)]}…\" is not in email:Name:password format");
+
+            var email = parts[0].Trim().ToLowerInvariant();
+            if (await db.Users.AnyAsync(u => u.Email == email))
+                continue;
+
+            db.Users.Add(new User
+            {
+                Id = Guid.NewGuid(),
+                Email = email,
+                Name = parts[1].Trim(),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(parts[2]),
+                CreatedAt = DateTime.UtcNow,
+            });
+            created.Add(email);
+        }
+
+        await db.SaveChangesAsync();
+        return created;
+    }
+
     public static async Task SeedContactLabelsAsync(WorkHubDbContext db)
     {
         if (await db.ContactLabels.AnyAsync())

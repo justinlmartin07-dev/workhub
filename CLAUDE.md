@@ -111,7 +111,7 @@ Local dev uses PostgreSQL via Docker: `docker run -d --name workhub-db -e POSTGR
 
 ## Environment Variables (API)
 
-`DATABASE_URL`, `JWT_SECRET_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `MINIMUM_APP_VERSION`, `GOOGLE_PLACES_API_KEY` (address autocomplete — feature silently disabled when unset)
+`DATABASE_URL`, `JWT_SECRET_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `MINIMUM_APP_VERSION`, `GOOGLE_PLACES_API_KEY` (address autocomplete — feature silently disabled when unset), `BOOTSTRAP_USERS` (optional; `email:Name:password;…` — creates missing user accounts at startup, remove after first boot)
 
 Local dev config goes in `WorkHub.Api/appsettings.Development.json` (gitignored).
 

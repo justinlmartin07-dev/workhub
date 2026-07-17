@@ -179,6 +179,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<WorkHubDbContext>();
     db.Database.Migrate();
+    // Real accounts from BOOTSTRAP_USERS run first so a bootstrapped dev DB
+    // skips the demo seed below (SeedAsync no-ops once any user exists).
+    var bootstrapped = await SeedData.BootstrapUsersAsync(db);
+    foreach (var email in bootstrapped)
+        app.Logger.LogInformation("Bootstrapped user account {Email}", email);
     // Demo/test data (including default-password user accounts) must never seed
     // into a non-development environment — see SeedData.SeedAsync.
     if (app.Environment.IsDevelopment())
