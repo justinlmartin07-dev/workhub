@@ -77,12 +77,14 @@
                                                      IsVisible="{Binding Job.MainContact, Converter={StaticResource IsNotNullConverter}}">
                                     <Label Text="{Binding Job.MainContact.Display}" />
                                     <Label Text="{Binding Job.MainContact.Phone}" IsVisible="{Binding Job.MainContact.HasPhone, FallbackValue=false}"
+                                           TextDecorations="Underline"
                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                         <Label.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding CallPhoneCommand}" CommandParameter="{Binding Job.MainContact.Phone}" />
                                         </Label.GestureRecognizers>
                                     </Label>
                                     <Label Text="{Binding Job.MainContact.Email}" IsVisible="{Binding Job.MainContact.HasEmail, FallbackValue=false}"
+                                           TextDecorations="Underline"
                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                         <Label.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding SendEmailCommand}" CommandParameter="{Binding Job.MainContact.Email}" />
@@ -120,7 +122,7 @@
                                IsVisible="{Binding Job.Address, Converter={StaticResource StringNotEmptyConverter}}">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Job Address" Style="{StaticResource SectionHeading}" />
-                                <Label Text="{Binding Job.Address}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                <Label Text="{Binding Job.Address}" TextDecorations="Underline" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                     <Label.GestureRecognizers>
                                         <!-- Primary button only: a right-click must reach ONLY the
                                              ContextFlyout below, or the menu is instantly dismissed

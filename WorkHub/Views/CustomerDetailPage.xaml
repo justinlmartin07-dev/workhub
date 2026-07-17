@@ -66,7 +66,7 @@
                                     <DataTemplate x:DataType="models:CustomerContactResponse">
                                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
                                             <Label Text="{Binding Label, StringFormat='{0}:'}" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="76" />
-                                            <Label Grid.Column="1" Text="{Binding Value}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                            <Label Grid.Column="1" Text="{Binding Value}" TextDecorations="Underline" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                                 <Label.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=CallPhoneCommand}"
                                                                           CommandParameter="{Binding Value}" />
@@ -83,7 +83,7 @@
                                     <DataTemplate x:DataType="models:CustomerContactResponse">
                                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
                                             <Label Text="{Binding Label, StringFormat='{0}:'}" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="76" />
-                                            <Label Grid.Column="1" Text="{Binding Value}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                            <Label Grid.Column="1" Text="{Binding Value}" TextDecorations="Underline" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                                 <Label.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=SendEmailCommand}"
                                                                           CommandParameter="{Binding Value}" />
@@ -97,7 +97,7 @@
                             <!-- Address -->
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
                                 <Label Text="Address:" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" WidthRequest="76" />
-                                <Label Grid.Column="1" Text="{Binding Customer.Address, FallbackValue='-'}" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                <Label Grid.Column="1" Text="{Binding Customer.Address, FallbackValue='-'}" TextDecorations="Underline" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                     <Label.GestureRecognizers>
                                         <!-- Primary button only: a right-click must reach ONLY the
                                              ContextFlyout below, or the menu is instantly dismissed
@@ -131,14 +131,14 @@
                                     <DataTemplate x:DataType="models:ContactPersonResponse">
                                         <VerticalStackLayout Padding="0,4" Spacing="2">
                                             <Label Text="{Binding Display}" FontFamily="OpenSansSemibold" />
-                                            <Label Text="{Binding Phone}" IsVisible="{Binding HasPhone}"
+                                            <Label Text="{Binding Phone}" IsVisible="{Binding HasPhone}" TextDecorations="Underline"
                                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                                 <Label.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=CallPhoneCommand}"
                                                                           CommandParameter="{Binding Phone}" />
                                                 </Label.GestureRecognizers>
                                             </Label>
-                                            <Label Text="{Binding Email}" IsVisible="{Binding HasEmail}"
+                                            <Label Text="{Binding Email}" IsVisible="{Binding HasEmail}" TextDecorations="Underline"
                                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
                                                 <Label.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CustomerDetailViewModel}}, Path=SendEmailCommand}"
