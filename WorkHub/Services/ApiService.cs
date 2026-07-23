@@ -210,6 +210,9 @@ public class ApiService
     public async Task<InventoryItemResponse?> GetInventoryItemAsync(Guid id)
         => await _httpClient.GetFromJsonAsync<InventoryItemResponse>($"v1/inventory/{id}");
 
+    public async Task<List<string>> GetInventoryCategoriesAsync()
+        => await _httpClient.GetFromJsonAsync<List<string>>("v1/inventory/categories") ?? [];
+
     public async Task<InventoryItemResponse?> CreateInventoryItemAsync(CreateInventoryItemRequest request)
     {
         var response = await _httpClient.PostAsJsonAsync("v1/inventory", request);

@@ -41,6 +41,7 @@ public static class SeedData
 
         // --- Inventory Items (100) ---
         var partPrefixes = new[] { "HVAC", "PLM", "ELC", "GEN", "FLR", "RF", "INS", "DRW", "PNT", "HRD" };
+        var partCategories = new[] { "HVAC", "Plumbing", "Electrical", "General", "Flooring", "Roofing", "Insulation", "Drywall", "Paint", "Hardware" };
         var partNames = new[]
         {
             "Capacitor", "Contactor", "Thermostat", "Filter", "Relay", "Fuse", "Valve",
@@ -73,6 +74,7 @@ public static class SeedData
                 Name = partNames[i],
                 Description = $"Standard {partNames[i].ToLower()} for field service use",
                 PartNumber = $"{prefix}-{1000 + i}",
+                Category = partCategories[i / 10],
                 CreatedAt = now,
                 UpdatedAt = now,
             });

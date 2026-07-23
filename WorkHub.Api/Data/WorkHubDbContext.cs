@@ -193,8 +193,10 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
             e.Property(x => x.Description).HasColumnName("description");
             e.Property(x => x.PartNumber).HasColumnName("part_number").HasMaxLength(100);
+            e.Property(x => x.Category).HasColumnName("category").HasMaxLength(100);
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+            e.HasIndex(x => x.Category).HasDatabaseName("idx_inventory_items_category");
         });
 
         // Job Inventory (library-linked items)

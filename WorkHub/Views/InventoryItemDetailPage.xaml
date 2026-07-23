@@ -17,6 +17,11 @@
                                      IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
                 <Label Grid.Column="1" Text="{Binding PageTitle}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center" />
             </Grid>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Category" Style="{StaticResource FieldLabel}" />
+                <Picker ItemsSource="{Binding CategoryOptions}"
+                        SelectedItem="{Binding SelectedCategory}" />
+            </VerticalStackLayout>
             <Entry Placeholder="Name *" Text="{Binding Name}" />
             <Entry Placeholder="Part Number" Text="{Binding PartNumber}" />
             <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" />

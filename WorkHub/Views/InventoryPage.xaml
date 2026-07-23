@@ -4,8 +4,101 @@
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
              xmlns:controls="clr-namespace:WorkHub.Controls"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.InventoryPage"
              x:DataType="vm:InventoryViewModel">
+
+    <ContentView.Resources>
+        <!-- Category header row. The list is flat (headers + items in one collection):
+             grouped CollectionView crashes on Windows when groups change at runtime. -->
+        <DataTemplate x:Key="InventoryHeaderTemplate" x:DataType="models:InventoryGroupHeader">
+            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8"
+                  Padding="{OnPlatform '14,12,14,6', WinUI='10,12,14,6'}">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleGroupCommand, Source={RelativeSource AncestorType={x:Type vm:InventoryViewModel}}}"
+                                          CommandParameter="{Binding .}" />
+                </Grid.GestureRecognizers>
+                <!-- Chevron: points right when collapsed, down when expanded -->
+                <shapes:Path Data="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"
+                             Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                             Aspect="Uniform" WidthRequest="14" HeightRequest="14" VerticalOptions="Center">
+                    <shapes:Path.Triggers>
+                        <DataTrigger TargetType="shapes:Path" Binding="{Binding IsExpanded}" Value="True">
+                            <Setter Property="Rotation" Value="90" />
+                        </DataTrigger>
+                    </shapes:Path.Triggers>
+                </shapes:Path>
+                <Label Grid.Column="1" Text="{Binding Category}" FontSize="14" FontAttributes="Bold"
+                       VerticalTextAlignment="Center" />
+                <Label Grid.Column="2" Text="{Binding ItemCount}" FontSize="12"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                       VerticalTextAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="InventoryItemTemplate" x:DataType="models:InventoryItemResponse">
+            <Border Margin="10,0" Padding="0"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    Stroke="Transparent"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    controls:RippleEffect.Enable="True">
+                <Border.GestureRecognizers>
+                    <!-- Navigation rides on the tap, not SelectionChanged, so tapping
+                         the already-selected item still opens it. -->
+                    <TapGestureRecognizer Command="{Binding SelectItemCommand, Source={RelativeSource AncestorType={x:Type vm:InventoryViewModel}}}"
+                                          CommandParameter="{Binding .}" />
+                </Border.GestureRecognizers>
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="Selected">
+                            <VisualState.Setters>
+                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                <Setter Property="StrokeThickness" Value="2" />
+                                <Setter Property="Shadow">
+                                    <Shadow Brush="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            Offset="0,2" Radius="12" Opacity="0.25" />
+                                </Setter>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+                <Grid ColumnDefinitions="4,*" ColumnSpacing="0">
+                    <!-- Accent bar -->
+                    <BoxView Grid.Column="0" WidthRequest="4"
+                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                             Margin="0,6" />
+
+                    <!-- Content -->
+                    <Grid Grid.Column="1" Padding="14,12" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Part" FontSize="11"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding Name}" FontSize="15" FontAttributes="Bold" />
+                            <Label Text="{Binding Description}" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                   IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
+                                   LineBreakMode="TailTruncation" MaxLines="1" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="3" HorizontalOptions="End">
+                            <Label Text="Part #" FontSize="11"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                   HorizontalTextAlignment="End" />
+                            <Label Text="{Binding PartNumber}" FontSize="13" FontAttributes="Bold"
+                                   HorizontalTextAlignment="End"
+                                   IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <controls:InventoryRowTemplateSelector x:Key="InventoryRowTemplates"
+                                               HeaderTemplate="{StaticResource InventoryHeaderTemplate}"
+                                               ItemTemplate="{StaticResource InventoryItemTemplate}" />
+    </ContentView.Resources>
 
     <Grid RowDefinitions="Auto,Auto,*">
         <!-- Header -->
@@ -25,73 +118,14 @@
             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
             EmptyMessage="No inventory items" RetryCommand="{Binding LoadItemsCommand}">
             <controls:DataStateView.Body>
-                <CollectionView x:Name="InventoryCollectionView" ItemsSource="{Binding Items}"
+                <CollectionView x:Name="InventoryCollectionView" ItemsSource="{Binding Rows}"
+                                ItemTemplate="{StaticResource InventoryRowTemplates}"
                                 SelectionMode="Single"
                                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                                 TranslationX="6" Margin="0,0,6,0">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="4" />
                     </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:InventoryItemResponse">
-                            <Border Margin="10,0" Padding="0"
-                                    StrokeShape="RoundRectangle 12"
-                                    StrokeThickness="0"
-                                    Stroke="Transparent"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
-                                    controls:RippleEffect.Enable="True">
-                                <Border.GestureRecognizers>
-                                    <!-- Navigation rides on the tap, not SelectionChanged, so tapping
-                                         the already-selected item still opens it. -->
-                                    <TapGestureRecognizer Command="{Binding Source={x:Reference InventoryCollectionView}, Path=BindingContext.SelectItemCommand}"
-                                                          CommandParameter="{Binding .}" />
-                                </Border.GestureRecognizers>
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal" />
-                                        <VisualState x:Name="Selected">
-                                            <VisualState.Setters>
-                                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                                <Setter Property="StrokeThickness" Value="2" />
-                                                <Setter Property="Shadow">
-                                                    <Shadow Brush="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                                            Offset="0,2" Radius="12" Opacity="0.25" />
-                                                </Setter>
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-                                <Grid ColumnDefinitions="4,*" ColumnSpacing="0">
-                                    <!-- Accent bar -->
-                                    <BoxView Grid.Column="0" WidthRequest="4"
-                                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                             Margin="0,6" />
-
-                                    <!-- Content -->
-                                    <Grid Grid.Column="1" Padding="14,12" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                        <VerticalStackLayout Spacing="3">
-                                            <Label Text="Part" FontSize="11"
-                                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                                   FontAttributes="Bold" />
-                                            <Label Text="{Binding Name}" FontSize="15" FontAttributes="Bold" />
-                                            <Label Text="{Binding Description}" FontSize="12"
-                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
-                                                   IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyConverter}}"
-                                                   LineBreakMode="TailTruncation" MaxLines="1" />
-                                        </VerticalStackLayout>
-                                        <VerticalStackLayout Grid.Column="1" Spacing="3" HorizontalOptions="End">
-                                            <Label Text="Part #" FontSize="11"
-                                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
-                                                   HorizontalTextAlignment="End" />
-                                            <Label Text="{Binding PartNumber}" FontSize="13" FontAttributes="Bold"
-                                                   HorizontalTextAlignment="End"
-                                                   IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
-                                        </VerticalStackLayout>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
                 </CollectionView>
             </controls:DataStateView.Body>
         </controls:DataStateView>

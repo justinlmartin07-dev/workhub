@@ -10,6 +10,8 @@ public class CreateInventoryItemRequest
     public string? Description { get; set; }
     [MaxLength(100)]
     public string? PartNumber { get; set; }
+    [MaxLength(100)]
+    public string? Category { get; set; }
 }
 
 public class UpdateInventoryItemRequest
@@ -20,6 +22,9 @@ public class UpdateInventoryItemRequest
     public string? Description { get; set; }
     [MaxLength(100)]
     public string? PartNumber { get; set; }
+    // null = unchanged, empty string = clear category
+    [MaxLength(100)]
+    public string? Category { get; set; }
 }
 
 public class CreateJobInventoryRequest

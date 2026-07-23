@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -35,18 +36,79 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     [ObservableProperty]
     private string _pageTitle = "New Item";
 
+    public const string NoCategoryOption = "No Category";
+    public const string AddNewCategoryOption = "+ New Category…";
+
+    public ObservableCollection<string> CategoryOptions { get; } = new() { NoCategoryOption, AddNewCategoryOption };
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
+    private string? _selectedCategory = NoCategoryOption;
+
+    // The real category value behind the picker sentinels ("" = none).
+    private string CategoryValue =>
+        SelectedCategory is null || SelectedCategory == NoCategoryOption || SelectedCategory == AddNewCategoryOption
+            ? string.Empty
+            : SelectedCategory;
+
     private string _originalName = string.Empty;
     private string _originalDescription = string.Empty;
     private string _originalPartNumber = string.Empty;
+    private string _originalCategory = string.Empty;
 
     public bool HasChanges =>
         !string.Equals(Name ?? string.Empty, _originalName, StringComparison.Ordinal)
         || !string.Equals(Description ?? string.Empty, _originalDescription, StringComparison.Ordinal)
-        || !string.Equals(PartNumber ?? string.Empty, _originalPartNumber, StringComparison.Ordinal);
+        || !string.Equals(PartNumber ?? string.Empty, _originalPartNumber, StringComparison.Ordinal)
+        || !string.Equals(CategoryValue, _originalCategory, StringComparison.Ordinal);
 
     public InventoryItemDetailViewModel(ApiService apiService)
     {
         _apiService = apiService;
+        _ = LoadCategoryOptionsAsync();
+    }
+
+    private async Task LoadCategoryOptionsAsync()
+    {
+        try
+        {
+            var categories = await _apiService.GetInventoryCategoriesAsync();
+            foreach (var category in categories)
+                EnsureCategoryOption(category);
+        }
+        catch
+        {
+            // Options stay minimal; the picker still works for the current value.
+        }
+    }
+
+    /// <summary>Inserts a category into the picker options (sorted, before the "+ New" entry) if missing.</summary>
+    private string EnsureCategoryOption(string category)
+    {
+        var existing = CategoryOptions.FirstOrDefault(o =>
+            o != NoCategoryOption && o != AddNewCategoryOption
+            && string.Equals(o, category, StringComparison.OrdinalIgnoreCase));
+        if (existing != null) return existing;
+
+        int insertAt = 1;
+        while (insertAt < CategoryOptions.Count - 1
+               && string.Compare(CategoryOptions[insertAt], category, StringComparison.OrdinalIgnoreCase) < 0)
+            insertAt++;
+        CategoryOptions.Insert(insertAt, category);
+        return category;
+    }
+
+    partial void OnSelectedCategoryChanged(string? oldValue, string? newValue)
+    {
+        if (newValue == AddNewCategoryOption)
+            _ = PromptNewCategoryAsync(oldValue ?? NoCategoryOption);
+    }
+
+    private async Task PromptNewCategoryAsync(string previous)
+    {
+        var name = await Shell.Current.DisplayPromptAsync("New Category", "Category name:", maxLength: 100);
+        name = name?.Trim();
+        SelectedCategory = string.IsNullOrEmpty(name) ? previous : EnsureCategoryOption(name);
     }
 
     partial void OnItemIdChanged(string? value)
@@ -71,6 +133,9 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                 Name = item.Name;
                 Description = item.Description ?? string.Empty;
                 PartNumber = item.PartNumber ?? string.Empty;
+                SelectedCategory = string.IsNullOrEmpty(item.Category)
+                    ? NoCategoryOption
+                    : EnsureCategoryOption(item.Category);
                 SnapshotOriginal();
             }
         });
@@ -81,6 +146,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         _originalName = Name ?? string.Empty;
         _originalDescription = Description ?? string.Empty;
         _originalPartNumber = PartNumber ?? string.Empty;
+        _originalCategory = CategoryValue;
         OnPropertyChanged(nameof(HasChanges));
     }
 
@@ -102,9 +168,11 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                 {
                     Name = Name.Trim(),
                     Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
-                    PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim()
+                    PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim(),
+                    Category = CategoryValue.Length == 0 ? null : CategoryValue
                 };
                 await _apiService.CreateInventoryItemAsync(request);
+                WeakReferenceMessenger.Default.Send(new DataChangedMessage("inventory"));
                 NavigateBack();
             }
             else
@@ -113,9 +181,12 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                 {
                     Name = Name.Trim(),
                     Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
-                    PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim()
+                    PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim(),
+                    // Empty string clears the category server-side; null would mean "unchanged".
+                    Category = CategoryValue
                 };
                 await _apiService.UpdateInventoryItemAsync(Guid.Parse(ItemId!), request);
+                WeakReferenceMessenger.Default.Send(new DataChangedMessage("inventory"));
                 SnapshotOriginal();
             }
         });

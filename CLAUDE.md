@@ -102,6 +102,7 @@ dotnet ef database update --project WorkHub.Api
 - **CollectionView flicker on item replace** — updating an item in an ObservableCollection causes the whole row to re-render. For quantity +/- buttons, update Entry.Text directly in code-behind and fire-and-forget the API call.
 - **Calendar grid rebuild is slow** — don't rebuild the entire grid on day selection. Update border strokes directly on the old/new cells in the tap handler.
 - **CarouselView is unusable on Windows** — swiping is janky and programmatic `Position` changes don't scroll backwards. PhotoViewerPopup shows a plain Image + prev/next buttons on Windows and keeps CarouselView only on Android.
+- **Grouped CollectionView crashes on Windows** — `IsGrouped="True"` throws WinUI's "Value does not fall within the expected range" when groups are inserted or mutated at runtime (e.g. clearing a search filter restores filtered-out groups). Don't use IsGrouped. The inventory list renders a flat collection mixing header + item rows via a DataTemplateSelector; expand/collapse is plain row insert/remove.
 
 ## Database
 

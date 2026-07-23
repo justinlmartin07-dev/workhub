@@ -16,11 +16,18 @@ public partial class InventoryViewModel : BaseViewModel
     private readonly ListCacheService _listCache;
     private readonly AuthService _authService;
 
-    // Full dataset; Items below is the (possibly search-filtered) view of it.
+    private const string UncategorizedLabel = "Uncategorized";
+
+    // Full dataset; Rows below is the (possibly search-filtered) view of it —
+    // a flat mix of InventoryGroupHeader and InventoryItemResponse rows. Flat on
+    // purpose: grouped CollectionView crashes on Windows when groups change.
     private List<InventoryItemResponse> _allItems = new();
 
+    // Remembered per category so a refresh doesn't reset what the user collapsed.
+    private readonly Dictionary<string, bool> _expandedState = new(StringComparer.OrdinalIgnoreCase);
+
     [ObservableProperty]
-    private ObservableCollection<InventoryItemResponse> _items = new();
+    private ObservableCollection<object> _rows = new();
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -79,41 +86,97 @@ public partial class InventoryViewModel : BaseViewModel
             _allItems = await _apiService.GetAllInventoryAsync();
             PublishList(rebuild: false);
             _ = _listCache.SaveAsync(CacheKey, _allItems);
-        }, showLoading: Items.Count == 0);
+        }, showLoading: Rows.Count == 0);
     }
 
     // Projects the master list through the current search filter into the bound
-    // collection. rebuild swaps the collection wholesale; otherwise rows are merged
-    // in place so only actual changes re-render. visible may be pre-computed off
-    // the main thread by the search debounce path.
+    // flat collection of header + item rows. rebuild swaps the collection wholesale;
+    // otherwise rows are merged in place so only actual changes re-render. visible
+    // may be pre-computed off the main thread by the search debounce path.
     private void PublishList(bool rebuild, IReadOnlyList<InventoryItemResponse>? visible = null)
     {
-        if (visible == null)
-        {
-            var query = SearchText.Trim();
-            visible = query.Length == 0
-                ? _allItems
-                : _allItems.Where(i => MatchesSearch(i, query)).ToList();
-        }
+        var query = SearchText.Trim();
+        visible ??= query.Length == 0
+            ? _allItems
+            : _allItems.Where(i => MatchesSearch(i, query)).ToList();
 
-        if (rebuild || Items.Count == 0 || visible.Count == 0)
-            Items = new ObservableCollection<InventoryItemResponse>(visible);
+        var fresh = BuildRows(visible, forceExpand: query.Length > 0);
+
+        if (rebuild || Rows.Count == 0 || fresh.Count == 0)
+            Rows = new ObservableCollection<object>(fresh);
         else
-            Items.MergeInto(visible, i => i.Id, RowUnchanged);
+            Rows.MergeInto(fresh, RowKey, RowEqual, TryUpdateRowInPlace);
 
-        if (Items.Count == 0) SetEmpty();
+        if (Rows.Count == 0) SetEmpty();
         else SetContent();
+    }
+
+    // While searching, groups are forced open so matches are actually visible.
+    private List<object> BuildRows(IReadOnlyList<InventoryItemResponse> items, bool forceExpand)
+    {
+        var rows = new List<object>();
+        var groups = items
+            .GroupBy(i => string.IsNullOrWhiteSpace(i.Category) ? UncategorizedLabel : i.Category!)
+            .OrderBy(g => g.Key == UncategorizedLabel ? 1 : 0)
+            .ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+        foreach (var group in groups)
+        {
+            var expanded = forceExpand || IsExpandedFor(group.Key);
+            var groupItems = group.ToList();
+            rows.Add(new InventoryGroupHeader(group.Key, groupItems.Count, expanded));
+            if (expanded) rows.AddRange(groupItems);
+        }
+        return rows;
+    }
+
+    private static string RowKey(object row) => row switch
+    {
+        InventoryGroupHeader h => "h:" + h.Category,
+        InventoryItemResponse i => "i:" + i.Id,
+        _ => throw new InvalidOperationException($"Unexpected row type {row.GetType()}"),
+    };
+
+    private static bool RowEqual(object a, object b) => (a, b) switch
+    {
+        (InventoryGroupHeader x, InventoryGroupHeader y) => x.ItemCount == y.ItemCount && x.IsExpanded == y.IsExpanded,
+        (InventoryItemResponse x, InventoryItemResponse y) => RowUnchanged(x, y),
+        _ => false,
+    };
+
+    // Headers are observable — mutate the existing instance so the row doesn't
+    // re-render wholesale; items are replaced (RowUnchanged already filtered).
+    private static bool TryUpdateRowInPlace(object existing, object fresh)
+    {
+        if (existing is not InventoryGroupHeader h || fresh is not InventoryGroupHeader f) return false;
+        h.ItemCount = f.ItemCount;
+        h.IsExpanded = f.IsExpanded;
+        return true;
+    }
+
+    private bool IsExpandedFor(string category) =>
+        !_expandedState.TryGetValue(category, out var expanded) || expanded;
+
+    [RelayCommand]
+    private void ToggleGroup(InventoryGroupHeader header)
+    {
+        if (header == null) return;
+        _expandedState[header.Category] = !header.IsExpanded;
+        // Re-publish: the merge flips the header state and inserts/removes the
+        // group's item rows in place.
+        PublishList(rebuild: false);
     }
 
     private static bool MatchesSearch(InventoryItemResponse i, string query) =>
         i.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
         || (i.PartNumber?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
-        || (i.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false);
+        || (i.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (i.Category?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false);
 
     private static bool RowUnchanged(InventoryItemResponse a, InventoryItemResponse b) =>
         a.Name == b.Name
         && a.Description == b.Description
         && a.PartNumber == b.PartNumber
+        && a.Category == b.Category
         && a.UpdatedAt == b.UpdatedAt;
 
     private CancellationTokenSource? _searchCts;
