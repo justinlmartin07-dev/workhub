@@ -14,6 +14,13 @@ public partial class JobsListPage : ContentView
         BindingContext = viewModel;
     }
 
+    private async void OnSortTapped(object? sender, TappedEventArgs e)
+    {
+        var selection = await SortOptionsPopup.ShowAsync(SortButton, _viewModel.SortKey, _viewModel.SortAscending);
+        if (selection != null)
+            _viewModel.SetSort(selection.Key, selection.Ascending);
+    }
+
     private async void OnScrollToRequested(JobListItemResponse job)
     {
         await Task.Delay(100);
