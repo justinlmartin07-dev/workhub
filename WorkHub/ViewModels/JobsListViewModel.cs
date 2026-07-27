@@ -31,8 +31,11 @@ public partial class JobsListViewModel : BaseViewModel
     private string? _pendingSelectId;
     private bool _suppressSelectionNav;
 
-    // Active sort: "priority" / "status" / null for API order. Lives on the
-    // singleton VM so it survives tab switches; resets on app restart.
+    private const string SortKeyPref = "jobs_sort_key";
+    private const string SortAscendingPref = "jobs_sort_ascending";
+
+    // Active sort: "priority" / "status" / null for API order. Persisted in
+    // Preferences so it survives app restarts; empty string means API order.
     public string? SortKey { get; private set; }
     public bool SortAscending { get; private set; }
 
@@ -59,6 +62,12 @@ public partial class JobsListViewModel : BaseViewModel
         _listCache = listCache;
         _authService = authService;
         _userPhotoUrl = authService.CurrentUser?.ProfilePhotoUrl;
+
+        // First run defaults to Status · Active first; an explicit "Default"
+        // choice is stored as empty string and still means API order.
+        var savedSort = Preferences.Get(SortKeyPref, "status");
+        SortKey = savedSort.Length == 0 ? null : savedSort;
+        SortAscending = Preferences.Get(SortAscendingPref, true);
 
         WeakReferenceMessenger.Default.Register<SelectListItemMessage>(this, (r, m) =>
         {
@@ -168,6 +177,8 @@ public partial class JobsListViewModel : BaseViewModel
     {
         SortKey = key;
         SortAscending = ascending;
+        Preferences.Set(SortKeyPref, key ?? string.Empty);
+        Preferences.Set(SortAscendingPref, ascending);
         PublishList(rebuild: true);
     }
 
