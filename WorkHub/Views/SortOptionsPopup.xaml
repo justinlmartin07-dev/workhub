@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
+               xmlns:controls="clr-namespace:WorkHub.Controls"
+               x:Class="WorkHub.Views.SortOptionsPopup"
+               CanBeDismissedByTappingOutsideOfPopup="True"
+               Color="Transparent">
+
+    <Border StrokeShape="RoundRectangle 12"
+            Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+            StrokeThickness="1"
+            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+            Padding="6"
+            MinimumWidthRequest="220">
+        <VerticalStackLayout Spacing="2">
+            <Label Text="Sort by" FontSize="12" Padding="10,6,10,4"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+
+            <BoxView HeightRequest="1" Margin="4,0"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}" />
+
+            <Border StrokeThickness="0" BackgroundColor="Transparent" StrokeShape="RoundRectangle 8"
+                    controls:TapFeedback.Enable="True">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDefaultTapped" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="10,8">
+                    <Label x:Name="DefaultLabel" Text="Default" FontSize="14" FontFamily="OpenSansSemibold"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+                </Grid>
+            </Border>
+
+            <Border StrokeThickness="0" BackgroundColor="Transparent" StrokeShape="RoundRectangle 8"
+                    controls:TapFeedback.Enable="True">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPriorityHighTapped" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="10,8">
+                    <Label x:Name="PriorityHighLabel" Text="Priority · High first" FontSize="14" FontFamily="OpenSansSemibold"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+                    <!-- Material Symbols "arrow_downward" -->
+                    <shapes:Path Grid.Column="1" Data="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z"
+                                 Fill="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <Border StrokeThickness="0" BackgroundColor="Transparent" StrokeShape="RoundRectangle 8"
+                    controls:TapFeedback.Enable="True">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPriorityLowTapped" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="10,8">
+                    <Label x:Name="PriorityLowLabel" Text="Priority · Low first" FontSize="14" FontFamily="OpenSansSemibold"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+                    <!-- Material Symbols "arrow_upward" -->
+                    <shapes:Path Grid.Column="1" Data="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z"
+                                 Fill="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <Border StrokeThickness="0" BackgroundColor="Transparent" StrokeShape="RoundRectangle 8"
+                    controls:TapFeedback.Enable="True">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnStatusActiveTapped" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="10,8">
+                    <Label x:Name="StatusActiveLabel" Text="Status · Active first" FontSize="14" FontFamily="OpenSansSemibold"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+                    <shapes:Path Grid.Column="1" Data="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z"
+                                 Fill="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <Border StrokeThickness="0" BackgroundColor="Transparent" StrokeShape="RoundRectangle 8"
+                    controls:TapFeedback.Enable="True">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnStatusDoneTapped" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="10,8">
+                    <Label x:Name="StatusDoneLabel" Text="Status · Done first" FontSize="14" FontFamily="OpenSansSemibold"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+                    <shapes:Path Grid.Column="1" Data="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z"
+                                 Fill="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                                 Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

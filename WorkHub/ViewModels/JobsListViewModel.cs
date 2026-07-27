@@ -31,6 +31,14 @@ public partial class JobsListViewModel : BaseViewModel
     private string? _pendingSelectId;
     private bool _suppressSelectionNav;
 
+    private const string SortKeyPref = "jobs_sort_key";
+    private const string SortAscendingPref = "jobs_sort_ascending";
+
+    // Active sort: "priority" / "status" / null for API order. Persisted in
+    // Preferences so it survives app restarts; empty string means API order.
+    public string? SortKey { get; private set; }
+    public bool SortAscending { get; private set; }
+
     public event Action<JobListItemResponse>? ScrollToRequested;
 
     public string UserName => _authService.CurrentUser?.Name ?? "";
@@ -54,6 +62,12 @@ public partial class JobsListViewModel : BaseViewModel
         _listCache = listCache;
         _authService = authService;
         _userPhotoUrl = authService.CurrentUser?.ProfilePhotoUrl;
+
+        // First run defaults to Status · Active first; an explicit "Default"
+        // choice is stored as empty string and still means API order.
+        var savedSort = Preferences.Get(SortKeyPref, "status");
+        SortKey = savedSort.Length == 0 ? null : savedSort;
+        SortAscending = Preferences.Get(SortAscendingPref, true);
 
         WeakReferenceMessenger.Default.Register<SelectListItemMessage>(this, (r, m) =>
         {
@@ -102,13 +116,7 @@ public partial class JobsListViewModel : BaseViewModel
     // the main thread by the search debounce path.
     private void PublishList(bool rebuild, IReadOnlyList<JobListItemResponse>? visible = null)
     {
-        if (visible == null)
-        {
-            var query = SearchText.Trim();
-            visible = query.Length == 0
-                ? _allJobs
-                : _allJobs.Where(j => MatchesSearch(j, query)).ToList();
-        }
+        visible ??= ProjectList(_allJobs, SearchText.Trim());
 
         if (rebuild || Jobs.Count == 0 || visible.Count == 0)
         {
@@ -123,6 +131,55 @@ public partial class JobsListViewModel : BaseViewModel
 
         if (Jobs.Count == 0) SetEmpty();
         else SetContent();
+    }
+
+    // Filter + sort in one pass; safe to run off the main thread on a snapshot.
+    private List<JobListItemResponse> ProjectList(List<JobListItemResponse> source, string query)
+    {
+        IEnumerable<JobListItemResponse> result = query.Length == 0
+            ? source
+            : source.Where(j => MatchesSearch(j, query));
+
+        result = SortKey switch
+        {
+            "priority" => SortAscending
+                ? result.OrderBy(j => PriorityRank(j.Priority))
+                : result.OrderByDescending(j => PriorityRank(j.Priority)),
+            "status" => SortAscending
+                ? result.OrderBy(j => StatusRank(j.Status))
+                : result.OrderByDescending(j => StatusRank(j.Status)),
+            _ => result,
+        };
+        return result.ToList();
+    }
+
+    private static int PriorityRank(string p) => p switch
+    {
+        "Low" => 0,
+        "Medium" => 1,
+        "High" => 2,
+        _ => -1,
+    };
+
+    // Most-active-first order, so ascending puts work underway above untouched
+    // jobs and descending puts finished work first.
+    private static int StatusRank(string s) => s switch
+    {
+        "In Progress" => 0,
+        "New" => 1,
+        "On Hold" => 2,
+        "Complete" => 3,
+        "Cancelled" => 4,
+        _ => -1,
+    };
+
+    public void SetSort(string? key, bool ascending)
+    {
+        SortKey = key;
+        SortAscending = ascending;
+        Preferences.Set(SortKeyPref, key ?? string.Empty);
+        Preferences.Set(SortAscendingPref, ascending);
+        PublishList(rebuild: true);
     }
 
     private static bool MatchesSearch(JobListItemResponse j, string query) =>
@@ -188,8 +245,7 @@ public partial class JobsListViewModel : BaseViewModel
         catch (OperationCanceledException) { return; }
         var query = SearchText.Trim();
         var snapshot = _allJobs;
-        var visible = await Task.Run(() =>
-            query.Length == 0 ? snapshot : snapshot.Where(j => MatchesSearch(j, query)).ToList(), ct);
+        var visible = await Task.Run(() => ProjectList(snapshot, query), ct);
         if (ct.IsCancellationRequested) return;
         PublishList(rebuild: false, visible);
     }
