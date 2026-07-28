@@ -4,17 +4,33 @@
              xmlns:vm="clr-namespace:WorkHub.ViewModels"
              xmlns:models="clr-namespace:WorkHub.Models"
              xmlns:controls="clr-namespace:WorkHub.Controls"
+             xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
              x:Class="WorkHub.Views.JobsListPage"
              x:DataType="vm:JobsListViewModel">
 
     <Grid RowDefinitions="Auto,Auto,*">
         <!-- Header -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="8,8,16,4">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="8,8,16,4">
             <controls:UserAvatarView Grid.Column="0"
                 UserName="{Binding UserName}" PhotoUrl="{Binding UserPhotoUrl}"
                 Command="{Binding GoToProfileCommand}" VerticalOptions="Center" />
             <Label Grid.Column="1" Text="Jobs" FontSize="20" FontAttributes="Bold"
                    Margin="8,0,0,0" VerticalOptions="Center" />
+            <Border Grid.Column="2" x:Name="SortButton"
+                    StrokeThickness="0" Stroke="Transparent" BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 8" Padding="0"
+                    WidthRequest="40" HeightRequest="40" VerticalOptions="Center"
+                    SemanticProperties.Description="Sort jobs"
+                    controls:RippleEffect.Enable="True">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnSortTapped" />
+                </Border.GestureRecognizers>
+                <!-- Material Symbols "sort" -->
+                <shapes:Path Data="M120-240v-80h240v80H120Zm0-200v-80h480v80H120Zm0-200v-80h720v80H120Z"
+                             Fill="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}"
+                             Aspect="Uniform" WidthRequest="20" HeightRequest="20"
+                             HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
         </Grid>
 
         <SearchBar Grid.Row="1" Placeholder="Search jobs..." Text="{Binding SearchText}"
