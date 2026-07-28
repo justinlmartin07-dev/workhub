@@ -4,6 +4,9 @@
 	<Import Project="signing.props" Condition="Exists('signing.props')" />
 
 	<PropertyGroup>
+		<!-- Build profiles: Debug → local API, QA → Railway staging, Release → Railway production.
+		     URLs live in AppConfig.cs, selected by compile symbols. -->
+		<Configurations>Debug;QA;Release</Configurations>
 		<TargetFrameworks>net9.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
@@ -42,6 +45,21 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<!-- QA: release-like build pointed at the staging API (see AppConfig.cs) -->
+	<PropertyGroup Condition="'$(Configuration)' == 'QA'">
+		<DefineConstants>$(DefineConstants);QA</DefineConstants>
+		<Optimize>true</Optimize>
+	</PropertyGroup>
+
+	<!-- Debug builds talk to the local API over plain http; QA/Release are https-only.
+	     The placeholder is substituted into AndroidManifest.xml at build time. -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<AndroidManifestPlaceholders>usesCleartextTraffic=true</AndroidManifestPlaceholders>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+		<AndroidManifestPlaceholders>usesCleartextTraffic=false</AndroidManifestPlaceholders>
 	</PropertyGroup>
 
 	<ItemGroup>

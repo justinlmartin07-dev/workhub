@@ -64,6 +64,21 @@ dotnet build -f net9.0-android
 # Publish
 dotnet publish -f net9.0-android -c Release
 dotnet publish -f net9.0-windows10.0.19041.0 -c Release
+```
+
+### Client build profiles
+
+The client's API base URL is a compile-time constant in `WorkHub/AppConfig.cs`, selected by build configuration (`-c`):
+
+| Configuration | API URL |
+|---|---|
+| `Debug` (default) | `http://localhost:5180/` — local API (`10.0.2.2` on Android; cleartext HTTP is Debug-only) |
+| `QA` | `https://workhub-api-staging.up.railway.app/` — Railway staging |
+| `Release` | `https://workhub-api-production-1baa.up.railway.app/` — Railway production |
+
+```bash
+dotnet build -f net9.0-android -c QA        # staging build
+dotnet publish -f net9.0-android -c Release # production build
 
 # Database Migrations
 dotnet tool install --global dotnet-ef

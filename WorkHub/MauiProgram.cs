@@ -16,22 +16,10 @@ public static class MauiProgram
 {
 	public static IServiceProvider Services { get; private set; } = null!;
 
-	// Reads the API base URL from the bundled Resources/Raw/appsettings.json.
-	// Edit that file (and rebuild) to point the app at a different API.
-	private static string LoadApiBaseUrl()
-	{
-		using var stream = Microsoft.Maui.Storage.FileSystem.OpenAppPackageFileAsync("appsettings.json")
-			.GetAwaiter().GetResult();
-		using var reader = new StreamReader(stream);
-		using var doc = System.Text.Json.JsonDocument.Parse(reader.ReadToEnd());
-		return doc.RootElement.GetProperty("ApiBaseUrl").GetString()
-			?? throw new InvalidOperationException("ApiBaseUrl missing from appsettings.json");
-	}
-
 	public static MauiApp CreateMauiApp()
 	{
 		var builder = MauiApp.CreateBuilder();
-		var apiBaseUrl = LoadApiBaseUrl();
+		var apiBaseUrl = AppConfig.ApiBaseUrl;
 		builder
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
