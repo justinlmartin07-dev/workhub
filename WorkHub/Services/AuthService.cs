@@ -188,21 +188,32 @@ public class AuthService
     {
         if (_currentUser != null)
             _currentUser.ProfilePhotoUrl = photoUrl;
-        _ = SecureStorage.SetAsync(UserPhotoUrlKey, photoUrl ?? "");
+        _ = SetOrRemoveAsync(UserPhotoUrlKey, photoUrl);
         WeakReferenceMessenger.Default.Send(new DataChangedMessage("user_photo"));
     }
 
     private async Task SaveTokensAsync()
     {
-        await SecureStorage.SetAsync(AccessTokenKey, _accessToken ?? "");
-        await SecureStorage.SetAsync(RefreshTokenKey, _refreshToken ?? "");
-        await SecureStorage.SetAsync(ExpiresAtKey, _expiresAt.ToString("O"));
+        await SetOrRemoveAsync(AccessTokenKey, _accessToken);
+        await SetOrRemoveAsync(RefreshTokenKey, _refreshToken);
+        await SetOrRemoveAsync(ExpiresAtKey, _expiresAt.ToString("O"));
         if (_currentUser != null)
         {
-            await SecureStorage.SetAsync(UserIdKey, _currentUser.Id.ToString());
-            await SecureStorage.SetAsync(UserNameKey, _currentUser.Name);
-            await SecureStorage.SetAsync(UserEmailKey, _currentUser.Email);
-            await SecureStorage.SetAsync(UserPhotoUrlKey, _currentUser.ProfilePhotoUrl ?? "");
+            await SetOrRemoveAsync(UserIdKey, _currentUser.Id.ToString());
+            await SetOrRemoveAsync(UserNameKey, _currentUser.Name);
+            await SetOrRemoveAsync(UserEmailKey, _currentUser.Email);
+            await SetOrRemoveAsync(UserPhotoUrlKey, _currentUser.ProfilePhotoUrl);
         }
+    }
+
+    // Windows SecureStorage protects values via WinRT DataProtectionProvider, which
+    // throws E_INVALIDARG ("Value does not fall within the expected range") on an
+    // empty string — remove the key instead of storing "".
+    private static async Task SetOrRemoveAsync(string key, string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            SecureStorage.Remove(key);
+        else
+            await SecureStorage.SetAsync(key, value);
     }
 }
