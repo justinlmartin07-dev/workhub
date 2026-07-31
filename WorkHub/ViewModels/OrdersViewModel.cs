@@ -132,6 +132,7 @@ public partial class OrdersViewModel : BaseViewModel
     private static bool MatchesSearch(OrderLineResponse o, string query) =>
         o.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
         || (o.PartNumber?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (o.Sku?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
         || (o.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
         || o.JobTitle.Contains(query, StringComparison.OrdinalIgnoreCase)
         || o.CustomerName.Contains(query, StringComparison.OrdinalIgnoreCase);
@@ -167,6 +168,7 @@ public partial class OrdersViewModel : BaseViewModel
         a.Name == b.Name
         && a.Description == b.Description
         && a.PartNumber == b.PartNumber
+        && a.Sku == b.Sku
         && a.Quantity == b.Quantity
         && a.JobId == b.JobId
         && a.JobTitle == b.JobTitle

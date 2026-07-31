@@ -31,6 +31,10 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     private string _partNumber = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
+    private string _sku = string.Empty;
+
+    [ObservableProperty]
     private bool _isNew = true;
 
     [ObservableProperty]
@@ -54,12 +58,14 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     private string _originalName = string.Empty;
     private string _originalDescription = string.Empty;
     private string _originalPartNumber = string.Empty;
+    private string _originalSku = string.Empty;
     private string _originalCategory = string.Empty;
 
     public bool HasChanges =>
         !string.Equals(Name ?? string.Empty, _originalName, StringComparison.Ordinal)
         || !string.Equals(Description ?? string.Empty, _originalDescription, StringComparison.Ordinal)
         || !string.Equals(PartNumber ?? string.Empty, _originalPartNumber, StringComparison.Ordinal)
+        || !string.Equals(Sku ?? string.Empty, _originalSku, StringComparison.Ordinal)
         || !string.Equals(CategoryValue, _originalCategory, StringComparison.Ordinal);
 
     public InventoryItemDetailViewModel(ApiService apiService)
@@ -133,6 +139,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                 Name = item.Name;
                 Description = item.Description ?? string.Empty;
                 PartNumber = item.PartNumber ?? string.Empty;
+                Sku = item.Sku ?? string.Empty;
                 SelectedCategory = string.IsNullOrEmpty(item.Category)
                     ? NoCategoryOption
                     : EnsureCategoryOption(item.Category);
@@ -146,6 +153,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         _originalName = Name ?? string.Empty;
         _originalDescription = Description ?? string.Empty;
         _originalPartNumber = PartNumber ?? string.Empty;
+        _originalSku = Sku ?? string.Empty;
         _originalCategory = CategoryValue;
         OnPropertyChanged(nameof(HasChanges));
     }
@@ -169,6 +177,7 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                     Name = Name.Trim(),
                     Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
                     PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim(),
+                    Sku = string.IsNullOrWhiteSpace(Sku) ? null : Sku.Trim(),
                     Category = CategoryValue.Length == 0 ? null : CategoryValue
                 };
                 await _apiService.CreateInventoryItemAsync(request);
@@ -177,12 +186,14 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
             }
             else
             {
+                // For optional fields, empty string clears the value server-side;
+                // null would mean "unchanged" and a cleared field would survive the save.
                 var request = new UpdateInventoryItemRequest
                 {
                     Name = Name.Trim(),
-                    Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
-                    PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim(),
-                    // Empty string clears the category server-side; null would mean "unchanged".
+                    Description = Description.Trim(),
+                    PartNumber = PartNumber.Trim(),
+                    Sku = Sku.Trim(),
                     Category = CategoryValue
                 };
                 await _apiService.UpdateInventoryItemAsync(Guid.Parse(ItemId!), request);

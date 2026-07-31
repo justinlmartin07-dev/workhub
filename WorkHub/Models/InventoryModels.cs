@@ -2,13 +2,28 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WorkHub.Models;
 
-public class InventoryItemResponse
+// Displayed fields are observable so a refresh can update an existing row
+// in place. Replacing the instance in the bound collection makes the WinUI
+// list re-render the row (flicker) and drop its scroll position.
+public partial class InventoryItemResponse : ObservableObject
 {
     public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public string? PartNumber { get; set; }
-    public string? Category { get; set; }
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    private string? _description;
+
+    [ObservableProperty]
+    private string? _partNumber;
+
+    [ObservableProperty]
+    private string? _sku;
+
+    [ObservableProperty]
+    private string? _category;
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
@@ -18,15 +33,17 @@ public class CreateInventoryItemRequest
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? PartNumber { get; set; }
+    public string? Sku { get; set; }
     public string? Category { get; set; }
 }
 
+// For all optional fields: null = unchanged, empty string = clear.
 public class UpdateInventoryItemRequest
 {
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? PartNumber { get; set; }
-    // null = unchanged, empty string = clear category
+    public string? Sku { get; set; }
     public string? Category { get; set; }
 }
 

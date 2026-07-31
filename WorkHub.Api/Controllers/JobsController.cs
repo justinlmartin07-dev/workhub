@@ -110,6 +110,7 @@ public class JobsController : ControllerBase
                 Name = ji.InventoryItem.Name,
                 Description = ji.InventoryItem.Description,
                 PartNumber = ji.InventoryItem.PartNumber,
+                Sku = ji.InventoryItem.Sku,
                 Quantity = ji.Quantity,
                 ListType = ji.ListType,
                 Source = "library",

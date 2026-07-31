@@ -731,7 +731,7 @@ For a 3-person team entering addresses manually, this is acceptable — the team
 
 | Param | Type | Description |
 |---|---|---|
-| `q` | string | Search filter — matches against `name` and `part_number` via `ILIKE` |
+| `q` | string | Search filter — matches against `name`, `part_number`, `sku`, and `category` via `ILIKE` |
 | `page` | int | Page number (default 1) |
 | `pageSize` | int | Results per page (default 25, max 100) |
 
@@ -740,13 +740,14 @@ For a 3-person team entering addresses manually, this is acceptable — the team
 {
   "name": "20A Breaker",
   "description": "Standard 20-amp single-pole breaker",
-  "partNumber": "BR-20A"
+  "partNumber": "BR-20A",
+  "sku": "1006783"
 }
 ```
 Required: `name`. All other fields optional.
 
 **Request body for `PUT /v1/inventory/{id}`:**
-Same shape as POST. All fields optional — only provided fields are updated.
+Same shape as POST. All fields optional — only provided fields are updated. For optional text fields (`description`, `partNumber`, `sku`, `category`), an empty string clears the stored value; omitting the field (or `null`) leaves it unchanged.
 
 **Delete protection for `DELETE /v1/inventory/{id}`:**
 Before deleting, the API checks for any `job_inventory` rows referencing this item. If found, returns `409 Conflict`:

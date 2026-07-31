@@ -89,6 +89,13 @@
                             <Label Text="{Binding PartNumber}" FontSize="13" FontAttributes="Bold"
                                    HorizontalTextAlignment="End"
                                    IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                            <Label Text="SKU" FontSize="11"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                                   HorizontalTextAlignment="End"
+                                   IsVisible="{Binding Sku, Converter={StaticResource StringNotEmptyConverter}}" />
+                            <Label Text="{Binding Sku}" FontSize="13" FontAttributes="Bold"
+                                   HorizontalTextAlignment="End"
+                                   IsVisible="{Binding Sku, Converter={StaticResource StringNotEmptyConverter}}" />
                         </VerticalStackLayout>
                     </Grid>
                 </Grid>

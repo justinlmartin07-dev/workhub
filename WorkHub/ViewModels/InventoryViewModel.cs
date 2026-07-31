@@ -35,6 +35,10 @@ public partial class InventoryViewModel : BaseViewModel
     [ObservableProperty]
     private InventoryItemResponse? _selectedItem;
 
+    // Raised when the selected row lands at a new position after a refresh
+    // (e.g. its category changed) so the page can scroll it into view.
+    public event Action<object>? ScrollToRowRequested;
+
     public string UserName => _authService.CurrentUser?.Name ?? "";
     public string UserInitials
     {
@@ -103,9 +107,44 @@ public partial class InventoryViewModel : BaseViewModel
         var fresh = BuildRows(visible, forceExpand: query.Length > 0);
 
         if (rebuild || Rows.Count == 0 || fresh.Count == 0)
+        {
             Rows = new ObservableCollection<object>(fresh);
+        }
         else
+        {
+            var selected = SelectedItem;
+            var oldIndex = selected != null ? Rows.IndexOf(selected) : -1;
+
+            // If the selected item just moved into a collapsed group (category
+            // change), expand that group so its row has a visible spot to land in.
+            if (selected != null && oldIndex >= 0
+                && !fresh.OfType<InventoryItemResponse>().Any(i => i.Id == selected.Id))
+            {
+                var freshItem = visible.FirstOrDefault(i => i.Id == selected.Id);
+                if (freshItem != null)
+                {
+                    var group = string.IsNullOrWhiteSpace(freshItem.Category) ? UncategorizedLabel : freshItem.Category!;
+                    _expandedState[group] = true;
+                    fresh = BuildRows(visible, forceExpand: query.Length > 0);
+                }
+            }
+
             Rows.MergeInto(fresh, RowKey, RowEqual, TryUpdateRowInPlace);
+
+            // Follow the selected row if the refresh relocated it.
+            if (selected != null && oldIndex >= 0)
+            {
+                var newIndex = Rows.IndexOf(selected);
+                if (newIndex >= 0 && newIndex != oldIndex)
+                {
+                    // After row moves WinUI can leave the selection ring at the old
+                    // position — re-assert selection so it follows the item.
+                    SelectedItem = null;
+                    SelectedItem = selected;
+                    ScrollToRowRequested?.Invoke(selected);
+                }
+            }
+        }
 
         if (Rows.Count == 0) SetEmpty();
         else SetContent();
@@ -143,14 +182,28 @@ public partial class InventoryViewModel : BaseViewModel
         _ => false,
     };
 
-    // Headers are observable — mutate the existing instance so the row doesn't
-    // re-render wholesale; items are replaced (RowUnchanged already filtered).
+    // Headers and items are observable — mutate the existing instance instead of
+    // replacing it. A Replace notification makes the WinUI list re-render the row
+    // (flicker) and drop its scroll position, e.g. after saving an edit.
     private static bool TryUpdateRowInPlace(object existing, object fresh)
     {
-        if (existing is not InventoryGroupHeader h || fresh is not InventoryGroupHeader f) return false;
-        h.ItemCount = f.ItemCount;
-        h.IsExpanded = f.IsExpanded;
-        return true;
+        switch (existing, fresh)
+        {
+            case (InventoryGroupHeader h, InventoryGroupHeader f):
+                h.ItemCount = f.ItemCount;
+                h.IsExpanded = f.IsExpanded;
+                return true;
+            case (InventoryItemResponse x, InventoryItemResponse y):
+                x.Name = y.Name;
+                x.Description = y.Description;
+                x.PartNumber = y.PartNumber;
+                x.Sku = y.Sku;
+                x.Category = y.Category;
+                x.UpdatedAt = y.UpdatedAt;
+                return true;
+            default:
+                return false;
+        }
     }
 
     private bool IsExpandedFor(string category) =>
@@ -169,6 +222,7 @@ public partial class InventoryViewModel : BaseViewModel
     private static bool MatchesSearch(InventoryItemResponse i, string query) =>
         i.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
         || (i.PartNumber?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
+        || (i.Sku?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
         || (i.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)
         || (i.Category?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false);
 
@@ -176,6 +230,7 @@ public partial class InventoryViewModel : BaseViewModel
         a.Name == b.Name
         && a.Description == b.Description
         && a.PartNumber == b.PartNumber
+        && a.Sku == b.Sku
         && a.Category == b.Category
         && a.UpdatedAt == b.UpdatedAt;
 

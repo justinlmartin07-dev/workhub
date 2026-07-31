@@ -14,10 +14,40 @@ public partial class OrderDetailViewModel : BaseViewModel, IQueryAttributable
     [ObservableProperty]
     private OrderLineResponse? _order;
 
+    // Drives the transient "Copied" label next to the SKU copy button.
+    // Toolkit Toast is NOT an option here — it crashes unpackaged Windows apps
+    // (needs package identity for AppNotification).
+    [ObservableProperty]
+    private bool _skuCopied;
+
+    private int _skuCopiedVersion;
+
     public OrderDetailViewModel(ApiService apiService) => _apiService = apiService;
 
     [RelayCommand]
     private void Cancel() => NavigateBack();
+
+    [RelayCommand]
+    private async Task CopySkuAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Order?.Sku)) return;
+        try
+        {
+            await Clipboard.Default.SetTextAsync(Order.Sku);
+        }
+        catch
+        {
+            return; // no feedback shown; copying is best-effort
+        }
+
+        // Show "Copied" briefly; the version counter keeps rapid re-taps from
+        // hiding the label early.
+        var version = ++_skuCopiedVersion;
+        SkuCopied = true;
+        await Task.Delay(1500);
+        if (version == _skuCopiedVersion)
+            SkuCopied = false;
+    }
 
     private async void NavigateBack()
     {

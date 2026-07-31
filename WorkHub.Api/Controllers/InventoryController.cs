@@ -28,6 +28,7 @@ public class InventoryController : ControllerBase
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(i => EF.Functions.ILike(i.Name, $"%{q}%")
                 || (i.PartNumber != null && EF.Functions.ILike(i.PartNumber, $"%{q}%"))
+                || (i.Sku != null && EF.Functions.ILike(i.Sku, $"%{q}%"))
                 || (i.Category != null && EF.Functions.ILike(i.Category, $"%{q}%")));
 
         if (!string.IsNullOrWhiteSpace(category))
@@ -44,6 +45,7 @@ public class InventoryController : ControllerBase
                 Name = i.Name,
                 Description = i.Description,
                 PartNumber = i.PartNumber,
+                Sku = i.Sku,
                 Category = i.Category,
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt,
@@ -86,6 +88,7 @@ public class InventoryController : ControllerBase
             Name = item.Name,
             Description = item.Description,
             PartNumber = item.PartNumber,
+            Sku = item.Sku,
             Category = item.Category,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
@@ -101,7 +104,8 @@ public class InventoryController : ControllerBase
             Name = request.Name,
             Description = request.Description,
             PartNumber = request.PartNumber,
-            Category = NormalizeCategory(request.Category),
+            Sku = request.Sku,
+            Category = NormalizeOptional(request.Category),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
@@ -115,6 +119,7 @@ public class InventoryController : ControllerBase
             Name = item.Name,
             Description = item.Description,
             PartNumber = item.PartNumber,
+            Sku = item.Sku,
             Category = item.Category,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
@@ -128,10 +133,12 @@ public class InventoryController : ControllerBase
         if (item == null)
             return NotFound(new ErrorResponse { Error = "Inventory item not found" });
 
+        // For optional text fields: null = unchanged, empty string = clear.
         if (request.Name != null) item.Name = request.Name;
-        if (request.Description != null) item.Description = request.Description;
-        if (request.PartNumber != null) item.PartNumber = request.PartNumber;
-        if (request.Category != null) item.Category = NormalizeCategory(request.Category);
+        if (request.Description != null) item.Description = NormalizeOptional(request.Description);
+        if (request.PartNumber != null) item.PartNumber = NormalizeOptional(request.PartNumber);
+        if (request.Sku != null) item.Sku = NormalizeOptional(request.Sku);
+        if (request.Category != null) item.Category = NormalizeOptional(request.Category);
         item.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -142,6 +149,7 @@ public class InventoryController : ControllerBase
             Name = item.Name,
             Description = item.Description,
             PartNumber = item.PartNumber,
+            Sku = item.Sku,
             Category = item.Category,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
@@ -182,9 +190,9 @@ public class InventoryController : ControllerBase
         return NoContent();
     }
 
-    private static string? NormalizeCategory(string? category)
+    private static string? NormalizeOptional(string? value)
     {
-        var trimmed = category?.Trim();
+        var trimmed = value?.Trim();
         return string.IsNullOrEmpty(trimmed) ? null : trimmed;
     }
 }

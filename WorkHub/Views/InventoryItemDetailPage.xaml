@@ -24,6 +24,7 @@
             </VerticalStackLayout>
             <Entry Placeholder="Name *" Text="{Binding Name}" />
             <Entry Placeholder="Part Number" Text="{Binding PartNumber}" />
+            <Entry Placeholder="SKU" Text="{Binding Sku}" />
             <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" />
 
             <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" IsVisible="{Binding HasError}" />
