@@ -33,10 +33,29 @@
                 <VerticalStackLayout Grid.Column="1" Spacing="4">
                     <Label Text="Markup %" Style="{StaticResource FieldLabel}" />
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
-                        <Entry Placeholder="0" Text="{Binding Markup}" Keyboard="Numeric" />
+                        <Entry Placeholder="0" Text="{Binding Markup}" Keyboard="Numeric"
+                               Unfocused="OnMarkupEntryUnfocused" />
                         <Button Grid.Column="1" Text="&#x25BE;" Padding="10,0" MinimumWidthRequest="36"
-                                Command="{Binding PickMarkupCommand}" />
+                                Command="{Binding ToggleMarkupSuggestionsCommand}" />
                     </Grid>
+                    <Border StrokeThickness="1" StrokeShape="RoundRectangle 8"
+                            IsVisible="{Binding IsMarkupSuggestionsVisible}"
+                            Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding MarkupSuggestions}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Label Text="{Binding .}" Padding="12,8" FontSize="14"
+                                           controls:TapFeedback.Enable="True">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding BindingContext.SelectMarkupCommand, Source={x:Reference thisPage}}"
+                                                                  CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
                 </VerticalStackLayout>
                 <VerticalStackLayout Grid.Column="2" Spacing="4">
                     <Label Text="Price" Style="{StaticResource FieldLabel}" />

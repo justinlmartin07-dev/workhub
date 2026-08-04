@@ -165,22 +165,83 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         _markupOptions.Insert(insertAt, markup);
     }
 
-    [RelayCommand]
-    private async Task PickMarkupAsync()
+    public const string NoMarkupsPlaceholder = "No saved markups yet";
+
+    // Inline dropdown under the markup entry: typing filters previously used
+    // percentages by prefix; the ▾ button shows the full list.
+    public ObservableCollection<string> MarkupSuggestions { get; } = new();
+
+    [ObservableProperty]
+    private bool _isMarkupSuggestionsVisible;
+
+    private bool _suppressMarkupSuggestions;
+    private DateTime _markupDropdownOpenedAt;
+
+    private void UpdateMarkupSuggestions(string? text)
     {
-        if (_markupOptions.Count == 0)
+        var typed = text?.Trim().TrimEnd('%');
+        MarkupSuggestions.Clear();
+        if (!string.IsNullOrEmpty(typed))
         {
-            await Shell.Current.DisplayAlert("Markup", "No previously used markup percentages yet. Type one to get started.", "OK");
+            foreach (var option in _markupOptions)
+            {
+                var formatted = FormatMarkup(option);
+                if (formatted.StartsWith(typed, StringComparison.Ordinal) && formatted != typed)
+                    MarkupSuggestions.Add($"{formatted}%");
+            }
+        }
+        IsMarkupSuggestionsVisible = MarkupSuggestions.Count > 0;
+    }
+
+    [RelayCommand]
+    private void ToggleMarkupSuggestions()
+    {
+        if (IsMarkupSuggestionsVisible)
+        {
+            IsMarkupSuggestionsVisible = false;
             return;
         }
-        var options = _markupOptions.Select(m => $"{FormatMarkup(m)}%").ToArray();
-        var choice = await Shell.Current.DisplayActionSheet("Markup %", "Cancel", null, options);
-        if (!string.IsNullOrEmpty(choice) && choice != "Cancel")
-            Markup = choice.TrimEnd('%');
+        MarkupSuggestions.Clear();
+        foreach (var option in _markupOptions)
+            MarkupSuggestions.Add($"{FormatMarkup(option)}%");
+        if (MarkupSuggestions.Count == 0)
+            MarkupSuggestions.Add(NoMarkupsPlaceholder);
+        _markupDropdownOpenedAt = DateTime.UtcNow;
+        IsMarkupSuggestionsVisible = true;
+    }
+
+    [RelayCommand]
+    private void SelectMarkup(string suggestion)
+    {
+        if (suggestion != NoMarkupsPlaceholder)
+        {
+            _suppressMarkupSuggestions = true;
+            Markup = suggestion.TrimEnd('%');
+            _suppressMarkupSuggestions = false;
+        }
+        IsMarkupSuggestionsVisible = false;
+    }
+
+    /// <summary>
+    /// Called when the markup entry loses focus. Skips the hide right after the
+    /// ▾ button opened the list — pressing the button unfocuses the entry, and
+    /// hiding then would close the dropdown the moment it opens.
+    /// </summary>
+    public void HideMarkupSuggestionsDeferred()
+    {
+        if (DateTime.UtcNow - _markupDropdownOpenedAt > TimeSpan.FromMilliseconds(400))
+            IsMarkupSuggestionsVisible = false;
     }
 
     partial void OnCostChanged(string value) => RecalculatePrice();
-    partial void OnMarkupChanged(string value) => RecalculatePrice();
+
+    partial void OnMarkupChanged(string value)
+    {
+        RecalculatePrice();
+        if (!_syncingPricing && !_suppressMarkupSuggestions)
+            UpdateMarkupSuggestions(value);
+    }
+
     partial void OnPriceChanged(string value) => RecalculateMarkup();
 
     private void RecalculatePrice()
