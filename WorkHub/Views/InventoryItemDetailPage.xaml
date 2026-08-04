@@ -38,10 +38,61 @@
                         <Button Grid.Column="1" Text="&#x25BE;" Padding="10,0" MinimumWidthRequest="36"
                                 Command="{Binding ToggleMarkupSuggestionsCommand}" />
                     </Grid>
-                    <Border StrokeThickness="1" StrokeShape="RoundRectangle 8"
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="2" Spacing="4">
+                    <Label Text="Price" Style="{StaticResource FieldLabel}" />
+                    <Entry Placeholder="0.00" Text="{Binding Price}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+            </Grid>
+            <!-- The markup suggestions flyout floats over this content instead of
+                 pushing it down: the overlay grid mirrors the pricing row's three
+                 columns so the flyout lines up under the markup entry. -->
+            <Grid>
+                <VerticalStackLayout Spacing="16">
+                    <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" />
+
+                    <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" IsVisible="{Binding HasError}" />
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsNew}">
+                        <Button Text="Cancel" Style="{StaticResource CancelButton}" Command="{Binding CancelCommand}" />
+                        <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
+                                IsEnabled="{Binding HasChanges}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 12" MinimumHeightRequest="44"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
+                                controls:TapFeedback.Enable="True"
+                                controls:TapFeedback.HoverLight="#DC2626"
+                                controls:TapFeedback.HoverDark="#FCA5A5">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding DeleteCommand}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                                <shapes:Path Data="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"
+                                             Fill="{StaticResource White}"
+                                             Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                <Label Text="Delete" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                                       IsVisible="{OnPlatform true, Android=false}"
+                                       TextColor="{StaticResource White}" />
+                            </HorizontalStackLayout>
+                        </Border>
+                        <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
+                                IsEnabled="{Binding HasChanges}" />
+                    </Grid>
+
+                    <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12" VerticalOptions="Start" ZIndex="10"
+                      Margin="0,-12,0,0" InputTransparent="True" CascadeInputTransparent="False">
+                    <Border Grid.Column="1" StrokeThickness="1" StrokeShape="RoundRectangle 8"
                             IsVisible="{Binding IsMarkupSuggestionsVisible}"
                             Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                             BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Opacity="0.25" Radius="8" Offset="0,4" />
+                        </Border.Shadow>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding MarkupSuggestions}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
@@ -56,45 +107,8 @@
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
                     </Border>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="2" Spacing="4">
-                    <Label Text="Price" Style="{StaticResource FieldLabel}" />
-                    <Entry Placeholder="0.00" Text="{Binding Price}" Keyboard="Numeric" />
-                </VerticalStackLayout>
+                </Grid>
             </Grid>
-            <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" />
-
-            <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" IsVisible="{Binding HasError}" />
-
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsNew}">
-                <Button Text="Cancel" Style="{StaticResource CancelButton}" Command="{Binding CancelCommand}" />
-                <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
-                        IsEnabled="{Binding HasChanges}" />
-            </Grid>
-
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsNew, Converter={StaticResource InverseBoolConverter}}">
-                <Border StrokeThickness="0" StrokeShape="RoundRectangle 12" MinimumHeightRequest="44"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Danger}, Dark={StaticResource DangerDark}}"
-                        controls:TapFeedback.Enable="True"
-                        controls:TapFeedback.HoverLight="#DC2626"
-                        controls:TapFeedback.HoverDark="#FCA5A5">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding DeleteCommand}" />
-                    </Border.GestureRecognizers>
-                    <HorizontalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
-                        <shapes:Path Data="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"
-                                     Fill="{StaticResource White}"
-                                     Aspect="Uniform" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                        <Label Text="Delete" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
-                               IsVisible="{OnPlatform true, Android=false}"
-                               TextColor="{StaticResource White}" />
-                    </HorizontalStackLayout>
-                </Border>
-                <Button Grid.Column="1" Text="Save" Command="{Binding SaveCommand}"
-                        IsEnabled="{Binding HasChanges}" />
-            </Grid>
-
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
