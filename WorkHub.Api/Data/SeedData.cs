@@ -64,10 +64,13 @@ public static class SeedData
             "Concrete Mix", "Rebar 4ft", "Wire Mesh", "Form Board", "Expansion Joint",
             "Sandpaper Pack", "Wood Filler", "Stain Quart", "Polyurethane", "Wood Glue",
         };
+        var markups = new decimal[] { 10m, 15m, 20m, 25m, 50m };
         var inventoryItems = new List<InventoryItem>();
         for (var i = 0; i < 100; i++)
         {
             var prefix = partPrefixes[i / 10];
+            var cost = Math.Round(rng.Next(200, 25000) / 100m, 2);
+            var markup = markups[rng.Next(markups.Length)];
             inventoryItems.Add(new InventoryItem
             {
                 Id = Guid.NewGuid(),
@@ -75,6 +78,9 @@ public static class SeedData
                 Description = $"Standard {partNames[i].ToLower()} for field service use",
                 PartNumber = $"{prefix}-{1000 + i}",
                 Category = partCategories[i / 10],
+                Cost = cost,
+                MarkupPercent = markup,
+                Price = Math.Round(cost * (1 + markup / 100m), 2),
                 CreatedAt = now,
                 UpdatedAt = now,
             });

@@ -195,6 +195,9 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.PartNumber).HasColumnName("part_number").HasMaxLength(100);
             e.Property(x => x.Sku).HasColumnName("sku").HasMaxLength(100);
             e.Property(x => x.Category).HasColumnName("category").HasMaxLength(100);
+            e.Property(x => x.Cost).HasColumnName("cost").HasPrecision(12, 2);
+            e.Property(x => x.MarkupPercent).HasColumnName("markup_percent").HasPrecision(8, 2);
+            e.Property(x => x.Price).HasColumnName("price").HasPrecision(12, 2);
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             e.HasIndex(x => x.Category).HasDatabaseName("idx_inventory_items_category");

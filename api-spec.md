@@ -722,6 +722,8 @@ For a 3-person team entering addresses manually, this is acceptable — the team
 | Method | Route | Description |
 |---|---|---|
 | GET | `/v1/inventory` | List all library items (search via `?q=`) |
+| GET | `/v1/inventory/categories` | Distinct categories in use (sorted) |
+| GET | `/v1/inventory/markups` | Distinct previously used markup percentages (sorted) |
 | GET | `/v1/inventory/{id}` | Get single inventory item |
 | POST | `/v1/inventory` | Create library item |
 | PUT | `/v1/inventory/{id}` | Update library item |
@@ -741,13 +743,16 @@ For a 3-person team entering addresses manually, this is acceptable — the team
   "name": "20A Breaker",
   "description": "Standard 20-amp single-pole breaker",
   "partNumber": "BR-20A",
-  "sku": "1006783"
+  "sku": "1006783",
+  "cost": 12.50,
+  "markupPercent": 20,
+  "price": 15.00
 }
 ```
-Required: `name`. All other fields optional.
+Required: `name`. All other fields optional. `cost`/`price` and `markupPercent` are decimals; the client keeps `price = cost × (1 + markupPercent/100)` but the API stores whatever it is sent.
 
 **Request body for `PUT /v1/inventory/{id}`:**
-Same shape as POST. All fields optional — only provided fields are updated. For optional text fields (`description`, `partNumber`, `sku`, `category`), an empty string clears the stored value; omitting the field (or `null`) leaves it unchanged.
+Same shape as POST. All fields optional — only provided fields are updated. For optional text fields (`description`, `partNumber`, `sku`, `category`), an empty string clears the stored value; omitting the field (or `null`) leaves it unchanged. The pricing fields (`cost`, `markupPercent`, `price`) are always applied as sent — `null`/omitted clears the stored value.
 
 **Delete protection for `DELETE /v1/inventory/{id}`:**
 Before deleting, the API checks for any `job_inventory` rows referencing this item. If found, returns `409 Conflict`:

@@ -47,6 +47,9 @@ public class InventoryController : ControllerBase
                 PartNumber = i.PartNumber,
                 Sku = i.Sku,
                 Category = i.Category,
+                Cost = i.Cost,
+                MarkupPercent = i.MarkupPercent,
+                Price = i.Price,
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt,
             })
@@ -75,6 +78,19 @@ public class InventoryController : ControllerBase
         return Ok(categories);
     }
 
+    [HttpGet("markups")]
+    public async Task<IActionResult> Markups()
+    {
+        var markups = await _db.InventoryItems
+            .Where(i => i.MarkupPercent != null)
+            .Select(i => i.MarkupPercent!.Value)
+            .Distinct()
+            .OrderBy(m => m)
+            .ToListAsync();
+
+        return Ok(markups);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Get(Guid id)
     {
@@ -90,6 +106,9 @@ public class InventoryController : ControllerBase
             PartNumber = item.PartNumber,
             Sku = item.Sku,
             Category = item.Category,
+            Cost = item.Cost,
+            MarkupPercent = item.MarkupPercent,
+            Price = item.Price,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
         });
@@ -106,6 +125,9 @@ public class InventoryController : ControllerBase
             PartNumber = request.PartNumber,
             Sku = request.Sku,
             Category = NormalizeOptional(request.Category),
+            Cost = request.Cost,
+            MarkupPercent = request.MarkupPercent,
+            Price = request.Price,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
@@ -121,6 +143,9 @@ public class InventoryController : ControllerBase
             PartNumber = item.PartNumber,
             Sku = item.Sku,
             Category = item.Category,
+            Cost = item.Cost,
+            MarkupPercent = item.MarkupPercent,
+            Price = item.Price,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
         });
@@ -139,6 +164,10 @@ public class InventoryController : ControllerBase
         if (request.PartNumber != null) item.PartNumber = NormalizeOptional(request.PartNumber);
         if (request.Sku != null) item.Sku = NormalizeOptional(request.Sku);
         if (request.Category != null) item.Category = NormalizeOptional(request.Category);
+        // Pricing fields are always applied as sent: null = clear.
+        item.Cost = request.Cost;
+        item.MarkupPercent = request.MarkupPercent;
+        item.Price = request.Price;
         item.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -151,6 +180,9 @@ public class InventoryController : ControllerBase
             PartNumber = item.PartNumber,
             Sku = item.Sku,
             Category = item.Category,
+            Cost = item.Cost,
+            MarkupPercent = item.MarkupPercent,
+            Price = item.Price,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
         });

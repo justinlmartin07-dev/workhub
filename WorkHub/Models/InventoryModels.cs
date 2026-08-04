@@ -24,6 +24,15 @@ public partial class InventoryItemResponse : ObservableObject
     [ObservableProperty]
     private string? _category;
 
+    [ObservableProperty]
+    private decimal? _cost;
+
+    [ObservableProperty]
+    private decimal? _markupPercent;
+
+    [ObservableProperty]
+    private decimal? _price;
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
@@ -35,9 +44,13 @@ public class CreateInventoryItemRequest
     public string? PartNumber { get; set; }
     public string? Sku { get; set; }
     public string? Category { get; set; }
+    public decimal? Cost { get; set; }
+    public decimal? MarkupPercent { get; set; }
+    public decimal? Price { get; set; }
 }
 
-// For all optional fields: null = unchanged, empty string = clear.
+// For optional text fields: null = unchanged, empty string = clear.
+// Pricing fields (Cost/MarkupPercent/Price) are always applied as sent: null = clear.
 public class UpdateInventoryItemRequest
 {
     public string? Name { get; set; }
@@ -45,6 +58,9 @@ public class UpdateInventoryItemRequest
     public string? PartNumber { get; set; }
     public string? Sku { get; set; }
     public string? Category { get; set; }
+    public decimal? Cost { get; set; }
+    public decimal? MarkupPercent { get; set; }
+    public decimal? Price { get; set; }
 }
 
 /// <summary>

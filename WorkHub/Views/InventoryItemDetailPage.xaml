@@ -25,6 +25,24 @@
             <Entry Placeholder="Name *" Text="{Binding Name}" />
             <Entry Placeholder="Part Number" Text="{Binding PartNumber}" />
             <Entry Placeholder="SKU" Text="{Binding Sku}" />
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Cost" Style="{StaticResource FieldLabel}" />
+                    <Entry Placeholder="0.00" Text="{Binding Cost}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="Markup %" Style="{StaticResource FieldLabel}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                        <Entry Placeholder="0" Text="{Binding Markup}" Keyboard="Numeric" />
+                        <Button Grid.Column="1" Text="&#x25BE;" Padding="10,0" MinimumWidthRequest="36"
+                                Command="{Binding PickMarkupCommand}" />
+                    </Grid>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="2" Spacing="4">
+                    <Label Text="Price" Style="{StaticResource FieldLabel}" />
+                    <Entry Placeholder="0.00" Text="{Binding Price}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+            </Grid>
             <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" />
 
             <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" IsVisible="{Binding HasError}" />

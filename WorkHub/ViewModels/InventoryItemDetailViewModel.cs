@@ -35,6 +35,18 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     private string _sku = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
+    private string _cost = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
+    private string _markup = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasChanges))]
+    private string _price = string.Empty;
+
+    [ObservableProperty]
     private bool _isNew = true;
 
     [ObservableProperty]
@@ -60,18 +72,25 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     private string _originalPartNumber = string.Empty;
     private string _originalSku = string.Empty;
     private string _originalCategory = string.Empty;
+    private string _originalCost = string.Empty;
+    private string _originalMarkup = string.Empty;
+    private string _originalPrice = string.Empty;
 
     public bool HasChanges =>
         !string.Equals(Name ?? string.Empty, _originalName, StringComparison.Ordinal)
         || !string.Equals(Description ?? string.Empty, _originalDescription, StringComparison.Ordinal)
         || !string.Equals(PartNumber ?? string.Empty, _originalPartNumber, StringComparison.Ordinal)
         || !string.Equals(Sku ?? string.Empty, _originalSku, StringComparison.Ordinal)
-        || !string.Equals(CategoryValue, _originalCategory, StringComparison.Ordinal);
+        || !string.Equals(CategoryValue, _originalCategory, StringComparison.Ordinal)
+        || !string.Equals(Cost ?? string.Empty, _originalCost, StringComparison.Ordinal)
+        || !string.Equals(Markup ?? string.Empty, _originalMarkup, StringComparison.Ordinal)
+        || !string.Equals(Price ?? string.Empty, _originalPrice, StringComparison.Ordinal);
 
     public InventoryItemDetailViewModel(ApiService apiService)
     {
         _apiService = apiService;
         _ = LoadCategoryOptionsAsync();
+        _ = LoadMarkupOptionsAsync();
     }
 
     private async Task LoadCategoryOptionsAsync()
@@ -117,6 +136,84 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         SelectedCategory = string.IsNullOrEmpty(name) ? previous : EnsureCategoryOption(name);
     }
 
+    // Previously used markup percentages (sorted), shown by the markup dropdown button.
+    private readonly List<decimal> _markupOptions = new();
+
+    // Guards against Cost/Markup/Price recalculating each other in a loop.
+    private bool _syncingPricing;
+
+    private async Task LoadMarkupOptionsAsync()
+    {
+        try
+        {
+            var markups = await _apiService.GetInventoryMarkupsAsync();
+            foreach (var markup in markups)
+                EnsureMarkupOption(markup);
+        }
+        catch
+        {
+            // Dropdown stays empty; typing a markup still works.
+        }
+    }
+
+    private void EnsureMarkupOption(decimal markup)
+    {
+        if (_markupOptions.Contains(markup)) return;
+        int insertAt = 0;
+        while (insertAt < _markupOptions.Count && _markupOptions[insertAt] < markup)
+            insertAt++;
+        _markupOptions.Insert(insertAt, markup);
+    }
+
+    [RelayCommand]
+    private async Task PickMarkupAsync()
+    {
+        if (_markupOptions.Count == 0)
+        {
+            await Shell.Current.DisplayAlert("Markup", "No previously used markup percentages yet. Type one to get started.", "OK");
+            return;
+        }
+        var options = _markupOptions.Select(m => $"{FormatMarkup(m)}%").ToArray();
+        var choice = await Shell.Current.DisplayActionSheet("Markup %", "Cancel", null, options);
+        if (!string.IsNullOrEmpty(choice) && choice != "Cancel")
+            Markup = choice.TrimEnd('%');
+    }
+
+    partial void OnCostChanged(string value) => RecalculatePrice();
+    partial void OnMarkupChanged(string value) => RecalculatePrice();
+    partial void OnPriceChanged(string value) => RecalculateMarkup();
+
+    private void RecalculatePrice()
+    {
+        if (_syncingPricing) return;
+        if (!TryParsePricing(Cost, out var cost) || !TryParsePricing(Markup, out var markup)) return;
+        _syncingPricing = true;
+        Price = FormatMoney(Math.Round(cost * (1 + markup / 100m), 2));
+        _syncingPricing = false;
+    }
+
+    private void RecalculateMarkup()
+    {
+        if (_syncingPricing) return;
+        if (!TryParsePricing(Price, out var price) || !TryParsePricing(Cost, out var cost) || cost <= 0) return;
+        _syncingPricing = true;
+        Markup = FormatMarkup(Math.Round((price / cost - 1m) * 100m, 2));
+        _syncingPricing = false;
+    }
+
+    private static bool TryParsePricing(string? text, out decimal value)
+    {
+        value = 0;
+        var trimmed = text?.Trim().TrimStart('$').TrimEnd('%').Trim();
+        return !string.IsNullOrEmpty(trimmed) && decimal.TryParse(trimmed, out value);
+    }
+
+    private static decimal? ParsePricingOrNull(string? text)
+        => TryParsePricing(text, out var value) ? value : null;
+
+    private static string FormatMoney(decimal value) => value.ToString("0.00");
+    private static string FormatMarkup(decimal value) => value.ToString("0.##");
+
     partial void OnItemIdChanged(string? value)
     {
         if (Guid.TryParse(value, out _))
@@ -143,6 +240,14 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                 SelectedCategory = string.IsNullOrEmpty(item.Category)
                     ? NoCategoryOption
                     : EnsureCategoryOption(item.Category);
+                // Assign loaded values without triggering price/markup recalculation.
+                _syncingPricing = true;
+                Cost = item.Cost.HasValue ? FormatMoney(item.Cost.Value) : string.Empty;
+                Markup = item.MarkupPercent.HasValue ? FormatMarkup(item.MarkupPercent.Value) : string.Empty;
+                Price = item.Price.HasValue ? FormatMoney(item.Price.Value) : string.Empty;
+                _syncingPricing = false;
+                if (item.MarkupPercent.HasValue)
+                    EnsureMarkupOption(item.MarkupPercent.Value);
                 SnapshotOriginal();
             }
         });
@@ -155,6 +260,9 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
         _originalPartNumber = PartNumber ?? string.Empty;
         _originalSku = Sku ?? string.Empty;
         _originalCategory = CategoryValue;
+        _originalCost = Cost ?? string.Empty;
+        _originalMarkup = Markup ?? string.Empty;
+        _originalPrice = Price ?? string.Empty;
         OnPropertyChanged(nameof(HasChanges));
     }
 
@@ -178,7 +286,10 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                     Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
                     PartNumber = string.IsNullOrWhiteSpace(PartNumber) ? null : PartNumber.Trim(),
                     Sku = string.IsNullOrWhiteSpace(Sku) ? null : Sku.Trim(),
-                    Category = CategoryValue.Length == 0 ? null : CategoryValue
+                    Category = CategoryValue.Length == 0 ? null : CategoryValue,
+                    Cost = ParsePricingOrNull(Cost),
+                    MarkupPercent = ParsePricingOrNull(Markup),
+                    Price = ParsePricingOrNull(Price)
                 };
                 await _apiService.CreateInventoryItemAsync(request);
                 WeakReferenceMessenger.Default.Send(new DataChangedMessage("inventory"));
@@ -194,9 +305,14 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
                     Description = Description.Trim(),
                     PartNumber = PartNumber.Trim(),
                     Sku = Sku.Trim(),
-                    Category = CategoryValue
+                    Category = CategoryValue,
+                    Cost = ParsePricingOrNull(Cost),
+                    MarkupPercent = ParsePricingOrNull(Markup),
+                    Price = ParsePricingOrNull(Price)
                 };
                 await _apiService.UpdateInventoryItemAsync(Guid.Parse(ItemId!), request);
+                if (request.MarkupPercent.HasValue)
+                    EnsureMarkupOption(request.MarkupPercent.Value);
                 WeakReferenceMessenger.Default.Send(new DataChangedMessage("inventory"));
                 SnapshotOriginal();
             }

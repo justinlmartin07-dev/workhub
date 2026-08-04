@@ -8,6 +8,9 @@ public class InventoryItem
     public string? PartNumber { get; set; }
     public string? Sku { get; set; }
     public string? Category { get; set; }
+    public decimal? Cost { get; set; }
+    public decimal? MarkupPercent { get; set; }
+    public decimal? Price { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

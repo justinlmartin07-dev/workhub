@@ -138,6 +138,9 @@ The library of known parts. Reference only — no stock tracking.
 | `part_number` | `varchar(100)` | |
 | `sku` | `varchar(100)` | |
 | `category` | `varchar(100)` | Indexed (`idx_inventory_items_category`) |
+| `cost` | `numeric(12,2)` | What the item costs to buy |
+| `markup_percent` | `numeric(8,2)` | Markup percentage applied to cost |
+| `price` | `numeric(12,2)` | Selling price |
 | `created_at` | `timestamptz` | |
 | `updated_at` | `timestamptz` | |
 
