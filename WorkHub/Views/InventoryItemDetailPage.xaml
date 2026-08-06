@@ -12,6 +12,12 @@
 
     <ScrollView>
         <VerticalStackLayout Spacing="16" Padding="24" HorizontalOptions="Fill">
+            <!-- Dismiss the markup flyout on taps outside it. Fires for empty space
+                 and labels; native input controls consume their own taps, so those
+                 are covered by Focused handlers instead. -->
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnPageTapped" />
+            </VerticalStackLayout.GestureRecognizers>
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="-8,0,0,0">
                 <controls:BackButton Command="{Binding CancelCommand}"
                                      IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
@@ -22,13 +28,13 @@
                 <Picker ItemsSource="{Binding CategoryOptions}"
                         SelectedItem="{Binding SelectedCategory}" />
             </VerticalStackLayout>
-            <Entry Placeholder="Name *" Text="{Binding Name}" />
-            <Entry Placeholder="Part Number" Text="{Binding PartNumber}" />
-            <Entry Placeholder="SKU" Text="{Binding Sku}" />
+            <Entry Placeholder="Name *" Text="{Binding Name}" Focused="OnOtherFieldFocused" />
+            <Entry Placeholder="Part Number" Text="{Binding PartNumber}" Focused="OnOtherFieldFocused" />
+            <Entry Placeholder="SKU" Text="{Binding Sku}" Focused="OnOtherFieldFocused" />
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                 <VerticalStackLayout Spacing="4">
                     <Label Text="Cost" Style="{StaticResource FieldLabel}" />
-                    <Entry Placeholder="0.00" Text="{Binding Cost}" Keyboard="Numeric" />
+                    <Entry Placeholder="0.00" Text="{Binding Cost}" Keyboard="Numeric" Focused="OnOtherFieldFocused" />
                 </VerticalStackLayout>
                 <VerticalStackLayout Grid.Column="1" Spacing="4">
                     <Label Text="Markup %" Style="{StaticResource FieldLabel}" />
@@ -41,7 +47,7 @@
                 </VerticalStackLayout>
                 <VerticalStackLayout Grid.Column="2" Spacing="4">
                     <Label Text="Price" Style="{StaticResource FieldLabel}" />
-                    <Entry Placeholder="0.00" Text="{Binding Price}" Keyboard="Numeric" />
+                    <Entry Placeholder="0.00" Text="{Binding Price}" Keyboard="Numeric" Focused="OnOtherFieldFocused" />
                 </VerticalStackLayout>
             </Grid>
             <!-- The markup suggestions flyout floats over this content instead of
@@ -49,7 +55,7 @@
                  columns so the flyout lines up under the markup entry. -->
             <Grid>
                 <VerticalStackLayout Spacing="16">
-                    <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" />
+                    <Editor Placeholder="Description" Text="{Binding Description}" HeightRequest="120" Focused="OnOtherFieldFocused" />
 
                     <Label Text="{Binding ErrorMessage}" Style="{StaticResource ErrorText}" IsVisible="{Binding HasError}" />
 

@@ -20,4 +20,15 @@ public partial class InventoryItemDetailPage : ContentPage
         await Task.Delay(250);
         (BindingContext as InventoryItemDetailViewModel)?.HideMarkupSuggestionsDeferred();
     }
+
+    // Taps on a suggestion bubble up here too — delay so the selection tap
+    // is processed before the flyout collapses.
+    private async void OnPageTapped(object sender, TappedEventArgs e)
+    {
+        await Task.Delay(250);
+        (BindingContext as InventoryItemDetailViewModel)?.HideMarkupSuggestionsDeferred();
+    }
+
+    private void OnOtherFieldFocused(object sender, FocusEventArgs e)
+        => (BindingContext as InventoryItemDetailViewModel)?.HideMarkupSuggestionsDeferred();
 }

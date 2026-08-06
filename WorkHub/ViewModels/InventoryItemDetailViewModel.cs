@@ -223,9 +223,10 @@ public partial class InventoryItemDetailViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Called when the markup entry loses focus. Skips the hide right after the
-    /// ▾ button opened the list — pressing the button unfocuses the entry, and
-    /// hiding then would close the dropdown the moment it opens.
+    /// Dismisses the flyout on interactions outside it (markup entry unfocus,
+    /// taps elsewhere on the page, focusing another field). Skips the hide right
+    /// after the ▾ button opened the list — pressing the button unfocuses the
+    /// entry, and hiding then would close the dropdown the moment it opens.
     /// </summary>
     public void HideMarkupSuggestionsDeferred()
     {
