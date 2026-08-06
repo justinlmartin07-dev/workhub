@@ -97,7 +97,7 @@ public partial class InventoryViewModel : BaseViewModel
     // flat collection of header + item rows. rebuild swaps the collection wholesale;
     // otherwise rows are merged in place so only actual changes re-render. visible
     // may be pre-computed off the main thread by the search debounce path.
-    private void PublishList(bool rebuild, IReadOnlyList<InventoryItemResponse>? visible = null)
+    private void PublishList(bool rebuild, IReadOnlyList<InventoryItemResponse>? visible = null, bool followSelection = true)
     {
         var query = SearchText.Trim();
         visible ??= query.Length == 0
@@ -117,7 +117,7 @@ public partial class InventoryViewModel : BaseViewModel
 
             // If the selected item just moved into a collapsed group (category
             // change), expand that group so its row has a visible spot to land in.
-            if (selected != null && oldIndex >= 0
+            if (followSelection && selected != null && oldIndex >= 0
                 && !fresh.OfType<InventoryItemResponse>().Any(i => i.Id == selected.Id))
             {
                 var freshItem = visible.FirstOrDefault(i => i.Id == selected.Id);
@@ -132,7 +132,7 @@ public partial class InventoryViewModel : BaseViewModel
             Rows.MergeInto(fresh, RowKey, RowEqual, TryUpdateRowInPlace);
 
             // Follow the selected row if the refresh relocated it.
-            if (selected != null && oldIndex >= 0)
+            if (followSelection && selected != null && oldIndex >= 0)
             {
                 var newIndex = Rows.IndexOf(selected);
                 if (newIndex >= 0 && newIndex != oldIndex)
@@ -215,8 +215,9 @@ public partial class InventoryViewModel : BaseViewModel
         if (header == null) return;
         _expandedState[header.Category] = !header.IsExpanded;
         // Re-publish: the merge flips the header state and inserts/removes the
-        // group's item rows in place.
-        PublishList(rebuild: false);
+        // group's item rows in place. A deliberate toggle must not re-expand the
+        // selected item's group or scroll back to the selected row.
+        PublishList(rebuild: false, followSelection: false);
     }
 
     private static bool MatchesSearch(InventoryItemResponse i, string query) =>
