@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WorkHub.Views.PrintPreviewPage"
+             Shell.NavBarIsVisible="False"
+             Title="Print Preview"
+             BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Padding="16,12" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+            <Label x:Name="TitleLabel" FontSize="18" FontAttributes="Bold"
+                   VerticalOptions="Center" LineBreakMode="TailTruncation" />
+            <Button Grid.Column="1" Text="Print" Clicked="OnPrintClicked" />
+            <Button Grid.Column="2" Text="Close" Style="{StaticResource SecondaryButton}" Clicked="OnCloseClicked" />
+        </Grid>
+        <WebView x:Name="PreviewWebView" Grid.Row="1" />
+    </Grid>
+</ContentPage>

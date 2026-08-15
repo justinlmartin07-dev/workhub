@@ -241,6 +241,15 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
     private async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
 
     [RelayCommand]
+    private async Task PrintAsync()
+    {
+        if (Customer == null) return;
+        var html = PrintSummaryBuilder.BuildCustomerSummary(Customer);
+        await Shell.Current.Navigation.PushModalAsync(
+            new PrintPreviewPage(html, $"{Customer.Name} — Customer Summary"));
+    }
+
+    [RelayCommand]
     private async Task DeleteAsync()
     {
         if (Customer == null) return;

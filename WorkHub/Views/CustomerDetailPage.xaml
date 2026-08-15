@@ -18,14 +18,28 @@
         <controls:DataStateView.Body>
             <ScrollView>
                 <VerticalStackLayout Spacing="16" Padding="16">
-                    <!-- Header with Edit/Delete -->
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                    <!-- Header with Print/Edit/Delete -->
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
                         <controls:BackButton Command="{Binding GoBackCommand}"
                                              IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
                         <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
                             <Label Text="{Binding Customer.Name, FallbackValue='Customer'}" FontSize="20" FontAttributes="Bold" />
                         </VerticalStackLayout>
                         <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
+                                StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding PrintCommand}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                <shapes:Path Data="M640-640v-120H320v120h-80v-200h480v200h-80Zm-480 80h640-640Zm560 100q17 0 28.5-11.5T760-500q0-17-11.5-28.5T720-540q-17 0-28.5 11.5T680-500q0 17 11.5 28.5T720-460Zm-80 260v-160H320v160h320Zm80 80H240v-160H80v-240q0-51 35-85.5t85-34.5h560q51 0 85.5 34.5T880-520v240H720v160Zm80-240v-160q0-17-11.5-28.5T760-560H200q-17 0-28.5 11.5T160-520v160h80v-80h480v80h80Z"
+                                             Fill="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                             Aspect="Uniform" WidthRequest="{OnPlatform 16, Android=20}" HeightRequest="{OnPlatform 16, Android=20}" VerticalOptions="Center" />
+                                <Label Text="Print" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                                       IsVisible="{OnPlatform true, Android=false}"
+                                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                            </HorizontalStackLayout>
+                        </Border>
+                        <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
                                 StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding EditCommand}" />
@@ -39,7 +53,7 @@
                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                             </HorizontalStackLayout>
                         </Border>
-                        <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
+                        <Border Grid.Column="4" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
                                 StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding DeleteCommand}" />

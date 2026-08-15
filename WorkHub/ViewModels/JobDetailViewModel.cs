@@ -241,6 +241,22 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
 
     [RelayCommand]
+    private async Task PrintAsync()
+    {
+        if (Job == null) return;
+
+        // Pull the customer so the printout carries company contact details;
+        // the summary still prints without them if the fetch fails.
+        CustomerResponse? customer = null;
+        try { customer = await _apiService.GetCustomerAsync(Job.CustomerId); }
+        catch { }
+
+        var html = PrintSummaryBuilder.BuildJobSummary(Job, customer);
+        await Shell.Current.Navigation.PushModalAsync(
+            new PrintPreviewPage(html, $"{Job.Title} — Job Summary"));
+    }
+
+    [RelayCommand]
     private void CallPhone(string? phoneNumber)
     {
         if (!string.IsNullOrEmpty(phoneNumber))
