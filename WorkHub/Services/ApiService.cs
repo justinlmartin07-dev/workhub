@@ -41,6 +41,10 @@ public class ApiService
     public Task<List<InventoryItemResponse>> GetAllInventoryAsync()
         => GetAllPagesAsync(page => GetInventoryAsync(page: page, pageSize: MaxPageSize));
 
+    // Print templates
+    public async Task<PrintTemplatesResponse?> GetPrintTemplatesAsync(CancellationToken cancellationToken = default)
+        => await _httpClient.GetFromJsonAsync<PrintTemplatesResponse>("v1/print-templates", cancellationToken);
+
     // Customers
     public async Task<PagedResponse<CustomerResponse>> GetCustomersAsync(string? search = null, int page = 1, int pageSize = 25)
     {

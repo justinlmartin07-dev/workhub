@@ -79,6 +79,11 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+
+		<!-- Print templates: embedded copies of the API's templates, used as the
+		     offline/first-run fallback. Linked from WorkHub.Api so there is a
+		     single source of truth. -->
+		<MauiAsset Include="..\WorkHub.Api\Templates\*.html" LogicalName="PrintTemplates/%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<ItemGroup>

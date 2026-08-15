@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--
+  Job summary print template. Edit freely and push — the app fetches this from
+  the API at print time, so changes go live on the next deploy (no app update).
+
+  Tokens: {{name}} inserts a value (HTML-escaped). {{#name}}...{{/name}} renders
+  the block when the value is non-empty (or once per item for lists).
+  {{^name}}...{{/name}} renders when the value IS empty.
+
+  Values: customer_name, address, date, job_title, status, priority
+  Lists:  contacts (name, role, tag, phone, email)
+          parts_used / parts_needed (name, part_number, description, quantity)
+          notes (content, author, date)
+  Flags:  has_contacts, has_parts_used, has_parts_needed, scope, has_notes
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Summary</title>
+<style>
+@page { margin: 0.6in; }
+* { box-sizing: border-box; }
+body { margin:0; background:#cbd5e1; font-family:'Segoe UI',Roboto,Arial,sans-serif; font-size:13px; color:#111; -webkit-print-color-adjust:exact; }
+.sheet { background:#fff; width:100%; max-width:8.5in; margin:16px auto; padding:0.6in; box-shadow:0 2px 10px rgba(0,0,0,0.35); min-height:10in; }
+.doc-header { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; }
+.customer-name { font-size:20px; font-weight:700; }
+.address { margin-top:6px; line-height:1.45; white-space:pre-line; }
+.doc-info { text-align:right; flex-shrink:0; }
+.doc-type { font-size:14px; font-weight:700; letter-spacing:2px; color:#334155; }
+.doc-date { margin-top:4px; }
+.rule { border:none; border-top:2px solid #111; margin:14px 0 6px; }
+h2 { font-size:12px; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid #94a3b8; padding-bottom:3px; margin:18px 0 8px; }
+.job-line { display:flex; justify-content:space-between; align-items:baseline; gap:16px; margin-top:10px; }
+.job-title { font-size:16px; font-weight:700; }
+.job-meta { color:#334155; white-space:nowrap; }
+.contact { display:flex; flex-wrap:wrap; gap:4px 18px; padding:3px 0; }
+.contact-name { font-weight:600; min-width:2in; }
+.tag { font-weight:400; font-size:11px; color:#334155; border:1px solid #94a3b8; border-radius:3px; padding:0 4px; }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#334155; border-bottom:1px solid #111; padding:4px 8px 4px 0; }
+td { border-bottom:1px solid #e2e8f0; padding:5px 8px 5px 0; vertical-align:top; }
+.qty { text-align:right; width:3em; }
+.item-desc { color:#475569; font-size:12px; }
+.prewrap { white-space:pre-wrap; line-height:1.45; }
+.note { margin-bottom:10px; }
+.note-meta { color:#475569; font-size:11px; margin-top:2px; }
+@media screen and (max-width:600px) { .sheet { padding:20px; margin:8px; min-height:0; } }
+@media print { body { background:#fff; } .sheet { box-shadow:none; margin:0; padding:0; max-width:none; min-height:0; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="doc-header">
+    <div>
+      <div class="customer-name">{{customer_name}}</div>
+      {{#address}}<div class="address">{{address}}</div>{{/address}}
+    </div>
+    <div class="doc-info">
+      <div class="doc-type">JOB SUMMARY</div>
+      <div class="doc-date">{{date}}</div>
+    </div>
+  </div>
+  <hr class="rule">
+
+  <div class="job-line">
+    <span class="job-title">{{job_title}}</span>
+    <span class="job-meta">{{status}} &middot; {{priority}} Priority</span>
+  </div>
+
+  {{#has_contacts}}<h2>Contacts</h2>{{/has_contacts}}
+  {{#contacts}}
+  <div class="contact">
+    <span class="contact-name">{{name}}{{#role}} &mdash; {{role}}{{/role}}{{#tag}} <span class="tag">{{tag}}</span>{{/tag}}</span>
+    {{#phone}}<span class="contact-detail">{{phone}}</span>{{/phone}}
+    {{#email}}<span class="contact-detail">{{email}}</span>{{/email}}
+  </div>
+  {{/contacts}}
+
+  {{#has_parts_used}}
+  <h2>Parts Used</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Part #</th><th class="qty">Qty</th></tr></thead>
+    <tbody>
+      {{#parts_used}}
+      <tr>
+        <td>{{name}}{{#description}}<div class="item-desc">{{description}}</div>{{/description}}</td>
+        <td>{{part_number}}</td>
+        <td class="qty">{{quantity}}</td>
+      </tr>
+      {{/parts_used}}
+    </tbody>
+  </table>
+  {{/has_parts_used}}
+
+  {{#has_parts_needed}}
+  <h2>Parts Needed</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Part #</th><th class="qty">Qty</th></tr></thead>
+    <tbody>
+      {{#parts_needed}}
+      <tr>
+        <td>{{name}}{{#description}}<div class="item-desc">{{description}}</div>{{/description}}</td>
+        <td>{{part_number}}</td>
+        <td class="qty">{{quantity}}</td>
+      </tr>
+      {{/parts_needed}}
+    </tbody>
+  </table>
+  {{/has_parts_needed}}
+
+  {{#scope}}
+  <h2>Scope</h2>
+  <div class="prewrap">{{scope}}</div>
+  {{/scope}}
+
+  {{#has_notes}}<h2>Notes</h2>{{/has_notes}}
+  {{#notes}}
+  <div class="note">
+    <div class="prewrap">{{content}}</div>
+    <div class="note-meta">{{author}} &mdash; {{date}}</div>
+  </div>
+  {{/notes}}
+
+</div>
+</body>
+</html>

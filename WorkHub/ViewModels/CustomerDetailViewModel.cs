@@ -24,6 +24,7 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
     private readonly PhotoService _photoService;
     private readonly ListCacheService _listCache;
     private readonly PhotoCacheService _photoCache;
+    private readonly PrintTemplateService _printTemplates;
 
     private string CacheKey => $"customer-{CustomerId}";
 
@@ -52,12 +53,13 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
     public bool HasPersons => Persons.Count > 0;
 
     public CustomerDetailViewModel(ApiService apiService, PhotoService photoService,
-        ListCacheService listCache, PhotoCacheService photoCache)
+        ListCacheService listCache, PhotoCacheService photoCache, PrintTemplateService printTemplates)
     {
         _apiService = apiService;
         _photoService = photoService;
         _listCache = listCache;
         _photoCache = photoCache;
+        _printTemplates = printTemplates;
     }
 
     partial void OnCustomerChanged(CustomerResponse? value)
@@ -244,7 +246,8 @@ public partial class CustomerDetailViewModel : BaseViewModel, IReusableDetail
     private async Task PrintAsync()
     {
         if (Customer == null) return;
-        var html = PrintSummaryBuilder.BuildCustomerSummary(Customer);
+        var template = await _printTemplates.GetCustomerTemplateAsync();
+        var html = PrintSummaryBuilder.BuildCustomerSummary(template, Customer);
         await Shell.Current.Navigation.PushModalAsync(
             new PrintPreviewPage(html, $"{Customer.Name} — Customer Summary"));
     }

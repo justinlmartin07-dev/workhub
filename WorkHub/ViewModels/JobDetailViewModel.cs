@@ -16,6 +16,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private readonly PhotoService _photoService;
     private readonly ListCacheService _listCache;
     private readonly PhotoCacheService _photoCache;
+    private readonly PrintTemplateService _printTemplates;
 
     private string CacheKey => $"job-{JobId}";
 
@@ -74,12 +75,13 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private string _activeListType = string.Empty;
 
     public JobDetailViewModel(ApiService apiService, PhotoService photoService,
-        ListCacheService listCache, PhotoCacheService photoCache)
+        ListCacheService listCache, PhotoCacheService photoCache, PrintTemplateService printTemplates)
     {
         _apiService = apiService;
         _photoService = photoService;
         _listCache = listCache;
         _photoCache = photoCache;
+        _printTemplates = printTemplates;
     }
 
     partial void OnJobIdChanged(string? value)
@@ -251,7 +253,8 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         try { customer = await _apiService.GetCustomerAsync(Job.CustomerId); }
         catch { }
 
-        var html = PrintSummaryBuilder.BuildJobSummary(Job, customer);
+        var template = await _printTemplates.GetJobTemplateAsync();
+        var html = PrintSummaryBuilder.BuildJobSummary(template, Job, customer);
         await Shell.Current.Navigation.PushModalAsync(
             new PrintPreviewPage(html, $"{Job.Title} — Job Summary"));
     }

@@ -30,6 +30,12 @@ public class RefreshResponse
     public DateTime ExpiresAt { get; set; }
 }
 
+public class PrintTemplatesResponse
+{
+    public string? JobSummary { get; set; }
+    public string? CustomerSummary { get; set; }
+}
+
 public class VersionResponse
 {
     public string ApiVersion { get; set; } = "1.0.0";

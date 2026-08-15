@@ -378,6 +378,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ApiService>();
 		builder.Services.AddSingleton<PhotoService>();
 		builder.Services.AddSingleton<LocationBiasService>();
+		builder.Services.AddSingleton<PrintTemplateService>();
 
 		// ViewModels
 		// List VMs are singletons: their data is preloaded at launch (MainLayout)

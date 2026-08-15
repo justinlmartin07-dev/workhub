@@ -965,6 +965,22 @@ Same shape as POST. All fields optional — only provided fields are updated. `a
 }
 ```
 
+### Print Templates
+
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| GET | `/v1/print-templates` | Bearer | HTML templates for the client's printable job/customer summaries |
+
+**Response (200):**
+```json
+{
+  "jobSummary": "<!DOCTYPE html>...",
+  "customerSummary": "<!DOCTYPE html>..."
+}
+```
+
+Templates are mustache-style HTML files checked into the API repo at `WorkHub.Api/Templates/` and served from disk, so editing a template and deploying the API changes the printout layout without a client update. A field is `null` when its file is missing. The client caches the last response and falls back to copies embedded at build time (linked from the same files) when offline. The token reference is documented in a comment at the top of each template.
+
 ---
 
 ## Pagination

@@ -17,6 +17,12 @@ public class PhotoResponse
     public DateTime UploadedAt { get; set; }
 }
 
+public class PrintTemplatesResponse
+{
+    public string? JobSummary { get; set; }
+    public string? CustomerSummary { get; set; }
+}
+
 public class ErrorResponse
 {
     public string Error { get; set; } = string.Empty;
