@@ -84,15 +84,25 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         _printTemplates = printTemplates;
     }
 
+    // Raised just before the reused view resets or reloads, while the outgoing
+    // job's items are still bound — the page commits any in-progress quantity
+    // edit here, because switching jobs doesn't unfocus the Entry on Windows.
+    public event EventHandler? Reloading;
+
     partial void OnJobIdChanged(string? value)
     {
         if (!Guid.TryParse(value, out _)) return;
+        Reloading?.Invoke(this, EventArgs.Empty);
         ResetForNewJob();
         LoadJobCommand.Execute(null);
     }
 
     // Same item shown again on the reused view — just refresh silently.
-    public void RefreshOnReuse() => LoadJobCommand.Execute(null);
+    public void RefreshOnReuse()
+    {
+        Reloading?.Invoke(this, EventArgs.Empty);
+        LoadJobCommand.Execute(null);
+    }
 
     // The detail view is cached and reused across items — wipe the previous
     // job's state so the new one starts from its own cache (or a spinner),
@@ -621,15 +631,6 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         }
     }
 
-    [RelayCommand]
-    private void UpdateQuantity(QuantityUpdateRequest req)
-    {
-        if (Job == null) return;
-        if (req.Quantity < 1 || req.Quantity == req.Item.Quantity) return;
-        req.Item.Quantity = req.Quantity;
-        SaveQuantityInBackground(req.Item, req.Quantity);
-    }
-
     public void SaveQuantityInBackground(JobItemResponse item, int newQuantity)
     {
         if (Job == null) return;
@@ -681,5 +682,3 @@ public partial class SelectableInventoryItem : ObservableObject
         Item = item;
     }
 }
-
-public record QuantityUpdateRequest(JobItemResponse Item, int Quantity);

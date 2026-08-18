@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace WorkHub.Models;
 
 public class JobResponse
@@ -57,13 +59,15 @@ public class JobNoteResponse
     public bool IsEdited => UpdatedAt.HasValue;
 }
 
-public class JobItemResponse
+public partial class JobItemResponse : ObservableObject
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? PartNumber { get; set; }
-    public int Quantity { get; set; }
+
+    [ObservableProperty]
+    private int _quantity;
     public string ListType { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
     public Guid? InventoryItemId { get; set; }

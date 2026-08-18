@@ -220,8 +220,7 @@
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
                                                 <!-- Compact segmented stepper: [+][qty][−]. The Border clips the
-                                                     square segments into the pill shape. Code-behind expects the
-                                                     buttons and entry to share this inner Grid. -->
+                                                     square segments into the pill shape. -->
                                                 <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
                                                         Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                                                         StrokeShape="RoundRectangle 8">
@@ -233,7 +232,10 @@
                                                                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                                                 TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
                                                                 Clicked="OnDecrementClicked" />
+                                                        <!-- TwoWay: typing writes into the model, so Focused snapshots the
+                                                             pre-edit value for the Unfocused handler's save-on-change check. -->
                                                         <Entry Grid.Column="1" Text="{Binding Quantity}" FontSize="13" Keyboard="Numeric" StyleId="stepper-qty"
+                                                               Focused="OnQuantityEntryFocused"
                                                                HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                                                                HeightRequest="{OnPlatform 30, Android=36}" Margin="0"
                                                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceInputLight}, Dark={StaticResource SurfaceInputDark}}"
@@ -287,8 +289,7 @@
                                                            IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
                                                 </VerticalStackLayout>
                                                 <!-- Compact segmented stepper: [+][qty][−]. The Border clips the
-                                                     square segments into the pill shape. Code-behind expects the
-                                                     buttons and entry to share this inner Grid. -->
+                                                     square segments into the pill shape. -->
                                                 <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
                                                         Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                                                         StrokeShape="RoundRectangle 8">
@@ -300,7 +301,10 @@
                                                                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                                                 TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"
                                                                 Clicked="OnDecrementClicked" />
+                                                        <!-- TwoWay: typing writes into the model, so Focused snapshots the
+                                                             pre-edit value for the Unfocused handler's save-on-change check. -->
                                                         <Entry Grid.Column="1" Text="{Binding Quantity}" FontSize="13" Keyboard="Numeric" StyleId="stepper-qty"
+                                                               Focused="OnQuantityEntryFocused"
                                                                HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                                                                HeightRequest="{OnPlatform 30, Android=36}" Margin="0"
                                                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceInputLight}, Dark={StaticResource SurfaceInputDark}}"
