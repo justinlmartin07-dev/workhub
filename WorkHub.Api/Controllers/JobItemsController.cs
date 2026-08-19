@@ -44,6 +44,8 @@ public class JobItemsController : ControllerBase
                 Source = "library",
                 InventoryItemId = ji.InventoryItemId,
                 OrderedAt = ji.OrderedAt,
+                Cost = ji.InventoryItem.Cost,
+                Price = ji.InventoryItem.Price,
             })
             .ToListAsync();
 
@@ -89,6 +91,8 @@ public class JobItemsController : ControllerBase
             Source = "library",
             InventoryItemId = ji.InventoryItemId,
             OrderedAt = ji.OrderedAt,
+            Cost = inventoryItem.Cost,
+            Price = inventoryItem.Price,
         });
     }
 
@@ -121,6 +125,8 @@ public class JobItemsController : ControllerBase
             Source = "library",
             InventoryItemId = ji.InventoryItemId,
             OrderedAt = ji.OrderedAt,
+            Cost = ji.InventoryItem.Cost,
+            Price = ji.InventoryItem.Price,
         });
     }
 

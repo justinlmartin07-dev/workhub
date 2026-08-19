@@ -71,6 +71,14 @@ public partial class JobItemResponse : ObservableObject
     public string ListType { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
     public Guid? InventoryItemId { get; set; }
+    public decimal? Cost { get; set; }
+    public decimal? Price { get; set; }
+
+    // Compact "cost / price" for the job item rows; a missing half shows as a dash.
+    public string PriceDisplay =>
+        Cost == null && Price == null
+            ? string.Empty
+            : $"{Cost?.ToString("C") ?? "—"} / {Price?.ToString("C") ?? "—"}";
 }
 
 public class CreateJobRequest

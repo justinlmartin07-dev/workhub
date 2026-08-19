@@ -115,6 +115,8 @@ public class JobsController : ControllerBase
                 ListType = ji.ListType,
                 Source = "library",
                 InventoryItemId = ji.InventoryItemId,
+                Cost = ji.InventoryItem.Cost,
+                Price = ji.InventoryItem.Price,
             };
             if (ji.ListType == "used") usedItems.Add(item);
             else toOrderItems.Add(item);

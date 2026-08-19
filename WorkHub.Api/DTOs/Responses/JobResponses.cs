@@ -63,6 +63,9 @@ public class JobItemResponse
     public string Source { get; set; } = string.Empty; // "library" or "adhoc"
     public Guid? InventoryItemId { get; set; }
     public DateTime? OrderedAt { get; set; }
+    // Current pricing of the linked inventory item; always null for adhoc items.
+    public decimal? Cost { get; set; }
+    public decimal? Price { get; set; }
 }
 
 // A single "to order" part across all jobs, for the ordering dashboard.

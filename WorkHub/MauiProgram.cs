@@ -90,6 +90,16 @@ public static class MauiProgram
 						native.Padding = new Microsoft.UI.Xaml.Thickness(4, 0, 4, 0);
 						native.MinHeight = 0;
 					}
+
+					// Stepper quantity cells: the TextBox default MinWidth (64) is wider
+					// than the cell, so the centered text lands off-screen-center once
+					// the box is clipped — drop the minimum and all padding.
+					if (view is Entry { StyleId: "stepper-qty" })
+					{
+						native.Padding = new Microsoft.UI.Xaml.Thickness(0);
+						native.MinWidth = 0;
+						native.MinHeight = 0;
+					}
 				});
 
 				// ── Editor: rounded, filled ──

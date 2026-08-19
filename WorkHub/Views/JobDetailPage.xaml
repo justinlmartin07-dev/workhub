@@ -213,18 +213,26 @@
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:JobItemResponse">
-                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
+                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="2" VerticalOptions="Center">
                                                 <VerticalStackLayout VerticalOptions="Center">
-                                                    <Label Text="{Binding Name}" FontSize="14" />
-                                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                                                           IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                    <Label Text="{Binding Name}" FontSize="14" LineBreakMode="TailTruncation" />
+                                                    <!-- Part number + price share the second line: part numbers are
+                                                         short, so the price gets the room the name row can't spare. -->
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                                        <Label Text="{Binding PartNumber}" FontSize="12" LineBreakMode="TailTruncation"
+                                                               TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                                               IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                        <Label Grid.Column="1" Text="{Binding PriceDisplay}" FontSize="12" VerticalTextAlignment="Center" Margin="0,0,3,0"
+                                                               TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                                               IsVisible="{Binding PriceDisplay, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                    </Grid>
                                                 </VerticalStackLayout>
                                                 <!-- Compact segmented stepper: [+][qty][−]. The Border clips the
                                                      square segments into the pill shape. -->
                                                 <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
                                                         Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                                                         StrokeShape="RoundRectangle 8">
-                                                    <Grid ColumnDefinitions="26,40,26"
+                                                    <Grid ColumnDefinitions="22,34,22"
                                                           HeightRequest="{OnPlatform 30, Android=36}">
                                                         <Button Text="−" FontSize="15" Padding="0" Margin="0" CornerRadius="0"
                                                                 HeightRequest="{OnPlatform 30, Android=36}"
@@ -249,7 +257,7 @@
                                                     </Grid>
                                                 </Border>
                                                 <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
-                                                        Padding="6" VerticalOptions="Center"
+                                                        Padding="4" VerticalOptions="Center"
                                                         StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                                                     <Border.GestureRecognizers>
                                                         <TapGestureRecognizer
@@ -282,18 +290,26 @@
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:JobItemResponse">
-                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" VerticalOptions="Center">
+                                            <Grid Padding="4" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="2" VerticalOptions="Center">
                                                 <VerticalStackLayout VerticalOptions="Center">
-                                                    <Label Text="{Binding Name}" FontSize="14" />
-                                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                                                           IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                    <Label Text="{Binding Name}" FontSize="14" LineBreakMode="TailTruncation" />
+                                                    <!-- Part number + price share the second line: part numbers are
+                                                         short, so the price gets the room the name row can't spare. -->
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                                        <Label Text="{Binding PartNumber}" FontSize="12" LineBreakMode="TailTruncation"
+                                                               TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                                               IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                        <Label Grid.Column="1" Text="{Binding PriceDisplay}" FontSize="12" VerticalTextAlignment="Center" Margin="0,0,3,0"
+                                                               TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                                               IsVisible="{Binding PriceDisplay, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                    </Grid>
                                                 </VerticalStackLayout>
                                                 <!-- Compact segmented stepper: [+][qty][−]. The Border clips the
                                                      square segments into the pill shape. -->
                                                 <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
                                                         Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                                                         StrokeShape="RoundRectangle 8">
-                                                    <Grid ColumnDefinitions="26,40,26"
+                                                    <Grid ColumnDefinitions="22,34,22"
                                                           HeightRequest="{OnPlatform 30, Android=36}">
                                                         <Button Text="−" FontSize="15" Padding="0" Margin="0" CornerRadius="0"
                                                                 HeightRequest="{OnPlatform 30, Android=36}"
@@ -318,7 +334,7 @@
                                                     </Grid>
                                                 </Border>
                                                 <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0"
-                                                        Padding="6" VerticalOptions="Center"
+                                                        Padding="4" VerticalOptions="Center"
                                                         StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                                                     <Border.GestureRecognizers>
                                                         <TapGestureRecognizer

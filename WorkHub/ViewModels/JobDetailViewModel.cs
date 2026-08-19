@@ -202,7 +202,9 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         && a.PartNumber == b.PartNumber
         && a.Quantity == b.Quantity
         && a.ListType == b.ListType
-        && a.Source == b.Source;
+        && a.Source == b.Source
+        && a.Cost == b.Cost
+        && a.Price == b.Price;
 
     // Sync the photo wrappers to the latest response. Existing wrappers keep
     // their identity (and their already-loaded ImageSource) — only their
