@@ -180,7 +180,8 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     }
 
     public bool CanComplete => Job?.Status is "New" or "In Progress";
-    public bool CanReopen   => Job?.Status is "Complete" or "Cancelled" or "On Hold";
+    public bool CanBill     => Job?.Status is "Complete";
+    public bool CanReopen   => Job?.Status is "Complete" or "Billed" or "Cancelled" or "On Hold";
     public bool CanHold     => Job?.Status is "New" or "In Progress";
     public bool CanCancel   => Job?.Status is "New" or "In Progress" or "On Hold";
 
@@ -188,6 +189,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     {
         Job = job;
         OnPropertyChanged(nameof(CanComplete));
+        OnPropertyChanged(nameof(CanBill));
         OnPropertyChanged(nameof(CanReopen));
         OnPropertyChanged(nameof(CanHold));
         OnPropertyChanged(nameof(CanCancel));
@@ -395,6 +397,16 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     }
 
     [RelayCommand]
+    private async Task MarkAsBilledAsync()
+    {
+        if (Job == null) return;
+        var confirmed = await Shell.Current.DisplayAlert("Bill Job", "Mark this job as billed?", "Mark Billed", "Cancel");
+        if (!confirmed) return;
+        await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "Billed" });
+        await LoadJobAsync();
+    }
+
+    [RelayCommand]
     private async Task ReopenJobAsync()
     {
         if (Job == null) return;
@@ -491,9 +503,9 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
 
     private async Task<bool> EnsureJobReopenedAsync()
     {
-        if (Job?.Status != "Complete") return true;
-        var reopen = await Shell.Current.DisplayAlert("Job Complete",
-            "This job is marked complete. Reopen it to add items?", "Reopen", "Cancel");
+        if (Job?.Status is not ("Complete" or "Billed")) return true;
+        var reopen = await Shell.Current.DisplayAlert($"Job {Job.Status}",
+            $"This job is marked {Job.Status.ToLowerInvariant()}. Reopen it to add items?", "Reopen", "Cancel");
         if (!reopen) return false;
         await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "In Progress" });
         return true;

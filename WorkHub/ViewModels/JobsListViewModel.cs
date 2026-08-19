@@ -169,7 +169,8 @@ public partial class JobsListViewModel : BaseViewModel
         "New" => 1,
         "On Hold" => 2,
         "Complete" => 3,
-        "Cancelled" => 4,
+        "Billed" => 4,
+        "Cancelled" => 5,
         _ => -1,
     };
 

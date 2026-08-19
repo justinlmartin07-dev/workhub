@@ -114,6 +114,9 @@
                                 ContentLayout="Left,8"
                                 Command="{Binding MarkAsCompleteCommand}"
                                 IsVisible="{Binding CanComplete}" />
+                        <Button Text="Mark as Billed"
+                                Command="{Binding MarkAsBilledCommand}"
+                                IsVisible="{Binding CanBill}" />
                         <Button Text="Reopen Job"
                                 Style="{StaticResource SecondaryButton}"
                                 Command="{Binding ReopenJobCommand}"

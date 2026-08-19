@@ -237,7 +237,8 @@ public class CustomersController : ControllerBase
             return NotFound(new ErrorResponse { Error = "Customer not found" });
 
         var blockingJobs = customer.Jobs
-            .Where(j => !string.Equals(j.Status, "Complete", StringComparison.OrdinalIgnoreCase))
+            .Where(j => !string.Equals(j.Status, "Complete", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(j.Status, "Billed", StringComparison.OrdinalIgnoreCase))
             .ToList();
         if (blockingJobs.Any())
         {

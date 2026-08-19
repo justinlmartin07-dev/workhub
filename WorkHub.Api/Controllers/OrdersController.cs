@@ -15,14 +15,15 @@ public class OrdersController : ControllerBase
 
     public OrdersController(WorkHubDbContext db) => _db = db;
 
-    // All "to_order" parts across active (non-deleted, not Complete) jobs.
+    // All "to_order" parts across active (non-deleted, not Complete/Billed) jobs.
     [HttpGet]
     public async Task<IActionResult> List()
     {
         var library = await _db.JobInventories
             .Where(ji => ji.ListType == "to_order"
                 && ji.Job.DeletedAt == null
-                && ji.Job.Status != "Complete")
+                && ji.Job.Status != "Complete"
+                && ji.Job.Status != "Billed")
             .Select(ji => new OrderLineResponse
             {
                 Id = ji.Id,
@@ -43,7 +44,8 @@ public class OrdersController : ControllerBase
         var adhoc = await _db.JobAdhocItems
             .Where(ai => ai.ListType == "to_order"
                 && ai.Job.DeletedAt == null
-                && ai.Job.Status != "Complete")
+                && ai.Job.Status != "Complete"
+                && ai.Job.Status != "Billed")
             .Select(ai => new OrderLineResponse
             {
                 Id = ai.Id,

@@ -21,6 +21,7 @@ public class StatusColorConverter : IValueConverter
             "In Progress" => Color.FromArgb("#F59E0B"),  // Warning amber
             "On Hold" => Color.FromArgb("#94A3B8"),      // Slate gray
             "Complete" => Color.FromArgb("#10B981"),      // Success green
+            "Billed" => Color.FromArgb("#8B5CF6"),        // Violet
             "Cancelled" => Color.FromArgb("#EF4444"),     // Danger red
             _ => Color.FromArgb("#94A3B8")                // Slate gray
         };
