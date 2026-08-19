@@ -74,11 +74,14 @@ public partial class JobItemResponse : ObservableObject
     public decimal? Cost { get; set; }
     public decimal? Price { get; set; }
 
-    // Compact "cost / price" for the job item rows; a missing half shows as a dash.
+    // Compact extended "cost / price" (unit × quantity) for the job item rows;
+    // a missing half shows as a dash.
     public string PriceDisplay =>
         Cost == null && Price == null
             ? string.Empty
-            : $"{Cost?.ToString("C") ?? "—"} / {Price?.ToString("C") ?? "—"}";
+            : $"{(Cost * Quantity)?.ToString("C") ?? "—"} / {(Price * Quantity)?.ToString("C") ?? "—"}";
+
+    partial void OnQuantityChanged(int value) => OnPropertyChanged(nameof(PriceDisplay));
 }
 
 public class CreateJobRequest
