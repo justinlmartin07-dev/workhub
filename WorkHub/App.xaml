@@ -18,6 +18,7 @@
             <converters:DateFormatConverter x:Key="DateFormatConverter" />
             <converters:LabelCaseConverter x:Key="LabelCaseConverter" />
             <converters:IndexEqualsConverter x:Key="IndexEqualsConverter" />
+            <converters:IsSelectedItemConverter x:Key="IsSelectedItemConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

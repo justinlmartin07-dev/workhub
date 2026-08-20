@@ -36,7 +36,7 @@
         <SearchBar Grid.Row="1" Placeholder="Search jobs..." Text="{Binding SearchText}"
                    SearchCommand="{Binding SearchCommand}" Margin="8,0,8,0" />
 
-        <controls:DataStateView Grid.Row="2"
+        <controls:DataStateView x:Name="ListStateView" Grid.Row="2"
             IsLoading="{Binding IsLoading}" HasError="{Binding HasError}" IsEmpty="{Binding IsEmpty}"
             HasContent="{Binding HasContent}" ErrorMessage="{Binding ErrorMessage}"
             EmptyMessage="No jobs found" RetryCommand="{Binding LoadJobsCommand}">
@@ -62,21 +62,15 @@
                                     <TapGestureRecognizer Command="{Binding Source={x:Reference JobsCollectionView}, Path=BindingContext.SelectJobCommand}"
                                                           CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal" />
-                                        <VisualState x:Name="Selected">
-                                            <VisualState.Setters>
-                                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                                <Setter Property="StrokeThickness" Value="2" />
-                                                <Setter Property="Shadow">
-                                                    <Shadow Brush="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                                            Offset="0,2" Radius="12" Opacity="0.25" />
-                                                </Setter>
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
+                                <!-- Ring driven by data, not the VSM Selected state — WinUI
+                                     recycles containers without resetting visual state, which
+                                     left stale rings on scrolled rows. -->
+                                <controls:SelectionRing.IsSelected>
+                                    <MultiBinding Converter="{StaticResource IsSelectedItemConverter}">
+                                        <Binding Path="." />
+                                        <Binding Path="SelectedItem" Source="{RelativeSource AncestorType={x:Type CollectionView}}" />
+                                    </MultiBinding>
+                                </controls:SelectionRing.IsSelected>
                                 <Grid ColumnDefinitions="4,*" ColumnSpacing="0">
                                     <!-- Status-colored accent bar -->
                                     <BoxView Grid.Column="0" WidthRequest="4"

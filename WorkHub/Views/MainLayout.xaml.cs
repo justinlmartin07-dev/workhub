@@ -63,6 +63,9 @@ public partial class MainLayout : ContentPage
             LoadTabContent(0);
             PrewarmDetailViews();
         }
+#if WINDOWS
+        AttachKeyboardHandler();
+#endif
     }
 
     private bool _prewarmStarted;
@@ -96,7 +99,68 @@ public partial class MainLayout : ContentPage
     {
         base.OnDisappearing();
         if (Current == this) Current = null;
+        // The F5 hook is deliberately kept alive here: OnDisappearing also
+        // fires when a narrow-mode detail page is pushed over this page.
     }
+
+    // Reloads the active tab's list, and (wide mode) the visible detail pane.
+    // Edit views implement IHasUnsavedChanges but not IReusableDetail, so a
+    // refresh can never discard an in-progress edit.
+    public void RefreshCurrentTab()
+    {
+        if (_tabPages.TryGetValue(_viewModel.SelectedTabIndex, out var page)
+            && page.BindingContext is BaseViewModel vm)
+            vm.RefreshCommand.Execute(null);
+
+        if (_isWide && DetailPanel.Content?.BindingContext is IReusableDetail detail)
+            detail.RefreshOnReuse();
+    }
+
+#if WINDOWS
+    private Microsoft.UI.Xaml.UIElement? _keyboardRoot;
+
+    protected override void OnHandlerChanged()
+    {
+        base.OnHandlerChanged();
+        if (Handler == null) DetachKeyboardHandler();
+    }
+
+    // Hooked on the WinUI window content root. PreviewKeyDown tunnels from the
+    // root down to the focused element, so it fires before any child control
+    // sees the key and regardless of where focus sits — including narrow-mode
+    // Shell pages that live outside this page's visual subtree.
+    private void AttachKeyboardHandler()
+    {
+        DetachKeyboardHandler();
+        if (Window?.Handler?.PlatformView is Microsoft.UI.Xaml.Window winuiWindow
+            && winuiWindow.Content is Microsoft.UI.Xaml.UIElement root)
+        {
+            root.PreviewKeyDown += OnRootKeyDown;
+            _keyboardRoot = root;
+        }
+    }
+
+    private void DetachKeyboardHandler()
+    {
+        if (_keyboardRoot != null)
+        {
+            _keyboardRoot.PreviewKeyDown -= OnRootKeyDown;
+            _keyboardRoot = null;
+        }
+    }
+
+    private void OnRootKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        var isCtrlR = e.Key == Windows.System.VirtualKey.R
+            && Microsoft.UI.Input.InputKeyboardSource
+                .GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control)
+                .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+        if (e.Key != Windows.System.VirtualKey.F5 && !isCtrlR) return;
+
+        e.Handled = true;
+        RefreshCurrentTab();
+    }
+#endif
 
     protected override void OnSizeAllocated(double width, double height)
     {

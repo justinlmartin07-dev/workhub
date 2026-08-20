@@ -12,6 +12,7 @@ public partial class JobsListPage : ContentView
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;
+        Controls.PullToRefresh.Enable(ListStateView);
     }
 
     private async void OnSortTapped(object? sender, TappedEventArgs e)

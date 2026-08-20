@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace WorkHub.ViewModels;
 
@@ -34,6 +35,22 @@ public partial class BaseViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isEmpty;
+
+    // Bound (TwoWay) by the Android pull-to-refresh RefreshView.
+    [ObservableProperty]
+    private bool _isRefreshing;
+
+    // Single entry point for manual refresh (F5 on Windows, pull-to-refresh on
+    // Android). Always clears IsRefreshing so the pull spinner retracts even
+    // when LoadAsync skipped the reload because a load was already in flight.
+    [RelayCommand]
+    private async Task RefreshAsync()
+    {
+        try { await OnRefreshRequestedAsync(); }
+        finally { IsRefreshing = false; }
+    }
+
+    protected virtual Task OnRefreshRequestedAsync() => Task.CompletedTask;
 
     protected async Task LoadAsync(Func<Task> action, bool showLoading = true)
     {

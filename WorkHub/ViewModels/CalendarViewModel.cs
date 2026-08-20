@@ -68,6 +68,8 @@ public partial class CalendarViewModel : BaseViewModel
         HighlightSelectedDay();
     }
 
+    protected override Task OnRefreshRequestedAsync() => LoadEventsAsync();
+
     [RelayCommand]
     public async Task LoadEventsAsync()
     {

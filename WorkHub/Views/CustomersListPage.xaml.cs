@@ -12,6 +12,7 @@ public partial class CustomersListPage : ContentView
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;
+        Controls.PullToRefresh.Enable(ListStateView);
     }
 
     private async void OnScrollToRequested(CustomerResponse customer)

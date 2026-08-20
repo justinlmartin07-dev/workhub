@@ -31,6 +31,8 @@ public partial class OrdersViewModel : BaseViewModel
     [ObservableProperty]
     private OrderLineResponse? _selectedOrder;
 
+    public event Action<OrderLineResponse>? ScrollToRequested;
+
     public string UserName => _authService.CurrentUser?.Name ?? "";
     public string UserInitials
     {
@@ -72,12 +74,32 @@ public partial class OrdersViewModel : BaseViewModel
     private void ApplyOrderedChange(OrderOrderedChange change)
     {
         var item = _allOrders.FirstOrDefault(o => o.Id == change.ItemId && o.Source == change.Source);
-        if (item != null)
-            item.OrderedAt = change.OrderedAt;
+        if (item == null)
+        {
+            OnPropertyChanged(nameof(OutstandingCount));
+            OnPropertyChanged(nameof(OrderedCount));
+            return;
+        }
 
-        OnPropertyChanged(nameof(OutstandingCount));
-        OnPropertyChanged(nameof(OrderedCount));
+        item.OrderedAt = change.OrderedAt;
+        // Re-sort locally the same way the API does so the row lands in its
+        // proper new spot immediately instead of on the next reload. The merge
+        // moves it in place and the follow-selection scroll keeps it in view.
+        _allOrders = SortLikeApi(_allOrders);
+        PublishList(rebuild: false);
     }
+
+    // Mirrors OrdersController's ordering: outstanding first, ordered last,
+    // then customer / job / part name.
+    private static List<OrderLineResponse> SortLikeApi(IEnumerable<OrderLineResponse> orders) =>
+        orders
+            .OrderBy(o => o.OrderedAt.HasValue)
+            .ThenBy(o => o.CustomerName)
+            .ThenBy(o => o.JobTitle)
+            .ThenBy(o => o.Name)
+            .ToList();
+
+    protected override Task OnRefreshRequestedAsync() => LoadOrdersAsync();
 
     [RelayCommand]
     public async Task LoadOrdersAsync()
@@ -107,7 +129,7 @@ public partial class OrdersViewModel : BaseViewModel
     // collection. rebuild swaps the collection wholesale; otherwise rows are merged
     // in place so only actual changes re-render. visible may be pre-computed off
     // the main thread by the search debounce path.
-    private void PublishList(bool rebuild, IReadOnlyList<OrderLineResponse>? visible = null)
+    private void PublishList(bool rebuild, IReadOnlyList<OrderLineResponse>? visible = null, bool followSelection = true)
     {
         if (visible == null)
         {
@@ -118,15 +140,49 @@ public partial class OrdersViewModel : BaseViewModel
         }
 
         if (rebuild || Orders.Count == 0)
+        {
             Orders = new ObservableCollection<OrderLineResponse>(visible);
+        }
         else
+        {
+            var selectedKey = SelectedOrder is { } s ? ((Guid, string)?)(s.Id, s.Source) : null;
+            var oldIndex = IndexOfKey(selectedKey);
             Orders.MergeInto(visible, o => (o.Id, o.Source), RowUnchanged, TryUpdateInPlace);
+            ReselectByKey(selectedKey);
+
+            // Follow the selected row when a refresh resorted it (marking a
+            // part ordered moves it on the next reload from the API).
+            if (followSelection && SelectedOrder != null && oldIndex >= 0)
+            {
+                var newIndex = Orders.IndexOf(SelectedOrder);
+                if (newIndex >= 0 && newIndex != oldIndex)
+                    ScrollToRequested?.Invoke(SelectedOrder);
+            }
+        }
 
         OnPropertyChanged(nameof(OutstandingCount));
         OnPropertyChanged(nameof(OrderedCount));
 
         if (_allOrders.Count == 0) SetEmpty();
         else SetContent();
+    }
+
+    private int IndexOfKey((Guid Id, string Source)? key)
+    {
+        if (key == null) return -1;
+        for (int i = 0; i < Orders.Count; i++)
+            if (Orders[i].Id == key.Value.Id && Orders[i].Source == key.Value.Source) return i;
+        return -1;
+    }
+
+    // After a merge replaced the selected row with a fresh instance, native
+    // selection drops (SelectedOrder goes null via the TwoWay binding) —
+    // re-point it at the new instance.
+    private void ReselectByKey((Guid Id, string Source)? key)
+    {
+        if (key == null || SelectedOrder != null) return;
+        var match = Orders.FirstOrDefault(o => o.Id == key.Value.Id && o.Source == key.Value.Source);
+        if (match != null) SelectedOrder = match;
     }
 
     private static bool MatchesSearch(OrderLineResponse o, string query) =>
@@ -155,7 +211,9 @@ public partial class OrdersViewModel : BaseViewModel
         var visible = await Task.Run(() =>
             query.Length == 0 ? snapshot : snapshot.Where(o => MatchesSearch(o, query)).ToList(), ct);
         if (ct.IsCancellationRequested) return;
-        PublishList(rebuild: false, visible);
+        // Filtering isn't a data change — don't yank the view to the selected
+        // row while the user is typing a search.
+        PublishList(rebuild: false, visible, followSelection: false);
     }
 
     [RelayCommand]

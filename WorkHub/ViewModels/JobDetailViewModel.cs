@@ -393,6 +393,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         var confirmed = await Shell.Current.DisplayAlert("Complete Job", "Mark this job as complete?", "Mark Complete", "Cancel");
         if (!confirmed) return;
         await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "Complete" });
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
         await LoadJobAsync();
     }
 
@@ -403,6 +404,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         var confirmed = await Shell.Current.DisplayAlert("Bill Job", "Mark this job as billed?", "Mark Billed", "Cancel");
         if (!confirmed) return;
         await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "Billed" });
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
         await LoadJobAsync();
     }
 
@@ -411,6 +413,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     {
         if (Job == null) return;
         await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "In Progress" });
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
         await LoadJobAsync();
     }
 
@@ -419,6 +422,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     {
         if (Job == null) return;
         await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "On Hold" });
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
         await LoadJobAsync();
     }
 
@@ -429,6 +433,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         var confirmed = await Shell.Current.DisplayAlert("Cancel Job", "Are you sure you want to cancel this job?", "Cancel Job", "Keep");
         if (!confirmed) return;
         await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "Cancelled" });
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
         await LoadJobAsync();
     }
 
@@ -508,6 +513,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
             $"This job is marked {Job.Status.ToLowerInvariant()}. Reopen it to add items?", "Reopen", "Cancel");
         if (!reopen) return false;
         await _apiService.UpdateJobAsync(Job.Id, new UpdateJobRequest { Status = "In Progress" });
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("job"));
         return true;
     }
 
@@ -637,6 +643,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
             }
 
             IsPartsPanelOpen = false;
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("orders"));
             await LoadJobAsync();
         }
         catch (Exception ex)
@@ -659,6 +666,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
                 await _apiService.UpdateJobItemAsync(Job!.Id, item.Id, new UpdateJobInventoryRequest { Quantity = newQuantity });
             else
                 await _apiService.UpdateJobAdhocItemAsync(Job!.Id, item.Id, new UpdateJobAdhocItemRequest { Quantity = newQuantity });
+            WeakReferenceMessenger.Default.Send(new DataChangedMessage("orders"));
         }
         catch (Exception ex)
         {
@@ -676,6 +684,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
             await _apiService.DeleteJobItemAsync(Job.Id, item.Id);
         else
             await _apiService.DeleteJobAdhocItemAsync(Job.Id, item.Id);
+        WeakReferenceMessenger.Default.Send(new DataChangedMessage("orders"));
         await LoadJobAsync();
     }
 }

@@ -71,6 +71,8 @@ public partial class CustomersListViewModel : BaseViewModel
         });
     }
 
+    protected override Task OnRefreshRequestedAsync() => LoadCustomersAsync();
+
     [RelayCommand]
     public async Task LoadCustomersAsync()
     {
@@ -100,7 +102,7 @@ public partial class CustomersListViewModel : BaseViewModel
     // collection. rebuild swaps the collection wholesale; otherwise rows are merged
     // in place so only actual changes re-render. visible may be pre-computed off
     // the main thread by the search debounce path.
-    private void PublishList(bool rebuild, IReadOnlyList<CustomerResponse>? visible = null)
+    private void PublishList(bool rebuild, IReadOnlyList<CustomerResponse>? visible = null, bool followSelection = true)
     {
         if (visible == null)
         {
@@ -117,12 +119,30 @@ public partial class CustomersListViewModel : BaseViewModel
         else
         {
             var selectedId = SelectedCustomer?.Id;
+            var oldIndex = IndexOfId(selectedId);
             Customers.MergeInto(visible, c => c.Id, RowUnchanged);
             ReselectById(selectedId);
+
+            // Follow the selected row when a refresh resorted it to a new spot
+            // (e.g. the customer was renamed and the list is ordered by name).
+            if (followSelection && SelectedCustomer != null && oldIndex >= 0)
+            {
+                var newIndex = Customers.IndexOf(SelectedCustomer);
+                if (newIndex >= 0 && newIndex != oldIndex)
+                    ScrollToRequested?.Invoke(SelectedCustomer);
+            }
         }
 
         if (Customers.Count == 0) SetEmpty();
         else SetContent();
+    }
+
+    private int IndexOfId(Guid? id)
+    {
+        if (id == null) return -1;
+        for (int i = 0; i < Customers.Count; i++)
+            if (Customers[i].Id == id) return i;
+        return -1;
     }
 
     private static bool MatchesSearch(CustomerResponse c, string query) =>
@@ -191,7 +211,9 @@ public partial class CustomersListViewModel : BaseViewModel
         var visible = await Task.Run(() =>
             query.Length == 0 ? snapshot : snapshot.Where(c => MatchesSearch(c, query)).ToList(), ct);
         if (ct.IsCancellationRequested) return;
-        PublishList(rebuild: false, visible);
+        // Filtering isn't a data change — don't yank the view to the selected
+        // row while the user is typing a search.
+        PublishList(rebuild: false, visible, followSelection: false);
     }
 
     [RelayCommand]

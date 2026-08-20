@@ -85,6 +85,8 @@ public partial class JobsListViewModel : BaseViewModel
         });
     }
 
+    protected override Task OnRefreshRequestedAsync() => LoadJobsAsync();
+
     [RelayCommand]
     public async Task LoadJobsAsync()
     {
@@ -114,7 +116,7 @@ public partial class JobsListViewModel : BaseViewModel
     // collection. rebuild swaps the collection wholesale; otherwise rows are merged
     // in place so only actual changes re-render. visible may be pre-computed off
     // the main thread by the search debounce path.
-    private void PublishList(bool rebuild, IReadOnlyList<JobListItemResponse>? visible = null)
+    private void PublishList(bool rebuild, IReadOnlyList<JobListItemResponse>? visible = null, bool followSelection = true)
     {
         visible ??= ProjectList(_allJobs, SearchText.Trim());
 
@@ -125,12 +127,30 @@ public partial class JobsListViewModel : BaseViewModel
         else
         {
             var selectedId = SelectedJob?.Id;
+            var oldIndex = IndexOfId(selectedId);
             Jobs.MergeInto(visible, j => j.Id, RowUnchanged);
             ReselectById(selectedId);
+
+            // Follow the selected row when a refresh resorted it to a new spot
+            // (e.g. its status changed and the list is sorted by status).
+            if (followSelection && SelectedJob != null && oldIndex >= 0)
+            {
+                var newIndex = Jobs.IndexOf(SelectedJob);
+                if (newIndex >= 0 && newIndex != oldIndex)
+                    ScrollToRequested?.Invoke(SelectedJob);
+            }
         }
 
         if (Jobs.Count == 0) SetEmpty();
         else SetContent();
+    }
+
+    private int IndexOfId(Guid? id)
+    {
+        if (id == null) return -1;
+        for (int i = 0; i < Jobs.Count; i++)
+            if (Jobs[i].Id == id) return i;
+        return -1;
     }
 
     // Filter + sort in one pass; safe to run off the main thread on a snapshot.
@@ -248,7 +268,9 @@ public partial class JobsListViewModel : BaseViewModel
         var snapshot = _allJobs;
         var visible = await Task.Run(() => ProjectList(snapshot, query), ct);
         if (ct.IsCancellationRequested) return;
-        PublishList(rebuild: false, visible);
+        // Filtering isn't a data change — don't yank the view to the selected
+        // row while the user is typing a search.
+        PublishList(rebuild: false, visible, followSelection: false);
     }
 
     [RelayCommand]

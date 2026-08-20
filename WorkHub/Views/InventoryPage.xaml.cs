@@ -11,6 +11,7 @@ public partial class InventoryPage : ContentView
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = viewModel;
+        Controls.PullToRefresh.Enable(ListStateView);
         _viewModel.ScrollToRowRequested += OnScrollToRowRequested;
     }
 

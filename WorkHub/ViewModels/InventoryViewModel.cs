@@ -70,6 +70,8 @@ public partial class InventoryViewModel : BaseViewModel
         });
     }
 
+    protected override Task OnRefreshRequestedAsync() => LoadItemsAsync();
+
     [RelayCommand]
     public async Task LoadItemsAsync()
     {
