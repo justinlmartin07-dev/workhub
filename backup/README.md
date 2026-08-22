@@ -116,9 +116,9 @@ Recovery runs locally, then the result is loaded into Railway via a dump:
 
 ## Troubleshooting
 
-- **`pg_receivewal` fails with a `pg_hba.conf` error about replication** —
-  dumps and base backups still work (they use a normal connection), but WAL
-  streaming uses the replication protocol, which `pg_hba.conf` gates
+- **`pg_receivewal`/`pg_basebackup` fail with a `pg_hba.conf` error about
+  replication** — dumps still work (normal connection), but base backups and
+  WAL streaming both use the replication protocol, which `pg_hba.conf` gates
   separately, and some images don't allow it remotely. Fix as superuser
   (Railway dashboard → Postgres service → Data tab → query). The edit lives on
   the database volume, so it survives restarts but must be reapplied if the
