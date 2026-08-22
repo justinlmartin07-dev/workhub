@@ -64,7 +64,7 @@ Restore the newest dump into a scratch database and look at the data:
 
 ```bash
 rclone copy r2:workhub-db-backups/dump/ ./restore-test --max-age 2d
-docker run -d --name restore-test -e POSTGRES_PASSWORD=test -p 5433:5432 postgres:16
+docker run -d --name restore-test -e POSTGRES_PASSWORD=test -p 5433:5432 postgres:18
 pg_restore --no-owner -h localhost -p 5433 -U postgres -C -d postgres ./restore-test/workhub-<newest>.dump
 ```
 
@@ -100,7 +100,7 @@ Recovery runs locally, then the result is loaded into Railway via a dump:
    recovery_target_time = '2026-08-21 14:55:00+00'
    recovery_target_action = 'promote'
    EOF
-   docker run -d --name pitr -v ./pgdata:/var/lib/postgresql/data -v ./wal:/wal -p 5433:5432 postgres:16
+   docker run -d --name pitr -v ./pgdata:/var/lib/postgresql/data -v ./wal:/wal -p 5433:5432 postgres:18
    ```
 
 3. Watch `docker logs pitr` until it promotes, sanity-check the data, then
@@ -120,16 +120,42 @@ Recovery runs locally, then the result is loaded into Railway via a dump:
   dumps and base backups still work (they use a normal connection), but WAL
   streaming uses the replication protocol, which `pg_hba.conf` gates
   separately, and some images don't allow it remotely. Fix as superuser
-  (appends an hba rule and reloads):
+  (Railway dashboard → Postgres service → Data tab → query). The edit lives on
+  the database volume, so it survives restarts but must be reapplied if the
+  Postgres service is ever recreated from scratch:
 
   ```sql
-  COPY (SELECT 'host replication all all scram-sha-256')
-    TO PROGRAM 'bash -c "cat >> $PGDATA/pg_hba.conf"';
+  SHOW hba_file;  -- note the path, substitute it below
+
+  -- leading empty row guards against a file with no trailing newline
+  COPY (SELECT line FROM (VALUES (''), ('host replication all all scram-sha-256')) AS t(line))
+  TO PROGRAM 'cat >> /var/lib/postgresql/data/pgdata/pg_hba.conf';
+
   SELECT pg_reload_conf();
+
+  -- verify it parsed: expect one row, error column empty
+  SELECT line_number, auth_method, error FROM pg_hba_file_rules
+  WHERE database = '{replication}';
   ```
 
-  If that feels too invasive, fall back to more frequent dumps instead of PITR:
-  set `BASE_BACKUP_INTERVAL_HOURS=1` and ignore the WAL warnings (RPO becomes 1h).
+  The service retries every 60s — no restart needed. Confirm with
+  `SELECT slot_name, active FROM pg_replication_slots;` (expect `active = t`).
+  If replication then fails with *authentication* errors, the role's password
+  may be md5-hashed — change the rule's method from `scram-sha-256` to `md5`.
+
+  If all that feels too invasive, fall back to more frequent dumps instead of
+  PITR: set `BASE_BACKUP_INTERVAL_HOURS=1` and ignore the WAL warnings (RPO 1h).
+
+- **rclone gets `403 AccessDenied` on `CreateBucket`** — a bucket-scoped R2
+  token can't check bucket existence, so rclone assumes the bucket is missing
+  and tries to create it. The Dockerfile sets `RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true`
+  to skip that check; if you still see this, the real cause is usually a
+  `BACKUP_BUCKET` value that doesn't exactly match the bucket the token is
+  scoped to.
+
+- **`server version mismatch` from pg_dump** — the server was upgraded past the
+  client tools. Bump the `FROM postgres:NN-alpine` major version in the
+  Dockerfile to match `SELECT version();` and redeploy.
 
 - **Database disk usage climbing** — the replication slot holds WAL while this
   service is down. Fix the service, or if retiring it permanently:
