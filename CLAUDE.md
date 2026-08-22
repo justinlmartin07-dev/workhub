@@ -52,6 +52,10 @@ dotnet publish -f net9.0-android -c Release # production build
 - **Address stored as single field** in API — client splits into Street/City/State/Zip fields for editing, combines to `"Street\nCity, State Zip"` format on save.
 - **Two named HttpClients** — `"AuthClient"` (no auth handler, for login/refresh) and `"ApiClient"` (with `AuthDelegatingHandler` for token injection/refresh).
 
+## Backups
+
+`backup/` is a standalone Railway service (Dockerfile, root dir `/backup`) that backs up the production Postgres to a dedicated R2 bucket: daily `pg_dump` + `pg_basebackup`, plus continuous WAL streaming via `pg_receivewal` for point-in-time recovery. Setup, env vars, and restore playbooks are in `backup/README.md`.
+
 ## Database
 
 Local dev uses PostgreSQL via Docker: `docker run -d --name workhub-db -e POSTGRES_USER=Admin -e POSTGRES_PASSWORD=Admin -e POSTGRES_DB=workhub -p 5432:5432 postgres:16`
