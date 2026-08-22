@@ -119,32 +119,22 @@ Recovery runs locally, then the result is loaded into Railway via a dump:
 - **`pg_receivewal`/`pg_basebackup` fail with a `pg_hba.conf` error about
   replication** — dumps still work (normal connection), but base backups and
   WAL streaming both use the replication protocol, which `pg_hba.conf` gates
-  separately, and some images don't allow it remotely. Fix as superuser
-  (Railway dashboard → Postgres service → Data tab → query). The edit lives on
-  the database volume, so it survives restarts but must be reapplied if the
-  Postgres service is ever recreated from scratch:
-
-  ```sql
-  SHOW hba_file;  -- note the path, substitute it below
-
-  -- leading empty row guards against a file with no trailing newline
-  COPY (SELECT line FROM (VALUES (''), ('host replication all all scram-sha-256')) AS t(line))
-  TO PROGRAM 'cat >> /var/lib/postgresql/data/pgdata/pg_hba.conf';
-
-  SELECT pg_reload_conf();
-
-  -- verify it parsed: expect one row, error column empty
-  SELECT line_number, auth_method, error FROM pg_hba_file_rules
-  WHERE database = '{replication}';
-  ```
-
-  The service retries every 60s — no restart needed. Confirm with
-  `SELECT slot_name, active FROM pg_replication_slots;` (expect `active = t`).
-  If replication then fails with *authentication* errors, the role's password
-  may be md5-hashed — change the rule's method from `scram-sha-256` to `md5`.
-
-  If all that feels too invasive, fall back to more frequent dumps instead of
-  PITR: set `BASE_BACKUP_INTERVAL_HOURS=1` and ignore the WAL warnings (RPO 1h).
+  separately, and some images don't allow it remotely. `apply-hba-fix.sh`
+  handles this automatically at container startup (idempotent: checks
+  `pg_hba_file_rules`, appends `host replication all all scram-sha-256` and
+  reloads only when missing) — so if these errors persist, read the startup
+  logs to see why the fix script itself failed. Notes:
+  - Railway's Data-tab query editor appends `LIMIT` to queries and cannot run
+    `COPY ... TO PROGRAM` statements manually; use the startup script (or
+    `railway ssh` into this service and `psql "$DATABASE_URL"`).
+  - Verify state with `SELECT * FROM pg_hba_file_rules WHERE database =
+    '{replication}';` and `SELECT slot_name, active FROM pg_replication_slots;`
+    (expect `active = t` once streaming).
+  - If replication fails with *authentication* errors after the rule is added,
+    the role's password may be md5-hashed — edit the rule's method to `md5`.
+  - Fallback if replication can't be made to work: set
+    `BASE_BACKUP_INTERVAL_HOURS=1` and ignore the WAL warnings (RPO 1h,
+    dumps only).
 
 - **rclone gets `403 AccessDenied` on `CreateBucket`** — a bucket-scoped R2
   token can't check bucket existence, so rclone assumes the bucket is missing

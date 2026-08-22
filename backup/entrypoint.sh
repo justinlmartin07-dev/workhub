@@ -8,6 +8,10 @@ set -uo pipefail
 : "${DATABASE_URL:?DATABASE_URL is required}"
 : "${BACKUP_BUCKET:?BACKUP_BUCKET is required}"
 
+# One-time server-side prerequisite for basebackup/WAL (no-op once applied)
+/backup/apply-hba-fix.sh \
+    || echo "WARN: could not verify/append pg_hba replication rule; basebackup and WAL streaming may fail" >&2
+
 /backup/wal-stream.sh &
 /backup/schedule.sh &
 
