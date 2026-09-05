@@ -66,13 +66,26 @@ public partial class JobItemResponse : ObservableObject
     public string? Description { get; set; }
     public string? PartNumber { get; set; }
 
-    [ObservableProperty]
-    private int _quantity;
+    private decimal _quantity;
+    // Fractional quantities are allowed (e.g. 1.56). The setter strips trailing
+    // zeros (numeric(10,2) arrives as 5.00) so the bound stepper Entry shows "5".
+    public decimal Quantity
+    {
+        get => _quantity;
+        set
+        {
+            if (SetProperty(ref _quantity, value / 1.000000000000000000000000000000m))
+                OnPropertyChanged(nameof(PriceDisplay));
+        }
+    }
     public string ListType { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
     public Guid? InventoryItemId { get; set; }
+    public DateTime? OrderedAt { get; set; }
     public decimal? Cost { get; set; }
     public decimal? Price { get; set; }
+
+    public bool IsOrdered => OrderedAt != null;
 
     // Compact extended "cost / price" (unit × quantity) for the job item rows;
     // a missing half shows as a dash.
@@ -80,8 +93,6 @@ public partial class JobItemResponse : ObservableObject
         Cost == null && Price == null
             ? string.Empty
             : $"{(Cost * Quantity)?.ToString("C") ?? "—"} / {(Price * Quantity)?.ToString("C") ?? "—"}";
-
-    partial void OnQuantityChanged(int value) => OnPropertyChanged(nameof(PriceDisplay));
 }
 
 public class CreateJobRequest
@@ -119,13 +130,13 @@ public class UpdateJobNoteRequest
 public class CreateJobInventoryRequest
 {
     public Guid InventoryItemId { get; set; }
-    public int Quantity { get; set; } = 1;
+    public decimal Quantity { get; set; } = 1;
     public string ListType { get; set; } = string.Empty;
 }
 
 public class UpdateJobInventoryRequest
 {
-    public int? Quantity { get; set; }
+    public decimal? Quantity { get; set; }
     public string? ListType { get; set; }
     public bool? Ordered { get; set; }
 }
@@ -134,7 +145,7 @@ public class CreateJobAdhocItemRequest
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public int Quantity { get; set; } = 1;
+    public decimal Quantity { get; set; } = 1;
     public string ListType { get; set; } = string.Empty;
 }
 
@@ -142,7 +153,7 @@ public class UpdateJobAdhocItemRequest
 {
     public string? Name { get; set; }
     public string? Description { get; set; }
-    public int? Quantity { get; set; }
+    public decimal? Quantity { get; set; }
     public string? ListType { get; set; }
     public bool? Ordered { get; set; }
 }

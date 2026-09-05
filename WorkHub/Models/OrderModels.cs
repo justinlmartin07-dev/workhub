@@ -11,7 +11,7 @@ public partial class OrderLineResponse : ObservableObject
     public string? Description { get; set; }
     public string? PartNumber { get; set; }
     public string? Sku { get; set; }
-    public int Quantity { get; set; }
+    public decimal Quantity { get; set; }
     public Guid JobId { get; set; }
     public string JobTitle { get; set; } = string.Empty;
     public Guid CustomerId { get; set; }

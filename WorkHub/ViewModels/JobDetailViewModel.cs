@@ -62,8 +62,11 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     [ObservableProperty]
     private string _newItemSearchText = string.Empty;
 
+    // Flat mix of InventoryGroupHeader and SelectableInventoryItem rows, grouped
+    // by category. Flat on purpose: grouped CollectionView crashes on Windows
+    // when groups change at runtime (see InventoryViewModel).
     [ObservableProperty]
-    private ObservableCollection<SelectableInventoryItem> _selectableInventory = new();
+    private ObservableCollection<object> _selectableInventory = new();
 
     [ObservableProperty]
     private string _newAdhocItemName = string.Empty;
@@ -72,6 +75,12 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private int _selectedCount;
 
     private List<InventoryItemResponse> _allInventory = new();
+    // Wrappers are created once per panel open (not per filter pass) so checked
+    // state survives searching and collapsing.
+    private List<SelectableInventoryItem> _allSelectable = new();
+    // Per-category collapse state for the picker; reset each time the panel opens.
+    private readonly Dictionary<string, bool> _pickerExpanded = new(StringComparer.OrdinalIgnoreCase);
+    private const string UncategorizedLabel = "Uncategorized";
     private string _activeListType = string.Empty;
 
     public JobDetailViewModel(ApiService apiService, PhotoService photoService,
@@ -205,6 +214,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         && a.Quantity == b.Quantity
         && a.ListType == b.ListType
         && a.Source == b.Source
+        && a.OrderedAt == b.OrderedAt
         && a.Cost == b.Cost
         && a.Price == b.Price;
 
@@ -257,20 +267,21 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
     private async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
 
     [RelayCommand]
-    private async Task PrintAsync()
+    private async Task ShareAsync()
     {
         if (Job == null) return;
 
-        // Pull the customer so the printout carries company contact details;
-        // the summary still prints without them if the fetch fails.
+        // Pull the customer so the summary carries company contact details;
+        // it still renders without them if the fetch fails.
         CustomerResponse? customer = null;
         try { customer = await _apiService.GetCustomerAsync(Job.CustomerId); }
         catch { }
 
         var template = await _printTemplates.GetJobTemplateAsync();
         var html = PrintSummaryBuilder.BuildJobSummary(template, Job, customer);
+        var plainText = PrintSummaryBuilder.BuildJobSummaryText(Job, customer);
         await Shell.Current.Navigation.PushModalAsync(
-            new PrintPreviewPage(html, $"{Job.Title} — Job Summary"));
+            new PrintPreviewPage(html, plainText, $"{Job.Title} — Job Summary"));
     }
 
     [RelayCommand]
@@ -567,24 +578,40 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
 
     private void FilterInventory()
     {
-        var search = (NewItemSearchText ?? string.Empty).ToLower();
-        var filtered = string.IsNullOrWhiteSpace(search)
-            ? _allInventory
-            : _allInventory.Where(i =>
-                i.Name.ToLower().Contains(search) ||
-                (i.PartNumber?.ToLower().Contains(search) ?? false)).ToList();
+        var search = (NewItemSearchText ?? string.Empty).Trim();
+        var searching = search.Length > 0;
+        var visible = !searching
+            ? _allSelectable
+            : _allSelectable.Where(si =>
+                si.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                (si.PartNumber?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (si.Category?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
 
-        SelectableInventory = new ObservableCollection<SelectableInventoryItem>(
-            filtered.Select(i =>
-            {
-                var si = new SelectableInventoryItem(i);
-                si.PropertyChanged += (s, e) =>
-                {
-                    if (e.PropertyName == nameof(SelectableInventoryItem.IsSelected))
-                        SelectedCount = SelectableInventory.Count(x => x.IsSelected);
-                };
-                return si;
-            }));
+        // Groups are forced open while searching so matches are actually visible.
+        var rows = new List<object>();
+        var groups = visible
+            .GroupBy(si => string.IsNullOrWhiteSpace(si.Category) ? UncategorizedLabel : si.Category!)
+            .OrderBy(g => g.Key == UncategorizedLabel ? 1 : 0)
+            .ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+        foreach (var group in groups)
+        {
+            var expanded = searching || IsPickerGroupExpanded(group.Key);
+            var groupItems = group.ToList();
+            rows.Add(new InventoryGroupHeader(group.Key, groupItems.Count, expanded));
+            if (expanded) rows.AddRange(groupItems);
+        }
+        SelectableInventory = new ObservableCollection<object>(rows);
+    }
+
+    private bool IsPickerGroupExpanded(string category) =>
+        !_pickerExpanded.TryGetValue(category, out var expanded) || expanded;
+
+    [RelayCommand]
+    private void TogglePickerGroup(InventoryGroupHeader header)
+    {
+        if (header == null) return;
+        _pickerExpanded[header.Category] = !header.IsExpanded;
+        FilterInventory();
     }
 
     [RelayCommand]
@@ -602,6 +629,17 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         {
             var result = await _apiService.GetInventoryAsync(pageSize: 200);
             _allInventory = result.Items.ToList();
+            _allSelectable = _allInventory.Select(i =>
+            {
+                var si = new SelectableInventoryItem(i);
+                si.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(SelectableInventoryItem.IsSelected))
+                        SelectedCount = _allSelectable.Count(x => x.IsSelected);
+                };
+                return si;
+            }).ToList();
+            _pickerExpanded.Clear();
             FilterInventory();
         }
         catch { }
@@ -621,7 +659,7 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         if (Job == null) return;
         try
         {
-            var selected = SelectableInventory.Where(i => i.IsSelected).ToList();
+            var selected = _allSelectable.Where(i => i.IsSelected).ToList();
             foreach (var item in selected)
             {
                 await _apiService.CreateJobItemAsync(Job.Id, new CreateJobInventoryRequest
@@ -652,13 +690,13 @@ public partial class JobDetailViewModel : BaseViewModel, IReusableDetail
         }
     }
 
-    public void SaveQuantityInBackground(JobItemResponse item, int newQuantity)
+    public void SaveQuantityInBackground(JobItemResponse item, decimal newQuantity)
     {
         if (Job == null) return;
         _ = SaveQuantityAsync(item, newQuantity);
     }
 
-    private async Task SaveQuantityAsync(JobItemResponse item, int newQuantity)
+    private async Task SaveQuantityAsync(JobItemResponse item, decimal newQuantity)
     {
         try
         {
@@ -699,6 +737,7 @@ public partial class SelectableInventoryItem : ObservableObject
     public string Name => Item.Name;
     public string? PartNumber => Item.PartNumber;
     public string? Description => Item.Description;
+    public string? Category => Item.Category;
 
     public SelectableInventoryItem(InventoryItemResponse item)
     {

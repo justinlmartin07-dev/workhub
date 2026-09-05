@@ -115,6 +115,7 @@ public class JobsController : ControllerBase
                 ListType = ji.ListType,
                 Source = "library",
                 InventoryItemId = ji.InventoryItemId,
+                OrderedAt = ji.OrderedAt,
                 Cost = ji.InventoryItem.Cost,
                 Price = ji.InventoryItem.Price,
             };
@@ -132,6 +133,7 @@ public class JobsController : ControllerBase
                 Quantity = ai.Quantity,
                 ListType = ai.ListType,
                 Source = "adhoc",
+                OrderedAt = ai.OrderedAt,
             };
             if (ai.ListType == "used") usedItems.Add(item);
             else toOrderItems.Add(item);

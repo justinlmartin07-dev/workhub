@@ -153,7 +153,7 @@ Links a job to a library inventory item. Used for both the **Used** and **To Be 
 | `id` | `uuid` | Primary key |
 | `job_id` | `uuid` | FK → `jobs.id` |
 | `inventory_item_id` | `uuid` | FK → `inventory_items.id` |
-| `quantity` | `integer` | Required, default 1 |
+| `quantity` | `numeric(10,2)` | Required, default 1; fractional quantities allowed (e.g. 1.56) |
 | `list_type` | `varchar(20)` | `'used'` or `'to_order'` |
 | `created_at` | `timestamptz` | |
 | `updated_at` | `timestamptz` | Null on first insert, set on edit |
@@ -168,7 +168,7 @@ Free-text items added directly to a job without a library reference. Same `list_
 | `job_id` | `uuid` | FK → `jobs.id` |
 | `name` | `varchar(200)` | Required |
 | `description` | `text` | |
-| `quantity` | `integer` | Required, default 1 |
+| `quantity` | `numeric(10,2)` | Required, default 1; fractional quantities allowed (e.g. 1.56) |
 | `list_type` | `varchar(20)` | `'used'` or `'to_order'` |
 | `created_at` | `timestamptz` | |
 | `updated_at` | `timestamptz` | Null on first insert, set on edit |

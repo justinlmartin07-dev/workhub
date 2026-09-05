@@ -56,7 +56,7 @@ public partial class JobDetailPage : ContentPage
     // event (job switch on the reused view, back-navigation) and must be
     // committed from CommitPendingQuantityEdit instead.
     private Entry? _focusedQuantityEntry;
-    private int _quantityBeforeEdit;
+    private decimal _quantityBeforeEdit;
 
     private void OnQuantityEntryFocused(object? sender, FocusEventArgs e)
     {
@@ -87,8 +87,10 @@ public partial class JobDetailPage : ContentPage
         if (entry.BindingContext is not JobItemResponse item) return;
         if (BindingContext is not JobDetailViewModel vm) return;
 
-        if (int.TryParse(entry.Text, out var qty) && qty >= 1)
+        // Fractional quantities (e.g. 1.56) are allowed; the DB stores 2 decimals.
+        if (decimal.TryParse(entry.Text, out var qty) && qty > 0)
         {
+            qty = Math.Round(qty, 2);
             if (qty == _quantityBeforeEdit) return;
             _quantityBeforeEdit = qty;
             item.Quantity = qty;
@@ -120,7 +122,8 @@ public partial class JobDetailPage : ContentPage
         if (BindingContext is not JobDetailViewModel vm) return;
         if (item.Quantity <= 1) return;
 
-        item.Quantity--;
+        // Step down a whole unit, but never below 1 (2.56 → 1.56 → 1).
+        item.Quantity = Math.Max(1, item.Quantity - 1);
         vm.SaveQuantityInBackground(item, item.Quantity);
     }
 }

@@ -58,7 +58,7 @@ public class JobItemResponse
     public string? Description { get; set; }
     public string? PartNumber { get; set; }
     public string? Sku { get; set; }
-    public int Quantity { get; set; }
+    public decimal Quantity { get; set; }
     public string ListType { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty; // "library" or "adhoc"
     public Guid? InventoryItemId { get; set; }
@@ -77,7 +77,7 @@ public class OrderLineResponse
     public string? Description { get; set; }
     public string? PartNumber { get; set; }
     public string? Sku { get; set; }
-    public int Quantity { get; set; }
+    public decimal Quantity { get; set; }
     public DateTime? OrderedAt { get; set; }
     public Guid JobId { get; set; }
     public string JobTitle { get; set; } = string.Empty;

@@ -211,7 +211,7 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.Id).HasColumnName("id");
             e.Property(x => x.JobId).HasColumnName("job_id");
             e.Property(x => x.InventoryItemId).HasColumnName("inventory_item_id");
-            e.Property(x => x.Quantity).HasColumnName("quantity").HasDefaultValue(1);
+            e.Property(x => x.Quantity).HasColumnName("quantity").HasPrecision(10, 2).HasDefaultValue(1m);
             e.Property(x => x.ListType).HasColumnName("list_type").HasMaxLength(20).IsRequired();
             e.Property(x => x.OrderedAt).HasColumnName("ordered_at");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
@@ -231,7 +231,7 @@ public class WorkHubDbContext : DbContext
             e.Property(x => x.JobId).HasColumnName("job_id");
             e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
             e.Property(x => x.Description).HasColumnName("description");
-            e.Property(x => x.Quantity).HasColumnName("quantity").HasDefaultValue(1);
+            e.Property(x => x.Quantity).HasColumnName("quantity").HasPrecision(10, 2).HasDefaultValue(1m);
             e.Property(x => x.ListType).HasColumnName("list_type").HasMaxLength(20).IsRequired();
             e.Property(x => x.OrderedAt).HasColumnName("ordered_at");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");

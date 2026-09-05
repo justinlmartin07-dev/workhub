@@ -99,7 +99,7 @@
                                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource SurfaceDark}}">
                                             <Label FontSize="13" FontAttributes="Bold" VerticalOptions="Center"
                                                    TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"
-                                                   Text="{Binding Quantity, StringFormat='×{0}'}" />
+                                                   Text="{Binding Quantity, StringFormat='×{0:0.##}'}" />
                                         </Border>
                                     </Grid>
                                 </Grid>

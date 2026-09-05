@@ -788,7 +788,7 @@ Both lists are served from the same endpoints, filtered by `list_type` (`used` o
   "listType": "used"
 }
 ```
-Required: `inventoryItemId`, `listType`. `quantity` defaults to 1 if omitted.
+Required: `inventoryItemId`, `listType`. `quantity` defaults to 1 if omitted and may be fractional (2 decimal places, e.g. 1.56).
 
 **Request body for `PUT /v1/jobs/{id}/items/{itemId}`:**
 ```json
@@ -818,7 +818,7 @@ Both fields optional — only provided fields are updated. Sets `updated_at` aut
   "listType": "used"
 }
 ```
-Required: `name`, `listType`. `quantity` defaults to 1, `description` optional.
+Required: `name`, `listType`. `quantity` defaults to 1 and may be fractional (2 decimal places), `description` optional.
 
 **Request body for `PUT /v1/jobs/{id}/adhoc-items/{itemId}`:**
 ```json

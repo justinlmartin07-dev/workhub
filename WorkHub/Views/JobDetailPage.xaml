@@ -12,6 +12,49 @@
              Shell.NavBarIsVisible="False"
              Title="{Binding Job.Title, FallbackValue='Job'}">
 
+    <ContentPage.Resources>
+        <!-- Parts picker rows. Flat list of category headers + checkbox items:
+             grouped CollectionView crashes on Windows when groups change at runtime. -->
+        <DataTemplate x:Key="PickerHeaderTemplate" x:DataType="models:InventoryGroupHeader">
+            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8" Padding="4,10,4,4">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding TogglePickerGroupCommand, Source={RelativeSource AncestorType={x:Type vm:JobDetailViewModel}}}"
+                                          CommandParameter="{Binding .}" />
+                </Grid.GestureRecognizers>
+                <!-- Chevron: points right when collapsed, down when expanded -->
+                <shapes:Path Data="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"
+                             Fill="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                             Aspect="Uniform" WidthRequest="12" HeightRequest="12" VerticalOptions="Center">
+                    <shapes:Path.Triggers>
+                        <DataTrigger TargetType="shapes:Path" Binding="{Binding IsExpanded}" Value="True">
+                            <Setter Property="Rotation" Value="90" />
+                        </DataTrigger>
+                    </shapes:Path.Triggers>
+                </shapes:Path>
+                <Label Grid.Column="1" Text="{Binding Category}" FontSize="13" FontAttributes="Bold"
+                       VerticalTextAlignment="Center" />
+                <Label Grid.Column="2" Text="{Binding ItemCount}" FontSize="11"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                       VerticalTextAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PickerItemTemplate" x:DataType="vm:SelectableInventoryItem">
+            <Grid Padding="4,6" ColumnDefinitions="Auto,*">
+                <CheckBox IsChecked="{Binding IsSelected}" VerticalOptions="Center" />
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                    <Label Text="{Binding Name}" FontSize="14" />
+                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                           IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                </VerticalStackLayout>
+            </Grid>
+        </DataTemplate>
+
+        <controls:InventoryRowTemplateSelector x:Key="PickerRowTemplates"
+                                               HeaderTemplate="{StaticResource PickerHeaderTemplate}"
+                                               ItemTemplate="{StaticResource PickerItemTemplate}" />
+    </ContentPage.Resources>
+
     <Grid>
         <!-- Main content -->
         <controls:DataStateView IsLoading="{Binding IsLoading}" HasError="{Binding HasError}"
@@ -20,7 +63,7 @@
             <controls:DataStateView.Body>
                 <ScrollView>
                     <VerticalStackLayout Spacing="16" Padding="16">
-                        <!-- Header with Print/Edit/Delete -->
+                        <!-- Header with Share/Edit/Delete -->
                         <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
                             <controls:BackButton Command="{Binding GoBackCommand}"
                                                  IsVisible="{Binding IsNarrowLayout, Source={x:Reference thisPage}}" />
@@ -29,13 +72,13 @@
                             <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="{OnPlatform 4, Android=8}" VerticalOptions="Center"
                                     StrokeShape="RoundRectangle 8" controls:TapFeedback.Enable="True">
                                 <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding PrintCommand}" />
+                                    <TapGestureRecognizer Command="{Binding ShareCommand}" />
                                 </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                                    <shapes:Path Data="M640-640v-120H320v120h-80v-200h480v200h-80Zm-480 80h640-640Zm560 100q17 0 28.5-11.5T760-500q0-17-11.5-28.5T720-540q-17 0-28.5 11.5T680-500q0 17 11.5 28.5T720-460Zm-80 260v-160H320v160h320Zm80 80H240v-160H80v-240q0-51 35-85.5t85-34.5h560q51 0 85.5 34.5T880-520v240H720v160Zm80-240v-160q0-17-11.5-28.5T760-560H200q-17 0-28.5 11.5T160-520v160h80v-80h480v80h80Z"
+                                    <shapes:Path Data="M680-80q-50 0-85-35t-35-85q0-6 3-28L282-392q-16 15-37 23.5t-45 8.5q-50 0-85-35t-35-85q0-50 35-85t85-35q24 0 45 8.5t37 23.5l281-164q-2-7-2.5-13.5T560-760q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35q-24 0-45-8.5T598-672L317-508q2 7 2.5 13.5t.5 14.5q0 8-.5 14.5T317-452l281 164q16-15 37-23.5t45-8.5q50 0 85 35t35 85q0 50-35 85t-85 35Z"
                                                  Fill="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                                  Aspect="Uniform" WidthRequest="{OnPlatform 16, Android=20}" HeightRequest="{OnPlatform 16, Android=20}" VerticalOptions="Center" />
-                                    <Label Text="Print" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
+                                    <Label Text="Share" FontSize="14" FontFamily="OpenSansSemibold" VerticalTextAlignment="Center"
                                            IsVisible="{OnPlatform true, Android=false}"
                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                                 </HorizontalStackLayout>
@@ -295,25 +338,46 @@
                                         <DataTemplate x:DataType="models:JobItemResponse">
                                             <Grid Padding="4" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="2" VerticalOptions="Center">
                                                 <VerticalStackLayout VerticalOptions="Center">
-                                                    <Label Text="{Binding Name}" FontSize="14" LineBreakMode="TailTruncation" />
+                                                    <!-- Ordered items stay listed for reference but read as done. -->
+                                                    <Label Text="{Binding Name}" FontSize="14" LineBreakMode="TailTruncation">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding IsOrdered}" Value="True">
+                                                                <Setter Property="TextDecorations" Value="Strikethrough" />
+                                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
                                                     <!-- Part number + price share the second line: part numbers are
                                                          short, so the price gets the room the name row can't spare. -->
                                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
                                                         <Label Text="{Binding PartNumber}" FontSize="12" LineBreakMode="TailTruncation"
                                                                TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                                                               IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                               IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}">
+                                                            <Label.Triggers>
+                                                                <DataTrigger TargetType="Label" Binding="{Binding IsOrdered}" Value="True">
+                                                                    <Setter Property="TextDecorations" Value="Strikethrough" />
+                                                                </DataTrigger>
+                                                            </Label.Triggers>
+                                                        </Label>
                                                         <Label Grid.Column="1" Text="{Binding PriceDisplay}" FontSize="12" VerticalTextAlignment="Center" Margin="0,0,3,0"
                                                                TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
                                                                IsVisible="{Binding PriceDisplay, Converter={StaticResource StringNotEmptyConverter}}" />
                                                     </Grid>
                                                 </VerticalStackLayout>
                                                 <!-- Compact segmented stepper: [+][qty][−]. The Border clips the
-                                                     square segments into the pill shape. -->
+                                                     square segments into the pill shape. Once the part is ordered
+                                                     the quantity is locked — the order already went out with it. -->
                                                 <Border Grid.Column="1" StrokeThickness="1" Padding="0" VerticalOptions="Center"
                                                         Stroke="{AppThemeBinding Light={StaticResource SurfaceBorderLight}, Dark={StaticResource SurfaceBorderDark}}"
                                                         StrokeShape="RoundRectangle 8">
                                                     <Grid ColumnDefinitions="22,34,22"
                                                           HeightRequest="{OnPlatform 30, Android=36}">
+                                                        <Grid.Triggers>
+                                                            <DataTrigger TargetType="Grid" Binding="{Binding IsOrdered}" Value="True">
+                                                                <Setter Property="IsEnabled" Value="False" />
+                                                                <Setter Property="Opacity" Value="0.4" />
+                                                            </DataTrigger>
+                                                        </Grid.Triggers>
                                                         <Button Text="−" FontSize="15" Padding="0" Margin="0" CornerRadius="0"
                                                                 HeightRequest="{OnPlatform 30, Android=36}"
                                                                 VerticalOptions="Fill" MinimumWidthRequest="0" MinimumHeightRequest="0"
@@ -481,25 +545,15 @@
                 <SearchBar Grid.Row="1" Placeholder="Search parts..." Text="{Binding NewItemSearchText}"
                            Margin="0,8,0,0" />
 
-                <!-- Inventory list with checkboxes -->
+                <!-- Inventory list: category headers + checkbox items (searching also
+                     matches category names; groups are forced open while searching) -->
                 <CollectionView Grid.Row="2" ItemsSource="{Binding SelectableInventory}" SelectionMode="None"
+                                ItemTemplate="{StaticResource PickerRowTemplates}"
                                 Margin="0,8,0,0">
                     <CollectionView.EmptyView>
                         <Label Text="No parts found" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" Padding="0,16"
                                HorizontalTextAlignment="Center" />
                     </CollectionView.EmptyView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:SelectableInventoryItem">
-                            <Grid Padding="4,6" ColumnDefinitions="Auto,*">
-                                <CheckBox IsChecked="{Binding IsSelected}" VerticalOptions="Center" />
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                    <Label Text="{Binding Name}" FontSize="14" />
-                                    <Label Text="{Binding PartNumber}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
-                                           IsVisible="{Binding PartNumber, Converter={StaticResource StringNotEmptyConverter}}" />
-                                </VerticalStackLayout>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
                 </CollectionView>
 
                 <!-- Custom item entry -->

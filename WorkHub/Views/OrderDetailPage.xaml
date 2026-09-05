@@ -77,7 +77,7 @@
                 <!-- Quantity -->
                 <VerticalStackLayout Spacing="3">
                     <Label Text="Quantity" Style="{StaticResource FieldLabel}" />
-                    <Label Text="{Binding Order.Quantity}" FontSize="15" FontAttributes="Bold" />
+                    <Label Text="{Binding Order.Quantity, StringFormat='{0:0.##}'}" FontSize="15" FontAttributes="Bold" />
                 </VerticalStackLayout>
 
                 <!-- Ordered toggle -->
