@@ -7,11 +7,12 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
 
     <Grid RowDefinitions="Auto,*">
-        <Grid Padding="16,12" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+        <Grid Padding="16,12" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="12">
             <Label x:Name="TitleLabel" FontSize="18" FontAttributes="Bold"
                    VerticalOptions="Center" LineBreakMode="TailTruncation" />
             <Button Grid.Column="1" Text="Print" Clicked="OnPrintClicked" />
-            <Button Grid.Column="2" Text="Close" Style="{StaticResource SecondaryButton}" Clicked="OnCloseClicked" />
+            <Button Grid.Column="2" Text="Share" Clicked="OnShareClicked" />
+            <Button Grid.Column="3" Text="Close" Style="{StaticResource SecondaryButton}" Clicked="OnCloseClicked" />
         </Grid>
         <WebView x:Name="PreviewWebView" Grid.Row="1" />
     </Grid>
